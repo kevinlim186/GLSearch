@@ -1,11 +1,14 @@
-from pflacco.pflacco import create_initial_sample, create_feature_object, calculate_feature_set, calculate_features
+
 import bbobbenchmarks.bbobbenchmarks as bn
-from modea import Algorithms, Parameters, Individual, Mutation, Utils, Recombination, Selection, Sampling
 from modea.Utils import getOpts, getVals, reprToString, options, initializable_parameters
-import os
+from pflacco.pflacco import create_feature_object
 import numpy as np
-from functools import partial
-import math
+
+#from pflacco.pflacco import create_initial_sample , calculate_feature_set, calculate_features
+#from modea import Algorithms, Parameters, Individual, Mutation, Utils, Recombination, Selection, Sampling
+#import os
+#from functools import partial
+#import math
 
 def ensureFullLengthRepresentation(representation):
     """
@@ -27,11 +30,12 @@ def ensureFullLengthRepresentation(representation):
 
 def createBBOBFunction(functionID, instanceNumber):
     '''
-     Parameters
+    Parameters
         ----------
         FunctionID : int
 
         Noiseless Function
+            0: Parabola (As test function)
             1: Noise-free Sphere function
             2: Separable ellipsoid with monotone transformation
             3: Rastrigin with monotone transformation separable "condition" 10
@@ -96,10 +100,16 @@ def createBBOBFunction(functionID, instanceNumber):
         ----------
         function = createBBOBFunction(functionID=1, instanceNumber=2)
         function['name'] # Returns the name of the function.
-        function['function'] #returns a function 
-        function['function']([1,2,3]) #evaluates the function based on the given parameters
-    
-    Functions created here comes from http://coco.lri.fr/backup/COCOdoc/index.html# adapted to work in Python 3.
+        function['function'] # Returns a function 
+        function['function']([1,2,3]) # Evaluates the function based on the given parameters
+        function['batchFunction'] # Returns a function that can evaluate batch of inputs
+        function['function']([[1,2],[2,3],[3,4]]) # Evaluates the function given batch inputs
+    Return
+        ----------
+        Returns a dictionary with the name, function and batch function as keys
+    Source
+        ----------
+        Functions created here comes from http://coco.lri.fr/backup/COCOdoc/index.html# adapted to work in Python 3.
     '''
 
     functionNamesNoiseless = [ 
@@ -162,26 +172,102 @@ def createBBOBFunction(functionID, instanceNumber):
                     'Gallagher\'s Gaussian Peaks 101-me with uniform noise',
                     'Gallagher\'s Gaussian Peaks 101-me with seldom Cauchy noise'
             ]
-    if  isinstance(instanceNumber, int):
+    if  not isinstance(instanceNumber, int):
         return print('Please enter a valid instance number')
 
-    if functionID >=0 and functionID <=24:
+    if functionID >0 and functionID <=24:
         functionIndex = functionID - 1
         functionName = functionNamesNoiseless[functionIndex]
         functionAttr = 'F' + str(functionID)
         function = getattr(bn, functionAttr)(instanceNumber)
+
+        def batchFunction(inputValues):
+            return [function(entry) for entry in inputValues]
+
+
         returnValue = {}
         returnValue['name'] = functionName
         returnValue['function'] = function
+        returnValue['batchFunction'] = batchFunction
         return returnValue
     elif functionID >=101 and functionID <=130:
         functionIndex = functionID - 101
         functionName = functionNamesNoisy[functionIndex]
         functionAttr = 'F' + str(functionID)
         function = getattr(bn, functionAttr)(instanceNumber)
+
+        def batchFunction(inputValues):
+            return [function(entry) for entry in inputValues]
+
+
         returnValue = {}
         returnValue['name'] = functionName
         returnValue['function'] = function
+        returnValue['batchFunction'] = batchFunction
+        return returnValue
+    elif functionID == 0:
+        functionName = 'Parabola'
+        def parabola(x):
+            return sum([(number**2) for number in x])
+        
+        def batchFunction(inputValues):
+            return [parabola(entry) for entry in inputValues]
+        
+        returnValue = {}
+        returnValue['name'] = functionName
+        returnValue['function'] = parabola
+        returnValue['batchFunction'] = batchFunction
         return returnValue
     else:
         print("Please choose between Function 1 to 24 for noiseless functions and Function 101 to 130 for noisy function")
+
+
+def runOneGeneration(EvolutionaryOptimizer, Logger=None):
+    '''
+    Parameters
+        ----------
+        EvolutionaryOptimizer: Modea EvolutionaryOptimizer object
+        Logger: Array of input and output of previous runs. Leave blank upon initiatization.
+    
+    Usage
+        ----------
+        generation = runOneGeneration(evolutionaryOptimizer) # returns a dictionary object
+        generation['EvolutionaryOptimizer'] #Modea EvolutionaryOptimizer object after one generation
+        generation['Logger'] #Array of inputs and outputs for tracking
+        generation['FeatureObj'] #Feature Object of Pflacco
+    
+    Return
+        ----------
+        Returns a dictionary with the name, function and batch function as keys
+
+    Source
+        ----------
+        Implementation of PFlacco and Modea
+    '''
+    EvolutionaryOptimizer.runOneGeneration()
+    generationSize = len(EvolutionaryOptimizer.population)
+    EvolutionaryOptimizer.total_used_budget  += generationSize
+    EvolutionaryOptimizer.recordStatistics()
+
+    
+
+    lowerBound = EvolutionaryOptimizer.parameters.l_bound
+    upperBound = EvolutionaryOptimizer.parameters.u_bound
+
+    for i in range(generationSize):
+        if Logger is None:
+            Logger = {}
+            Logger['input'] = np.array([EvolutionaryOptimizer.population[i].genotype.flatten().tolist()])
+            Logger['output'] = np.array(EvolutionaryOptimizer.population[i].fitness)
+        else:
+            Logger['input'] = np.append(Logger['input'], np.array([EvolutionaryOptimizer.population[i].genotype.flatten().tolist()]), axis=0)
+            Logger['output'] = np.append(Logger['output'], np.array(EvolutionaryOptimizer.population[i].fitness))
+
+    FeatureObj = create_feature_object(x=Logger['input'], y=Logger['output'],minimize=True,lower=lowerBound, upper=upperBound,blocks=None)
+    
+    returnValue = {}
+    returnValue['EvolutionaryOptimizer'] = EvolutionaryOptimizer
+    returnValue['Logger'] = Logger
+    returnValue['FeatureObj'] = FeatureObj
+
+    return returnValue

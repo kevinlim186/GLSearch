@@ -300,7 +300,8 @@ def fGauss(ftrue, beta):
     fval = fval + 1.01 * tol
     idx = ftrue < tol
     try:
-        fval[idx] = ftrue[idx]
+        #fval[idx] = ftrue[idx]
+        fval[np.where(idx)] = ftrue[np.where(idx)]
     except IndexError: # fval is a scalar
         if idx:
             fval = ftrue
