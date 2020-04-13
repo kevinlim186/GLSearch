@@ -1,23 +1,21 @@
-from pflacco.pflacco import *
+from pflacco.pflacco import create_initial_sample, create_feature_object, calculate_feature_set, calculate_features
 import bbobbenchmarks.bbobbenchmarks as bn
-from modea import Algorithms
+from modea import Algorithms, Parameters, Individual, Mutation, Utils, Recombination, Selection, Sampling
+from modea.Utils import getOpts, getVals, reprToString, options, initializable_parameters
 import os
+import numpy as np
+from functools import partial
+import math
+from Util import createBBOBFunction
+
+#Test function where we know the outcome. Zero is the best function
+def test_function(x):
+    return sum([-(number**2) for number in x])
 
 
 # objective function
-def objective_function(x):
+def objective_function(x, dim):
     return [entry[0]**2 - entry[1]**2 for entry in x]
-
-f3 = bn.F3(13)
-
-optim = Algorithms.EvolutionaryOptimizer(2, f3, 100)
-gensize, sigmas, fitness, best_ind = _onePlusOneES(2, sphere, 250)
-
-optim.best_individual
-optim.generation_size
-optim.fitness_over_time
-
-f3([0, 1, 2])
 
 # Create inital sample using latin hyper cube sampling
 sample = create_initial_sample(100, 2, type = 'lhs')
@@ -39,15 +37,148 @@ print(ela_features)
 
 
 
+# We use functions here to 'hide' the additional passing of parameters that are algorithm specific
+parameters = Parameters.Parameters(n=2, budget=100,l_bound=5, u_bound=100)
+recombine = Recombination.onePlusOne
+mutate = partial(Mutation.CMAMutation, sampler=Sampling.GaussianSampling(2))
+select = Selection.onePlusOneSelection
+mutateParameters = parameters.oneFifthRule
+
+functions = {
+    'recombine': recombine,
+    'mutate': mutate,
+    'select': select,
+    'mutateParameters': mutateParameters,
+}
+
+population = [Individual.FloatIndividual(2)]
 
 
- # short-cut for f3.evaluate([0, 1, 2])
+
+#CMAESOptimizer
+cMAESOptimizer = Algorithms.CMAESOptimizer(2,fitnessFunction=test_function, budget=100, mu=2, lambda_=3, elitist=False)
+
+parameters = Parameters.Parameters(n, budget, mu, lambda_, elitist=elitist)
+population = [Individual.FloatIndividual(n) for _ in range(parameters.mu_int)]
+pop = population
+
+parameters = Parameters.Parameters(n=2, budget=100,mu=2, lambda_=3)
+wcm = parameters.wcm
+parameters.weights
+
+for individual in population:
+    individual.genotype = wcm
+
+offspring = np.column_stack([ind.genotype for ind in pop])
+param.offspring = offspring
+
+param.wcm = dot(offspring, parameters.weights)
+
+param.wcm = dot(np.squeeze(np.asarray(offspring)), np.squeeze(np.asarray(parameters.weights)))
 
 
->>> print(bn.instantiate(13)[0])  # returns function instance and optimal f-value
-51.53
->>> print bn.nfreeIDs # list noise-free functions
-[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
->>> for i in bn.nfreeIDs: # evaluate all noiseless functions once
-...    print bn.instantiate(i)[0]([0., 0., 0., 0.]),
--77.27454592 6180022.82173 92.9877507529 92.9877507529 140.510117618 70877.9554128 -72.5505202195 33355.7924722 -339.94 4374717.49343 15631566.3487 4715481.0865 550.599783901 -17.2991756229 27.3633128519 -227.827833529 -24.3305918781 131.420159348 40.7103737427 6160.81782924 376.746889545 107.830426761 220.482266557 106.094767386
+
+#CustomizedES
+#Dictionary of options
+option = {
+    'active': True,
+    'elitist': True, #Current best will not be killed and allow to persist
+    'mirrored': True,
+    'orthogonal': True, 
+    'sequential': True,
+    'threshold': True,
+    'tpa': True,
+    'base-sampler': 'quasi-sobol', #choose between 'quasi-sobol' or 'quasi-halton' or None
+    'ipop': 'IPOP', #choose between 'IPOP' or 'BIPOP' or None
+    'selection': 'pairwise', # choose between 'pairwise' or None
+    'weights_option': '1/n' # choose between '1/n'
+    }
+
+values = [0,0,0,0,0,0,0,0,0,0,0]
+
+customizedES = Algorithms.CustomizedES(n=2,fitnessFunction=test_function,budget=100,mu=2,lambda_=4,opts=option, values=values)
+customizedES.runOneGeneration()
+
+
+
+
+# Configuration of the 11 Modules
+starting_configuration = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+representation = ensureFullLengthRepresentation(starting_configuration)
+# Interpret the representation into parameters for the ES
+opts = getOpts(representation[:len(options)])
+lambda_ = representation[len(options)]
+mu = representation[len(options)+1]
+values = getVals(representation[len(options)+2:])
+ES_BUDGET_FACTOR = 10
+ndim = 2
+NUMBER_OF_RECONFIGURATION=1
+# Init CMA-Es
+custom_es = Algorithms.CustomizedES(n = ndim,
+                            fitnessFunction = test_function,
+                            budget = math.floor((ES_BUDGET_FACTOR * ndim) / NUMBER_OF_RECONFIGURATION),
+                            mu = mu,
+                            lambda_ = lambda_,
+                            opts = opts,  #Configuration of Modules
+                            values = values)
+
+custom_es.mutateParameters = custom_es.parameters.adaptCovarianceMatrix
+
+generation_size, sigma_over_time, fitness_over_time, best_individual = Algorithms._customizedES(n = ndim, fitnessFunction = test_function, budget = math.floor((ES_BUDGET_FACTOR * ndim) / NUMBER_OF_RECONFIGURATION), mu = mu, lambda_ = lambda_, opts = opts, values = values)
+
+
+
+# Run CMA-ES for one generation
+custom_es.runOneGeneration()
+custom_es.recordStatistics()
+custom_es.total_used_budget
+
+
+custom_es.runOptimizer()
+custom_es.runLocalRestartOptimizer()
+custom_es.best_individual
+custom_es.total_budget
+custom_es.total_used_budget
+
+
+
+
+#EvolutionaryOptimizer (OK)
+evolutionaryOptimizer = Algorithms.EvolutionaryOptimizer(population, test_function, 100,  functions= functions,parameters=parameters)
+
+evolutionaryOptimizer.runOptimizer()
+evolutionaryOptimizer.runLocalRestartOptimizer()
+
+evolutionaryOptimizer.total_budget
+evolutionaryOptimizer.total_used_budget
+
+
+#GA Opt
+gAOptimizer = Algorithms.GAOptimizer(2, test_function, 100, mu=5, lambda_=10, population = None,parameters=parameters)
+gAOptimizer.initializePopulation()
+gAOptimizer.evalPopulationSequentially()
+gAOptimizer.runOneGeneration()
+gAOptimizer.runOptimizer()
+
+#General Flow of the MIESOptimizer 
+mies = Individual.MixedIntIndividual(n=2,num_discrete=1,num_floats=0, num_ints=1)
+mies.genotype = [100,100]
+population2 = [mies,mies]
+
+mIESOptimizer = Algorithms.MIESOptimizer(n=2, mu=2, lambda_=2, population=population2, fitnessFunction=test_function,budget=100)
+
+mIESOptimizer.runOptimizer()
+
+
+#General Flow of the One plus one optimizer (OK)
+onePlustOneOptimizer = Algorithms.OnePlusOneOptimizer(2, test_function, 100)
+onePlustOneOptimizer.total_used_budget
+onePlustOneOptimizer.fitness_over_time
+onePlustOneOptimizer.best_individual
+onePlustOneOptimizer.initializePopulation()
+onePlustOneOptimizer.runOptimizer()
+onePlustOneOptimizer.evalPopulationSequentially()
+
+
+individual = Individual.FloatIndividual(2) #individual with 2 dimensions
+Mutation.adaptStepSize(individual)
