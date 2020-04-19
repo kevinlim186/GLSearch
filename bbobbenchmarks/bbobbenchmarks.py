@@ -317,7 +317,8 @@ def fUniform(ftrue, alpha, beta):
     fval = fval + 1.01 * tol
     idx = ftrue < tol
     try:
-        fval[idx] = ftrue[idx]
+    #    fval[idx] = ftrue[idx]
+        fval[np.where(idx)] = ftrue[np.where(idx)]
     except IndexError: # fval is a scalar
         if idx:
             fval = ftrue
@@ -339,7 +340,8 @@ def fCauchy(ftrue, alpha, p):
     fval = fval + 1.01 * tol
     idx = ftrue < tol
     try:
-        fval[idx] = ftrue[idx]
+        fval[np.where(idx)] = ftrue[np.where(idx)]
+    #    fval[idx] = ftrue[idx]
     except IndexError: # fval is a scalar
         if idx:
             fval = ftrue

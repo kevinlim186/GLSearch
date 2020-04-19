@@ -3,6 +3,10 @@ import bbobbenchmarks.bbobbenchmarks as bn
 from modea.Utils import getOpts, getVals, reprToString, options, initializable_parameters
 from pflacco.pflacco import create_feature_object
 import numpy as np
+from pflacco.pflacco import create_initial_sample
+from modea.Individual import FloatIndividual
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 #from pflacco.pflacco import create_initial_sample , calculate_feature_set, calculate_features
 #from modea import Algorithms, Parameters, Individual, Mutation, Utils, Recombination, Selection, Sampling
@@ -173,7 +177,7 @@ def createBBOBFunction(functionID, instanceNumber):
                     'Gallagher\'s Gaussian Peaks 101-me with seldom Cauchy noise'
             ]
     if  not isinstance(instanceNumber, int):
-        return print('Please enter a valid instance number')
+        raise ValueError('Please enter a valid instance number')
 
     if functionID >0 and functionID <=24:
         functionIndex = functionID - 1
@@ -219,7 +223,7 @@ def createBBOBFunction(functionID, instanceNumber):
         returnValue['batchFunction'] = batchFunction
         return returnValue
     else:
-        print("Please choose between Function 1 to 24 for noiseless functions and Function 101 to 130 for noisy function")
+        raise ValueError("Please choose between Function 1 to 24 for noiseless functions and Function 101 to 130 for noisy function")
 
 
 def runOneGeneration(EvolutionaryOptimizer, Logger=None):
@@ -249,10 +253,9 @@ def runOneGeneration(EvolutionaryOptimizer, Logger=None):
     EvolutionaryOptimizer.total_used_budget  += generationSize
     EvolutionaryOptimizer.recordStatistics()
 
-    
-
     lowerBound = EvolutionaryOptimizer.parameters.l_bound
     upperBound = EvolutionaryOptimizer.parameters.u_bound
+    range_ = upperBound - lowerBound
 
     for i in range(generationSize):
         if Logger is None:
@@ -263,7 +266,12 @@ def runOneGeneration(EvolutionaryOptimizer, Logger=None):
             Logger['input'] = np.append(Logger['input'], np.array([EvolutionaryOptimizer.population[i].genotype.flatten().tolist()]), axis=0)
             Logger['output'] = np.append(Logger['output'], np.array(EvolutionaryOptimizer.population[i].fitness))
 
-    FeatureObj = create_feature_object(x=Logger['input'], y=Logger['output'],minimize=True,lower=lowerBound, upper=upperBound,blocks=None)
+    # LHS was used so the number of blocks 
+    dim = len(Logger['input'][0])
+    sampleSize = len(Logger['input'])
+    block = sampleSize / dim
+
+    FeatureObj = create_feature_object(x=Logger['input'], y=list(Logger['output']),minimize=True,lower=lowerBound, upper=upperBound,blocks=block)
     
     returnValue = {}
     returnValue['EvolutionaryOptimizer'] = EvolutionaryOptimizer
@@ -271,3 +279,73 @@ def runOneGeneration(EvolutionaryOptimizer, Logger=None):
     returnValue['FeatureObj'] = FeatureObj
 
     return returnValue
+
+
+def initializePopulation(parameters):
+    '''
+    Parameters
+        ----------
+        parameter: Modea  Parameters Object
+    
+    Return
+        ----------
+        Returns Population List consisting of individuals of type Modea Float Individual
+
+    Source
+        ----------
+        Implementation of PFlacco and Modea
+    '''
+    low = parameters.l_bound
+    high = parameters.u_bound
+    dim = parameters.n
+    sampleSize = parameters.mu_int
+
+    lower_bound = [low] * dim
+    upper_bound = [high] * dim
+
+    
+
+    sample = create_initial_sample(n_obs=sampleSize,dim=dim,type='lhs',lower_bound=lower_bound,upper_bound=upper_bound)
+
+    population = []
+
+    for genotype in sample:
+        individual = FloatIndividual(dim)
+        individual.genotype = genotype.reshape(dim,1)
+        population.append(individual)
+
+    return population
+
+
+def graph2DFunction(lbound, ubound, resolution, function):
+    '''
+    Parameters
+        ----------
+        lbound: The lower bound value
+        ubound: The upper bound value
+        resolution: How small the spaces between the list of values
+        function: 2D Function to be evaluated (BBOB object)
+    
+    Return
+        ----------
+        Graphs the function given the X and Y and Resolution
+
+    Source
+        ----------
+        Implementation of PFlacco and Modea
+    '''
+
+    #Convert BBOB function to act like a normal function 
+    def function_n(x,y):
+        return function([x,y])
+
+    x = np.arange(lbound, ubound, resolution)
+    y = np.arange(lbound,ubound, resolution)
+    xx, yy = np.meshgrid(x, y, sparse=True) 
+    function_v = np.vectorize(function_n)
+    Z = function_v(xx,yy)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    plot = Axes3D.plot_wireframe(ax,X=xx, Y=yy,Z=Z)
+    return plt.show()
