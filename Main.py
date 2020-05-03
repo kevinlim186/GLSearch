@@ -39,6 +39,10 @@ values = getVals(starting_configuration)
 # Initialize the algorithm
 customES = Algorithms.CustomizedES(2, function['function'], budget=1000, opts=opts, values=values)
 customES.mutateParameters = customES.parameters.adaptCovarianceMatrix
+customES.runOneGeneration()
+customES.recordStatistics()
+customES.used_budget 
+customES.total_budget
 
 #Get the ERT
 customES, performance = computeERT(customES, target=10e-8)
