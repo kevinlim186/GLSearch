@@ -394,6 +394,7 @@ def computeERT(EvolutionaryOptimizer, target):
     while True:
         generation = runOneGeneration(generation['EvolutionaryOptimizer'], generation['Logger'])
         performance = performanceLogger(generation['FeatureObj'], generation['EvolutionaryOptimizer'], target=target, PerformanceLogger = performance)
+        print("Budget Used is " + str(generation['EvolutionaryOptimizer'].used_budget))
 
         if (performance['ERT'].iloc[-1] is not None) or (generation['EvolutionaryOptimizer'].used_budget == generation['EvolutionaryOptimizer'].total_budget):
             break
