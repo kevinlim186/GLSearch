@@ -13,12 +13,10 @@ n=2
 budget=1000
 l_bound=-5
 u_bound=5
-mu=20
-lambda_=20
 directory = './results/'
 
 #initiate the function
-function = createBBOBFunction(functionID=0, instanceNumber=44)
+function = createBBOBFunction(functionID=1, instanceNumber=44)
 
 #graph the function
 
@@ -39,14 +37,10 @@ values = getVals(starting_configuration)
 # Initialize the algorithm
 customES = Algorithms.CustomizedES(2, function['function'], budget=1000, opts=opts, values=values)
 customES.mutateParameters = customES.parameters.adaptCovarianceMatrix
-customES.runOneGeneration()
-customES.recordStatistics()
-customES.used_budget 
-customES.total_budget
-
+ 
 #Get the ERT
-customES, performance = computeERT(customES, target=10e-8)
-performance.to_csv(directory+function['name']+' '+ configName + '.csv')
+performanceDirectory = directory+function['name']+' '+ configName + '.csv'
+customES, performance = computeERT(customES, target=1, directory=performanceDirectory)
 
 #graphing for fitness over time
 fitness = pd.DataFrame({'Fitness Over Time': customES.fitness_over_time, 'Sigma Over Time': customES.sigma_over_time})

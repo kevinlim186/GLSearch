@@ -385,7 +385,7 @@ def performanceLogger(featureObj, EvolutionaryOptimizer, target, PerformanceLogg
     
     return Logger
     
-def computeERT(EvolutionaryOptimizer, target):
+def computeERT(EvolutionaryOptimizer, target, directory=None):
     #Initial Run
     generation = runOneGeneration(EvolutionaryOptimizer)
     performance = performanceLogger(generation['FeatureObj'], generation['EvolutionaryOptimizer'], target=target)
@@ -396,6 +396,8 @@ def computeERT(EvolutionaryOptimizer, target):
         performance = performanceLogger(generation['FeatureObj'], generation['EvolutionaryOptimizer'], target=target, PerformanceLogger = performance)
         print("Budget Used is " + str(generation['EvolutionaryOptimizer'].used_budget))
 
+        if (directory is not None):
+            performance.to_csv(directory)
         if (performance['ERT'].iloc[-1] is not None) or (generation['EvolutionaryOptimizer'].used_budget == generation['EvolutionaryOptimizer'].total_budget):
             break
 
