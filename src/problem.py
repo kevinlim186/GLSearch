@@ -1,9 +1,10 @@
 import bbobbenchmarks.bbobbenchmarks as bn
-from modea.Utils import getOpts, getVals, options,initializable_parameters
-from modea import Algorithms
+from modea.Utils import getOpts, getVals, options,initializable_parameters, ESFitness
+from modea import Algorithms, Parameters
 import numpy as np
-from scipy.optimize import minimize
+from scipy.optimize import minimize, Bounds
 import pandas as pd
+from pflacco.pflacco import calculate_feature_set, create_feature_object
 
 class Problem():
 	def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger):
@@ -16,7 +17,8 @@ class Problem():
 		self.esconfig = esconfig 
 		self.performance = logger
 		self.checkPoint = checkPoint
-		self.currentResults =  pd.DataFrame(columns=['x1', 'x2', 'x3','x4','x5','x6','x7','x8','x9','x10','x11','x12','x13','x14', 'x15', 'x16','x17','x18','x19','x20', 'y'])
+		self.currentResults =  pd.DataFrame(columns=['x1', 'x2', 'x3','x4','x5','x6','x7','x8','x9','x10','x11','x12','x13','x14', 'x15', 'x16','x17','x18','x19','x20', 'y', 'name'])
+		self.elaFetures =  pd.DataFrame(columns=['name', 'ela_distr', 'ela_level', 'ela_meta', 'basic', 'disp', 'limo', 'nbc', 'pca', 'ic'])
 
 		self.problemInstance = None
 		self.optimizer = None
@@ -26,42 +28,40 @@ class Problem():
 	
 	def getProblemName(self, functionID, instance, budget, local):
 		functionNamesNoiseless = [ 
-                    '1 Noise-free Sphere function', 
-                    '2 Separable ellipsoid with monotone transformation', 
-                    '3 Rastrigin with monotone transformation separable "condition" 10', 
-                    '4 skew Rastrigin-Bueche, condition 10, skew-"condition" 100', 
-                    '5 Linear slope', 
-                    '6 Attractive sector function',
-                    '7 Step-ellipsoid, condition 100, noise-free',
-                    '8 Rosenbrock noise-free',
-                    '9 Rosenbrock, rotated', 
-                    '10 Ellipsoid with monotone transformation, condition 1e6', 
-                    '11 Discus (tablet) with monotone transformation, condition 1e6', 
-                    '12 Bent cigar with asymmetric space distortion, condition 1e6',
-                    '13 Sharp ridge',
-                    '14 Sum of different powers, between x^2 and x^6, noise-free',
-                    '15 Rastrigin with asymmetric non-linear distortion, "condition" 10',
-                    '16 Weierstrass, condition 100',
-                    '17 Schaffers F7 with asymmetric non-linear transformation, condition 10',
-                    '18 Schaffers F7 with asymmetric non-linear transformation, condition 1000',
-                    '19 F8F2 sum of Griewank-Rosenbrock 2-D blocks, noise-free',
-                    '20 Schwefel with tridiagonal variable transformation',
-                    '21 Gallagher with 101 Gaussian peaks, condition up to 1000, one global rotation, noise-free',
-                    '22 Gallagher with 21 Gaussian peaks, condition up to 1000, one global rotation',
-                    '23 Katsuura function',
-                    '24 Lunacek bi-Rastrigin, condition 100',
-                    '25 The number of legs the animal (default is 4)'
-                    ]
+				'1_Noise-free_Sphere_function',
+				'2_Separable_ellipsoid',
+				'3_Rastrigin',
+				'4_skew_Rastrigin-Bueche',
+				'5_Linear_slope',
+				'6_Attractive_sector_function',
+				'7_Step-ellipsoid',
+				'8_Rosenbrock_noise-free',
+				'9_Rosenbrock_rotated',
+				'10_Ellipsoid_with_monotone_transformation',
+				'11_Discus_with_monotone_transformation',
+				'12_Bent_cigar',
+				'13_Sharp_ridge',
+				'14_Sum_of_different_powers',
+				'15_Rastrigin_with_asymmetric_non-linear_distortion',
+				'16_Weierstrass_condition_100',
+				'17_Schaffers_F7_condition_10',
+				'18_Schaffers_F7_condition_1000',
+				'19_sum_of_Griewank-Rosenbrock',
+				'20_Schwefel_with_tridiagonal_transformation',
+				'21_Gallagher_with_101_Gaussian_peaks',
+				'22_Gallagher_with_21_Gaussian_peaks',
+				'23_Katsuura_function',
+				'24_Lunacek_bi-Rastrigin_condition_100',
+				'25_The_number_of_legs_the_animal'
+                ]
     
-		if  not isinstance(instance, int):
-			raise ValueError('Please enter a valid instance number')
 		
 		esConfig = ''.join([str(elem) for elem in self.esconfig if elem is not None]) 
-		if instance >0 and instance <25:
+		if functionID >0 and functionID <25:
 			functionIndex = functionID - 1
 			functionAttr = functionNamesNoiseless[functionIndex]
 			
-			functionName = '_F'+str(functionID)+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local) 
+			functionName = '_F'+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local) 
 			return functionName
 		elif functionID == 0:
 			functionAttr = 'Parabola'
@@ -69,11 +69,11 @@ class Problem():
 			return functionName
 
 	def createProblemInstance(self):
-		if self.instance >0 and self.instance <25:
+		if self.function >0 and self.function <25:
 			functionAttr = 'F' + str(self.function)
 			function = getattr(bn, functionAttr)(self.instance)
 			def functionInstance(x):
-				self.RemainingBudget = self.TotalBudget - self.RemainingBudget - 1
+				self.RemainingBudget = self.RemainingBudget - 1
 				self.SpentBudget = self.SpentBudget + 1
 				result = function(x)
 	
@@ -86,7 +86,7 @@ class Problem():
 			self.problemInstance = functionInstance
 		elif self.function == 0:
 			def parabola(x):
-				self.RemainingBudget = self.TotalBudget - self.RemainingBudget - 1
+				self.RemainingBudget = self.RemainingBudget - 1
 				self.SpentBudget = self.SpentBudget + 1
 				result = sum([number**2 for number in x])
 				data = {}
@@ -97,17 +97,13 @@ class Problem():
 				return result
 			self.problemInstance = parabola
 	
-	def evaluateOneGeneration(self):
-		self.optimizer.runOneGeneration()
-		self.optimizer.recordStatistics()
-
 	
 	def runOptimizer(self):
 		checkpoints = self.getCheckPoints()
 		currentLength = 0
 		maxIndex = len(checkpoints) 
 		while self.TotalBudget > self.SpentBudget:
-			if (checkpoints[currentLength] > self.SpentBudget and currentLength+1 < maxIndex):
+			if (checkpoints[currentLength] < self.SpentBudget and currentLength < maxIndex):
 				currentLength += 1
 				#copy the old budget and results so we can continue the evaluation
 				remain = self.RemainingBudget 
@@ -115,15 +111,13 @@ class Problem():
 				result = self.currentResults
 				x0 = np.array(self.optimizer.best_individual.genotype.flatten())
 				name = self.getProblemName(self.function, self.instance, self.SpentBudget,'nedler')
+				self.calculateELA(name)
 				self.simplexAlgorithm(x0)
 
+				self.calculatePerformance(name)
+				self.currentResults['name'] = name
 				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-				self.performance.importLocalFile('historicalPath','temp/'+name+'.csv')
-				#Upload to database
-				'''
-				for row in self.currentResults.itertuples(index=False):
-					self.performance.insertPathData(name, row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14],row[15],row[16],row[17],row[18],row[19],row[20])
-				'''
+				self.performance.importHistoricalPath('temp/'+name+'.csv')
 				
 				#Reset the budget counter
 				self.RemainingBudget = remain
@@ -135,13 +129,11 @@ class Problem():
 
 		name = self.getProblemName(self.function, self.instance, self.SpentBudget, 'Base')
 		
+		self.currentResults['name'] = name
+		self.calculatePerformance(name)
 		self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-		self.performance.importLocalFile('historicalPath','temp/'+name+'.csv')
+		self.performance.importHistoricalPath('temp/'+name+'.csv')
 
-		'''
-		for row in self.currentResults.itertuples(index=False):
-			self.performance.insertPathData(name, row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14],row[15],row[16],row[17],row[18],row[19],row[20])
-		'''
 		
 
 	def initializedESAlgorithm(self):
@@ -150,7 +142,11 @@ class Problem():
 		values = getVals(representation[len(options)+2:])
 		values = getVals(self.esconfig)
 
+
+		parameters = Parameters.Parameters(n=5,budget=1000,  l_bound=-5, u_bound=5)
+
 		customES = Algorithms.CustomizedES(self.dimension, self.problemInstance, budget=self.TotalBudget, opts=opts, values=values)
+
 		customES.mutateParameters = customES.parameters.adaptCovarianceMatrix
 
 		self.optimizer = customES
@@ -175,11 +171,73 @@ class Problem():
 		return representation
 
 	def getCheckPoints(self):
-		checkpoints = range(self.checkPoint, self.TotalBudget, self.checkPoint)
+		checkpoints = range(1, self.TotalBudget + self.checkPoint , self.checkPoint)
 		return checkpoints
 
 	def simplexAlgorithm(self, population):
 		maxiter = self.RemainingBudget
-		opt={'maxfev': maxiter, 'disp': False, 'return_all': True}
+		x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
+		print(maxiter)
+		opt={'maxfev': maxiter, 'disp': False, 'return_all': False}
 
-		res = minimize(self.problemInstance, x0=population, method='nelder-mead', options=opt)
+		res = minimize(self.problemInstance,tol=1e-8, x0=population, method='nelder-mead', bounds = x_bounds, options=opt)
+	
+	def calculateELA(self, name):
+		sample = self.currentResults.iloc[:,0:self.dimension].values
+		obj_values = self.currentResults['y'].values
+		featureObj = create_feature_object(sample,obj_values, lower=-5, upper=5)
+
+		try:
+			ela_distr = calculate_feature_set(featureObj, 'ela_distr')
+		except:
+			ela_distr = {}
+		
+		try:
+			ela_level = calculate_feature_set(featureObj, 'ela_level')
+		except:
+			ela_level = {}
+
+		try:
+			ela_meta = calculate_feature_set(featureObj, 'ela_meta')
+		except:
+			ela_meta = {}
+		
+		try:
+			basic = calculate_feature_set(featureObj, 'basic')
+		except:
+			basic ={}
+		
+		try:
+			disp = calculate_feature_set(featureObj, 'disp')
+		except:
+			disp = {}
+
+		try:
+			limo = calculate_feature_set(featureObj, 'limo')
+		except:
+			limo = {}
+
+		try:
+			nbc = calculate_feature_set(featureObj, 'nbc')
+		except:
+			nbc = {}
+		
+		try:
+			pca = calculate_feature_set(featureObj, 'pca')
+		except:
+			pca ={}
+
+		try:
+			ic = calculate_feature_set(featureObj, 'ic')
+		except:
+			ic = {}
+
+		ela_feat =  {**ela_distr, **ela_level, **ela_meta, **basic, **disp, **limo, **nbc, **pca, **ic }
+
+		self.performance.insertELAData(name, ela_feat)
+	
+	def calculatePerformance(self, name):
+		fitness = ESFitness(fitnesses=np.array([list(self.currentResults['y'].values)]), target=1e-8)
+		ert = fitness.ERT
+		fce = fitness.FCE
+		self.performance.insertPerformance(name, ert, fce)

@@ -33,11 +33,13 @@ class Performance():
 		self.cHandler = self.conn.cursor()
 	
 
-	def insertLoggerData(self, name, budgetUsed, ela_distr, ela_level, ela_meta, basic, disp, limo, nbc, pca, ic):
+	def insertELAData(self, name, elaFeat):
+		columns = ', '.join('`'+ e + '`' for e in elaFeat.keys())
+		values = ', '.join(str(e) for e in elaFeat.values()).replace('nan', 'NULL')
 		sql = '''
-		insert into logger (name, budgetUsed, ela_distr, ela_level, ela_meta, basic, disp, limo, nbc, pca, ic)
-		values ('{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
-		'''.format (name, budgetUsed, ela_distr, ela_level, ela_meta, basic, disp, limo, nbc, pca, ic)
+		insert into elaFeatures (name, {})
+		values ('{}', {})
+		'''.format (columns, name, values)
 
 		try:
 			self.cHandler.execute(sql)
@@ -75,14 +77,48 @@ class Performance():
 		except Exception as e: 
 			print(e)
 
-	def importLocalFile(self, table, directory):
+	def importHistoricalPath(self, directory):
 		sql = '''
-		LOAD DATA LOCAL INFILE '{}' INTO TABLE {}
-		IGNORE 1 LINES;
-		'''.format(directory, table)
+		LOAD DATA LOCAL INFILE '{}' INTO TABLE historicalPath
+		FIELDS TERMINATED BY ','
+		IGNORE 1 LINES
+		(@x1,@x2,@x3,@x4,@x5,@x6,@x7,@x8,@x9,@x10,@x11,@x12,@x13,@x14,@x15,@x16,@x17,@x18,@x19,@x20,y,name)
+		set
+		x1 = NULLIF(@x1,''),
+		x2 = NULLIF(@x2,''),
+		x3 = NULLIF(@x3,''),
+		x4 = NULLIF(@x4,''),
+		x5 = NULLIF(@x5,''),
+		x6 = NULLIF(@x6,''),
+		x7 = NULLIF(@x7,''),
+		x8 = NULLIF(@x8,''),
+		x9 = NULLIF(@x9,''),
+		x10 = NULLIF(@x10,''),
+		x11 = NULLIF(@x11,''),
+		x12 = NULLIF(@x12,''),
+		x13 = NULLIF(@x13,''),
+		x14 = NULLIF(@x14,''),
+		x15 = NULLIF(@x15,''),
+		x16 = NULLIF(@x16,''),
+		x17 = NULLIF(@x17,''),
+		x18 = NULLIF(@x18,''),
+		x19 = NULLIF(@x19,''),
+		x20 = NULLIF(@x20,'')
+		;
+		'''.format(directory)
 
 		try:
 			self.cHandler.execute(sql)
 		except Exception as e: 
 			print(e)
 		
+	def insertPerformance(self, name, ert, fce):
+		sql = '''
+		insert into performance (name, fce, ert)
+		values ('{}', {}, {})
+		'''.format (name, fce, ert)
+
+		try:
+			self.cHandler.execute(sql)
+		except Exception as e: 
+			print(e)
