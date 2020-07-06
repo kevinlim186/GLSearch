@@ -9,11 +9,13 @@ import time
 import os
 
 class Performance():
-	def __init__(self):
-		self.intializeServer()
-		time.sleep(5)
+	def __init__(self, local):
+		if local == False:
+			self.intializeServer()
+			time.sleep(5)
 		self.intializeConnection()
 		self.baseDIR = os.getcwd()
+		self.local = local
 		
 
 	def intializeServer(self):
@@ -27,13 +29,22 @@ class Performance():
 		server.start()
 	
 	def intializeConnection(self):
-		self.conn = pymysql.connect(host=config.config['host'], user=config.config['dbuser'],
+		if self.local==False:
+			self.conn = pymysql.connect(host=config.config['host'], user=config.config['dbuser'],
 				passwd=config.config['dbpassword'], db=config.config['database'],
 				port=1122,autocommit=True, local_infile=True)
+		else:
+			self.conn = pymysql.connect(host=config.config['host'], user=config.config['dbuser'],
+				passwd=config.config['dbpassword'], db=config.config['database'],
+				port=3306,autocommit=True, local_infile=True)
 		self.cHandler = self.conn.cursor()
 	
 
 	def insertELAData(self, name, elaFeat):
+		if 'None' in elaFeat.keys():
+			elaFeat.pop('None')
+		if 'inf' in elaFeat.keys():
+			elaFeat.pop('inf')
 		columns = ', '.join('`'+ e + '`' for e in elaFeat.keys())
 		values = ', '.join(str(e) for e in elaFeat.values()).replace('nan', 'NULL')
 		sql = '''
@@ -113,6 +124,8 @@ class Performance():
 			print(e)
 		
 	def insertPerformance(self, name, ert, fce):
+		if ert == None or ert == 'inf':
+			ert = 'NULL'
 		sql = '''
 		insert into performance (name, fce, ert)
 		values ('{}', {}, {})

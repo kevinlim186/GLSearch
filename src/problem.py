@@ -8,9 +8,9 @@ from pflacco.pflacco import calculate_feature_set, create_feature_object
 
 class Problem():
 	def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger):
-		self.TotalBudget = budget
-		self.RemainingBudget = budget
-		self.SpentBudget = 0
+		self.totalBudget = budget
+		self.remainingBudget = budget
+		self.spentBudget = 0
 		self.function = function
 		self.instance = instance
 		self.dimension = dimension
@@ -19,9 +19,15 @@ class Problem():
 		self.checkPoint = checkPoint
 		self.currentResults =  pd.DataFrame(columns=['x1', 'x2', 'x3','x4','x5','x6','x7','x8','x9','x10','x11','x12','x13','x14', 'x15', 'x16','x17','x18','x19','x20', 'y', 'name'])
 		self.elaFetures =  pd.DataFrame(columns=['name', 'ela_distr', 'ela_level', 'ela_meta', 'basic', 'disp', 'limo', 'nbc', 'pca', 'ic'])
+		self.prevRemainingBudget = None
+		self.prevSpentBudget = None
+		self.prevcurrentResults = None
+
+		self.ela_feat = None
 
 		self.problemInstance = None
 		self.optimizer = None
+		self.optimalValue = None
 
 		self.createProblemInstance()
 		self.initializedESAlgorithm()
@@ -73,8 +79,8 @@ class Problem():
 			functionAttr = 'F' + str(self.function)
 			function = getattr(bn, functionAttr)(self.instance)
 			def functionInstance(x):
-				self.RemainingBudget = self.RemainingBudget - 1
-				self.SpentBudget = self.SpentBudget + 1
+				self.remainingBudget = self.remainingBudget - 1
+				self.spentBudget = self.spentBudget + 1
 				result = function(x)
 	
 				data = {}
@@ -84,10 +90,11 @@ class Problem():
 				self.currentResults = self.currentResults.append(data, ignore_index=True,)
 				return result
 			self.problemInstance = functionInstance
+			self.optimalValue = function.getfopt() + 1e-8
 		elif self.function == 0:
 			def parabola(x):
-				self.RemainingBudget = self.RemainingBudget - 1
-				self.SpentBudget = self.SpentBudget + 1
+				self.remainingBudget = self.remainingBudget - 1
+				self.spentBudget = self.spentBudget + 1
 				result = sum([number**2 for number in x])
 				data = {}
 				data['y'] = result
@@ -95,23 +102,27 @@ class Problem():
 					data['x'+str(i+1)] = x[i]
 				self.currentResults = self.currentResults.append(data, ignore_index=True,)
 				return result
-			self.problemInstance = parabola
+			self.problemInstance = parabola 
+			self.optimalValue = 0 + 1e-8
 	
 	
 	def runOptimizer(self):
 		checkpoints = self.getCheckPoints()
 		currentLength = 0
 		maxIndex = len(checkpoints) 
-		while self.TotalBudget > self.SpentBudget:
-			if (checkpoints[currentLength] < self.SpentBudget and currentLength < maxIndex):
+		while self.totalBudget > self.spentBudget:
+			if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
 				currentLength += 1
-				#copy the old budget and results so we can continue the evaluation
-				remain = self.RemainingBudget 
-				spent = self.SpentBudget 
-				result = self.currentResults
+				self._printProgressBar(currentLength, maxIndex-1,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance),length=50)
+				# Get the best individuals as of this time as input to the local search. Calculate the ELA features
 				x0 = np.array(self.optimizer.best_individual.genotype.flatten())
-				name = self.getProblemName(self.function, self.instance, self.SpentBudget,'nedler')
-				self.calculateELA(name)
+				self.calculateELA()
+
+				#Simplex Method
+				self.saveState()
+				
+				name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler')
+				self.saveElaFeat(name)
 				self.simplexAlgorithm(x0)
 
 				self.calculatePerformance(name)
@@ -119,22 +130,53 @@ class Problem():
 				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
 				self.performance.importHistoricalPath('temp/'+name+'.csv')
 				
-				#Reset the budget counter
-				self.RemainingBudget = remain
-				self.SpentBudget = spent
-				self.currentResults = result
+				self.loadState()
+				
+
+				#Gradient Descent Method 0.1
+				name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1')
+				self.saveElaFeat(name)
+				self.bfgsAlgorithm(x0, 0.1)
+
+				self.calculatePerformance(name)
+				self.currentResults['name'] = name
+				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+				self.performance.importHistoricalPath('temp/'+name+'.csv')
+				
+				self.loadState()
+
+				#Gradient Descent Method 0.3
+				name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3')
+				self.saveElaFeat(name)
+				self.bfgsAlgorithm(x0, 0.3)
+
+				self.calculatePerformance(name)
+				self.currentResults['name'] = name
+				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+				self.performance.importHistoricalPath('temp/'+name+'.csv')
+				
+				self.loadState()
 			
 			self.optimizer.runOneGeneration()
 			self.optimizer.recordStatistics()
 
-		name = self.getProblemName(self.function, self.instance, self.SpentBudget, 'Base')
+		name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base')
 		
 		self.currentResults['name'] = name
 		self.calculatePerformance(name)
 		self.currentResults.to_csv('temp/'+name+'.csv',index=False)
 		self.performance.importHistoricalPath('temp/'+name+'.csv')
 
-		
+
+	def saveState(self):
+		self.prevRemainingBudget  = self.remainingBudget 
+		self.prevSpentBudget  = self.spentBudget 
+		self.prevCurrentResults= self.currentResults
+
+	def loadState(self):
+		self.remainingBudget = self.prevRemainingBudget
+		self.spentBudget = self.prevSpentBudget 
+		self.currentResults = self.prevCurrentResults
 
 	def initializedESAlgorithm(self):
 		representation = self.ensureFullLengthRepresentation(self.esconfig)
@@ -142,10 +184,7 @@ class Problem():
 		values = getVals(representation[len(options)+2:])
 		values = getVals(self.esconfig)
 
-
-		parameters = Parameters.Parameters(n=5,budget=1000,  l_bound=-5, u_bound=5)
-
-		customES = Algorithms.CustomizedES(self.dimension, self.problemInstance, budget=self.TotalBudget, opts=opts, values=values)
+		customES = Algorithms.CustomizedES(self.dimension, self.problemInstance, budget=self.totalBudget, opts=opts, values=values)
 
 		customES.mutateParameters = customES.parameters.adaptCovarianceMatrix
 
@@ -171,18 +210,24 @@ class Problem():
 		return representation
 
 	def getCheckPoints(self):
-		checkpoints = range(1, self.TotalBudget + self.checkPoint , self.checkPoint)
+		checkpoints = range(1, self.totalBudget + self.checkPoint , self.checkPoint)
 		return checkpoints
 
 	def simplexAlgorithm(self, population):
-		maxiter = self.RemainingBudget
+		maxiter = self.remainingBudget
 		x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
-		print(maxiter)
 		opt={'maxfev': maxiter, 'disp': False, 'return_all': False}
 
-		res = minimize(self.problemInstance,tol=1e-8, x0=population, method='nelder-mead', bounds = x_bounds, options=opt)
+		minimize(self.problemInstance,tol=1e-8, x0=population, method='nelder-mead', bounds = x_bounds, options=opt)
+
+	def bfgsAlgorithm(self, population, stepSize):
+		maxiter = self.remainingBudget
+		x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
+		opt={'maxfev': maxiter, 'disp': False, 'return_all': False, 'eps': stepSize}
+
+		minimize(self.problemInstance,tol=1e-8, x0=population, method='BFGS', bounds = x_bounds, options=opt)
 	
-	def calculateELA(self, name):
+	def calculateELA(self):
 		sample = self.currentResults.iloc[:,0:self.dimension].values
 		obj_values = self.currentResults['y'].values
 		featureObj = create_feature_object(sample,obj_values, lower=-5, upper=5)
@@ -232,12 +277,34 @@ class Problem():
 		except:
 			ic = {}
 
-		ela_feat =  {**ela_distr, **ela_level, **ela_meta, **basic, **disp, **limo, **nbc, **pca, **ic }
+		self.ela_feat =  {**ela_distr, **ela_level, **ela_meta, **basic, **disp, **limo, **nbc, **pca, **ic }
 
-		self.performance.insertELAData(name, ela_feat)
+	def saveElaFeat(self, name):
+		self.performance.insertELAData(name, self.ela_feat)
 	
 	def calculatePerformance(self, name):
-		fitness = ESFitness(fitnesses=np.array([list(self.currentResults['y'].values)]), target=1e-8)
+		fitness = ESFitness(fitnesses=np.array([list(self.currentResults['y'].values)]), target=self.optimalValue)
 		ert = fitness.ERT
 		fce = fitness.FCE
 		self.performance.insertPerformance(name, ert, fce)
+	
+	def _printProgressBar (self, iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+		"""
+		Call in a loop to create terminal progress bar
+		@params:
+			iteration   - Required  : current iteration (Int)
+			total       - Required  : total iterations (Int)
+			prefix      - Optional  : prefix string (Str)
+			suffix      - Optional  : suffix string (Str)
+			decimals    - Optional  : positive number of decimals in percent complete (Int)
+			length      - Optional  : character length of bar (Int)
+			fill        - Optional  : bar fill character (Str)
+			printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+		"""
+		percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+		filledLength = int(length * iteration // total)
+		bar = fill * filledLength + '-' * (length - filledLength)
+		print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+		# Print New Line on Complete
+		if iteration == total: 
+			print()

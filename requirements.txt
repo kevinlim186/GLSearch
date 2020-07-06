@@ -1,0 +1,17 @@
+attrs==19.3.0
+matplotlib==3.2.1
+ModEA==0.4.0
+numpy==1.18.2
+pandas==1.0.3
+paramiko==2.7.1
+pflacco==0.4
+PyMySQL==0.9.3
+pytz==2019.3
+rpy2==3.2.7
+scipy==1.4.1
+seaborn==0.10.0
+sshtunnel==0.1.5
+tzlocal==2.0.0
+wcwidth==0.1.9
+wrapt==1.11.2
+zipp==3.1.0
