@@ -35,7 +35,7 @@ class Performance():
 		else:
 			self.conn = pymysql.connect(host=config.config['host'], user=config.config['dbuser'],
 				passwd=config.config['dbpassword'], db=config.config['database'],
-				port=config.cconfig['port'],autocommit=True, local_infile=True)
+				port=config.config['port'],autocommit=True, local_infile=True)
 		self.cHandler = self.conn.cursor()
 	
 
