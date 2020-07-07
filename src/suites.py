@@ -20,10 +20,11 @@ class Suites:
 			checkPoint = 500 * self.dimensions[i]
 			for j in range(maxInstanceLen):
 				instance = self.instances[j]
+				self.runProblem(budget=budget, function=self.function, instance=instance, dimension=dimension, esconfig=self.esconfig, checkPoint=checkPoint, logger=self.performance)
 
-				problem = Problem( budget=budget, function=self.function, instance=instance, dimension=dimension, esconfig=self.esconfig, checkPoint=checkPoint, logger=self.performance)
-				problem.runOptimizer()
-
+	def runProblem (self, budget, function, instance, dimension, esconfig, checkPoint, logger):
+			problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger)
+			problem.runOptimizer()
 
 
 		
