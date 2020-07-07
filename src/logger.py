@@ -10,7 +10,7 @@ import os
 
 class Performance():
 	def __init__(self):
-		if config['instance'] == 'local':
+		if config.config['instance'] == 'local':
 			self.intializeServer()
 			time.sleep(5)
 		self.intializeConnection()
@@ -28,14 +28,14 @@ class Performance():
 		server.start()
 	
 	def intializeConnection(self):
-		if config['instance'] == 'local':
+		if config.config['instance'] == 'local':
 			self.conn = pymysql.connect(host=config.config['host'], user=config.config['dbuser'],
 				passwd=config.config['dbpassword'], db=config.config['database'],
 				port=1122,autocommit=True, local_infile=True)
 		else:
 			self.conn = pymysql.connect(host=config.config['host'], user=config.config['dbuser'],
 				passwd=config.config['dbpassword'], db=config.config['database'],
-				port=3306,autocommit=True, local_infile=True)
+				port=config.cconfig['port'],autocommit=True, local_infile=True)
 		self.cHandler = self.conn.cursor()
 	
 
