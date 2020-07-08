@@ -31,6 +31,17 @@ class Problem():
 		self.createProblemInstance()
 		self.initializedESAlgorithm()
 	
+	def reset(self):
+		self.remainingBudget = self.totalBudget
+		self.spentBudget = 0
+		self.currentResults =  pd.DataFrame(columns=['x1', 'x2', 'x3','x4','x5','x6','x7','x8','x9','x10','x11','x12','x13','x14', 'x15', 'x16','x17','x18','x19','x20', 'y', 'name'])
+		self.elaFetures =  pd.DataFrame(columns=['name', 'ela_distr', 'ela_level', 'ela_meta', 'basic', 'disp', 'limo', 'nbc', 'pca', 'ic'])
+		self.prevRemainingBudget = None
+		self.prevSpentBudget = None
+		self.ela_feat = None
+		self.optimizer = None
+		self.initializedESAlgorithm()
+
 	def getProblemName(self, functionID, instance, budget, local, testRun):
 		functionNamesNoiseless = [ 
 				'1_Noise-free_Sphere_function',
@@ -109,6 +120,7 @@ class Problem():
 	def runTest(self):
 		#Runs three independent tests
 		for i in range(1,4):
+			self.reset()
 			self.runOptimizer(i)
 	
 	def runOptimizer(self, testRun):
@@ -187,7 +199,7 @@ class Problem():
 					self.loadState()
 				
 				
-			if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue:
+			if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue and not targetReachedEA:
 				targetReachedEA = True
 				name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
 		
@@ -372,7 +384,7 @@ class Problem():
 				min_index = num_evals
 			min_indices.append(min_index)
 
-		min_fixed_error =[round(x - target,8) for x in min_fitnesses]
+		min_fixed_error =[round(x-target,8) for x in min_fitnesses]
 		
 
 		minValue = round(np.min(fitnesses),8)
