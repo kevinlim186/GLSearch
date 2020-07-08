@@ -66,11 +66,11 @@ class Problem():
 			functionIndex = functionID - 1
 			functionAttr = functionNamesNoiseless[functionIndex]
 			
-			functionName = '_F'+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local) + '_T' + str(testRun)
+			functionName = '_F'+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_Local:" + str(local) + '_T' + str(testRun) + "_B" + str(budget)
 			return functionName
 		elif functionID == 0:
 			functionAttr = 'Parabola'
-			functionName = '_F'+str(functionID)+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local)  + '_T' + str(testRun)
+			functionName = '_F'+str(functionID)+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig  + "_Local:" + str(local)  + '_T' + str(testRun) + "_B" + str(budget)
 
 			return functionName
 
@@ -122,12 +122,14 @@ class Problem():
 
 		#Stop the iteration if target is reached OR budget is reached
 		while self.totalBudget > self.spentBudget and not (targetReachedEA and targetReachedSimplex and targetReachedBFGS10 and targetReachedBFGS30):
+	
 			if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex and not (targetReachedSimplex and targetReachedBFGS10 and targetReachedBFGS30)):
 				currentLength += 1
 				self._printProgressBar(currentLength, maxIndex-1,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
 				
 				# Get the best individuals as of this time as input to the local search. Calculate the ELA features
 				x0 = np.array(self.optimizer.best_individual.genotype.flatten())
+
 				self.calculateELA()
 
 				self.saveState()
@@ -185,20 +187,22 @@ class Problem():
 					self.loadState()
 				
 				
-			
+			if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue:
+				targetReachedEA = True
+				name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
+		
+				self.currentResults['name'] = name
+				minPerformance = self.calculatePerformance(name)
+				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+				self.performance.importHistoricalPath('temp/'+name+'.csv')
+
+			#If the optimal value is not reached then continue running
 			self.optimizer.runOneGeneration()
 			self.optimizer.recordStatistics()
 
-		name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
-		
-		self.currentResults['name'] = name
-		minPerformance = self.calculatePerformance(name)
-		self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-		self.performance.importHistoricalPath('temp/'+name+'.csv')
 
-		# If target is reached, we stop the calculation to save on CPU power
-		if minPerformance <= self.optimalValue:
-			targetReachedEA = True
+
+
 				
 	def saveState(self):
 		self.prevRemainingBudget  = self.remainingBudget 
@@ -368,12 +372,11 @@ class Problem():
 				min_index = num_evals
 			min_indices.append(min_index)
 
-		min_fixed_error =[x - target for x in min_fitnesses]
+		min_fixed_error =[round(x - target,8) for x in min_fitnesses]
 		
 
-		minValue = np.min(fitnesses)
-
-		FCE = np.mean(min_fixed_error)
+		minValue = round(np.min(fitnesses),8)
+		FCE = np.mean(min_fixed_error) 
 		std_dev_FCE = np.std(min_fixed_error)
 
 		### ERT ###
