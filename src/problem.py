@@ -185,8 +185,7 @@ class Problem():
 					
 					self.loadState()
 			else:
-				currentLength= maxIndex-1
-				self._printProgressBar(currentLength, maxIndex-1,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
+				self._printProgressBar(maxIndex-1, maxIndex-1,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
 				
 				
 			if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue:
