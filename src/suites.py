@@ -24,7 +24,7 @@ class Suites:
 
 	def runProblem (self, budget, function, instance, dimension, esconfig, checkPoint, logger):
 			problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger)
-			problem.runOptimizer()
+			problem.runTest()
 
 
 		

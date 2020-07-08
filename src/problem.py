@@ -21,7 +21,6 @@ class Problem():
 		self.elaFetures =  pd.DataFrame(columns=['name', 'ela_distr', 'ela_level', 'ela_meta', 'basic', 'disp', 'limo', 'nbc', 'pca', 'ic'])
 		self.prevRemainingBudget = None
 		self.prevSpentBudget = None
-		self.prevcurrentResults = None
 
 		self.ela_feat = None
 
@@ -32,7 +31,7 @@ class Problem():
 		self.createProblemInstance()
 		self.initializedESAlgorithm()
 	
-	def getProblemName(self, functionID, instance, budget, local):
+	def getProblemName(self, functionID, instance, budget, local, testRun):
 		functionNamesNoiseless = [ 
 				'1_Noise-free_Sphere_function',
 				'2_Separable_ellipsoid',
@@ -59,19 +58,20 @@ class Problem():
 				'23_Katsuura_function',
 				'24_Lunacek_bi-Rastrigin_condition_100',
 				'25_The_number_of_legs_the_animal'
-                ]
-    
+				]
+	
 		
 		esConfig = ''.join([str(elem) for elem in self.esconfig if elem is not None]) 
 		if functionID >0 and functionID <25:
 			functionIndex = functionID - 1
 			functionAttr = functionNamesNoiseless[functionIndex]
 			
-			functionName = '_F'+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local) 
+			functionName = '_F'+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local) + '_T' + testRun
 			return functionName
 		elif functionID == 0:
 			functionAttr = 'Parabola'
-			functionName = '_F'+str(functionID)+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local) 
+			functionName = '_F'+str(functionID)+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local)  + '_T' + testRun 
+
 			return functionName
 
 	def createProblemInstance(self):
@@ -105,78 +105,110 @@ class Problem():
 			self.problemInstance = parabola 
 			self.optimalValue = 0 + 1e-8
 	
+
+	def runTest(self):
+		#Runs three independent tests
+		for i in range(1,4):
+			self.runOptimizer(i)
 	
-	def runOptimizer(self):
+	def runOptimizer(self, testRun):
 		checkpoints = self.getCheckPoints()
 		currentLength = 0
-		maxIndex = len(checkpoints) 
-		while self.totalBudget > self.spentBudget:
+		maxIndex = len(checkpoints)
+		targetReachedEA = False
+		targetReachedSimplex = False
+		targetReachedBFGS10 = False
+		targetReachedBFGS30 = False
+
+		#Stop the iteration if target is reached OR budget is reached
+		while self.totalBudget > self.spentBudget and not (targetReachedEA and targetReachedSimplex and targetReachedBFGS10 and targetReachedBFGS30):
 			if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
 				currentLength += 1
-				self._printProgressBar(currentLength, maxIndex-1,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance),length=50)
+				self._printProgressBar(currentLength, maxIndex-1,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
+				
 				# Get the best individuals as of this time as input to the local search. Calculate the ELA features
 				x0 = np.array(self.optimizer.best_individual.genotype.flatten())
 				self.calculateELA()
 
-				#Simplex Method
 				self.saveState()
 				
-				name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler')
-				self.saveElaFeat(name)
-				self.simplexAlgorithm(x0)
+				#Simplex Method
+				if (not targetReachedSimplex):
+					name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler',testRun)
+					self.saveElaFeat(name)
+					self.simplexAlgorithm(x0)
 
-				self.calculatePerformance(name)
-				self.currentResults['name'] = name
-				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-				self.performance.importHistoricalPath('temp/'+name+'.csv')
-				
-				self.loadState()
+					minPerformance = self.calculatePerformance(name)
+					self.currentResults['name'] = name
+					self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+					self.performance.importHistoricalPath('temp/'+name+'.csv')
+
+					# If target is reached, we stop the calculation to save on CPU power
+					if minPerformance <= self.optimalValue:
+						targetReachedSimplex = True
+					
+					self.loadState()
 				
 
 				#Gradient Descent Method 0.1
-				name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1')
-				self.saveElaFeat(name)
-				self.bfgsAlgorithm(x0, 0.1)
+				elif (not targetReachedBFGS10):
+					name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1',testRun)
+					self.saveElaFeat(name)
+					self.bfgsAlgorithm(x0, 0.1)
 
-				self.calculatePerformance(name)
-				self.currentResults['name'] = name
-				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-				self.performance.importHistoricalPath('temp/'+name+'.csv')
-				
-				self.loadState()
+					minPerformance = self.calculatePerformance(name)
+					self.currentResults['name'] = name
+					self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+					self.performance.importHistoricalPath('temp/'+name+'.csv')
+
+					# If target is reached, we stop the calculation to save on CPU power
+					if minPerformance <= self.optimalValue:
+						targetReachedBFGS10 = True
+					
+					self.loadState()
 
 				#Gradient Descent Method 0.3
-				name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3')
-				self.saveElaFeat(name)
-				self.bfgsAlgorithm(x0, 0.3)
+				elif (not targetReachedBFGS30):
+					name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3',testRun)
+					self.saveElaFeat(name)
+					self.bfgsAlgorithm(x0, 0.3)
 
-				self.calculatePerformance(name)
-				self.currentResults['name'] = name
-				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-				self.performance.importHistoricalPath('temp/'+name+'.csv')
+					self.calculatePerformance(name)
+					self.currentResults['name'] = name
+					self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+					self.performance.importHistoricalPath('temp/'+name+'.csv')
+
+					# If target is reached, we stop the calculation to save on CPU power
+					if minPerformance <= self.optimalValue:
+						targetReachedBFGS30 = True
+					
+					self.loadState()
 				
-				self.loadState()
+				
 			
 			self.optimizer.runOneGeneration()
 			self.optimizer.recordStatistics()
 
-		name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base')
+		name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
 		
 		self.currentResults['name'] = name
-		self.calculatePerformance(name)
+		minPerformance = self.calculatePerformance(name)
 		self.currentResults.to_csv('temp/'+name+'.csv',index=False)
 		self.performance.importHistoricalPath('temp/'+name+'.csv')
 
-
+		# If target is reached, we stop the calculation to save on CPU power
+		if minPerformance <= self.optimalValue:
+			targetReachedEA = True
+				
 	def saveState(self):
 		self.prevRemainingBudget  = self.remainingBudget 
 		self.prevSpentBudget  = self.spentBudget 
-		self.prevCurrentResults= self.currentResults
+		self.currentResults.to_csv('temp/tempPath.csv', index=False)
 
 	def loadState(self):
 		self.remainingBudget = self.prevRemainingBudget
 		self.spentBudget = self.prevSpentBudget 
-		self.currentResults = self.prevCurrentResults
+		self.currentResults = pd.read_csv('temp/tempPath.csv')
 
 	def initializedESAlgorithm(self):
 		representation = self.ensureFullLengthRepresentation(self.esconfig)
@@ -218,14 +250,13 @@ class Problem():
 		x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
 		opt={'maxfev': maxiter, 'disp': False, 'return_all': False}
 
-		minimize(self.problemInstance,tol=1e-8, x0=population, method='nelder-mead', bounds = x_bounds, options=opt)
+		minimize(self.problemInstance, x0=population, method='nelder-mead', bounds = x_bounds, options=opt)
 
 	def bfgsAlgorithm(self, population, stepSize):
-		maxiter = self.remainingBudget
 		x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
-		opt={'maxfev': maxiter, 'disp': False, 'return_all': False, 'eps': stepSize}
+		opt={'maxiter' : self.remainingBudget, 'disp': False, 'return_all': False, 'eps': stepSize}
 
-		minimize(self.problemInstance,tol=1e-8, x0=population, method='BFGS', bounds = x_bounds, options=opt)
+		minimize(self.problemInstance,tol=1e-8,  x0=population, method='BFGS', bounds = x_bounds, options=opt)
 	
 	def calculateELA(self):
 		sample = self.currentResults.iloc[:,0:self.dimension].values
@@ -283,10 +314,11 @@ class Problem():
 		self.performance.insertELAData(name, self.ela_feat)
 	
 	def calculatePerformance(self, name):
-		fitness = ESFitness(fitnesses=np.array([list(self.currentResults['y'].values)]), target=self.optimalValue)
-		ert = fitness.ERT
-		fce = fitness.FCE
+		ert, fce, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=self.optimalValue)
+
 		self.performance.insertPerformance(name, ert, fce)
+
+		return minValue
 	
 	def _printProgressBar (self, iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
 		"""
@@ -308,3 +340,45 @@ class Problem():
 		# Print New Line on Complete
 		if iteration == total: 
 			print()
+
+
+	def _calcFCEandERT(self, fitnesses, target):
+		"""
+			Calculates the FCE and ERT of a given set of function evaluation results and target value
+
+			:param fitnesses:   Numpy array of size (num_runs, num_evals)
+			:param target:      Target value to use for basing the ERT on. Default: 1e-8
+			:return:            ESFitness object with FCE and ERT properly set
+			Source: Modea Python Package by https://github.com/sjvrijn, slightly modified to consider target based on BBOB target value.
+		"""
+		min_fitnesses = np.min(fitnesses, axis=1).tolist()  # Save as list to ensure eval() can read it as summary
+
+		num_runs, num_evals = fitnesses.shape
+		below_target = fitnesses < target
+		num_below_target = np.sum(below_target, axis=1)
+		min_indices = []
+		num_successful = 0
+		for i in range(num_runs):
+			if num_below_target[i] != 0:
+				# Take the lowest index at which the target was reached.
+				min_index = np.min(np.argwhere(below_target[i]))
+				num_successful += 1
+			else:
+				# No evaluation reached the target in this run
+				min_index = num_evals
+			min_indices.append(min_index)
+
+		min_fixed_error =[x - target for x in min_fitnesses]
+		
+
+		minValue = np.min(fitnesses)
+
+		FCE = np.mean(min_fixed_error)
+		std_dev_FCE = np.std(min_fixed_error)
+
+		### ERT ###
+		# If none of the runs reached the target, there is no (useful) ERT to be calculated
+		ERT = np.sum(min_indices) / num_successful if num_successful != 0 else None
+		std_dev_ERT = np.std(min_indices)
+
+		return ERT, FCE, std_dev_ERT, std_dev_FCE, minValue
