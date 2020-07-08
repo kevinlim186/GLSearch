@@ -66,11 +66,11 @@ class Problem():
 			functionIndex = functionID - 1
 			functionAttr = functionNamesNoiseless[functionIndex]
 			
-			functionName = '_F'+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local) + '_T' + testRun
+			functionName = '_F'+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local) + '_T' + str(testRun)
 			return functionName
 		elif functionID == 0:
 			functionAttr = 'Parabola'
-			functionName = '_F'+str(functionID)+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local)  + '_T' + testRun 
+			functionName = '_F'+str(functionID)+functionAttr + '_I' + str(self.instance) + '_D' + str(self.dimension)+ '_ES'+esConfig + "_B" + str(budget) + "_Local:" + str(local)  + '_T' + str(testRun)
 
 			return functionName
 
@@ -122,7 +122,7 @@ class Problem():
 
 		#Stop the iteration if target is reached OR budget is reached
 		while self.totalBudget > self.spentBudget and not (targetReachedEA and targetReachedSimplex and targetReachedBFGS10 and targetReachedBFGS30):
-			if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
+			if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex and not (targetReachedSimplex and targetReachedBFGS10 and targetReachedBFGS30)):
 				currentLength += 1
 				self._printProgressBar(currentLength, maxIndex-1,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
 				
