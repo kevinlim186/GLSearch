@@ -122,10 +122,11 @@ class Problem():
 
 		#Stop the iteration if target is reached OR budget is reached
 		while self.totalBudget > self.spentBudget and not (targetReachedEA and targetReachedSimplex and targetReachedBFGS10 and targetReachedBFGS30):
+			
+			self._printProgressBar(self.spentBudget, self.totalBudget,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
 
-	
 			if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex and not (targetReachedSimplex and targetReachedBFGS10 and targetReachedBFGS30)):
-				self._printProgressBar(currentLength, maxIndex-1,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
+				currentLength += 1
 				# Get the best individuals as of this time as input to the local search. Calculate the ELA features
 				x0 = np.array(self.optimizer.best_individual.genotype.flatten())
 
@@ -184,8 +185,6 @@ class Problem():
 						targetReachedBFGS30 = True
 					
 					self.loadState()
-			else:
-				self._printProgressBar(maxIndex-1, maxIndex-1,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
 				
 				
 			if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue:
@@ -200,7 +199,6 @@ class Problem():
 			#If the optimal value is not reached then continue running
 			self.optimizer.runOneGeneration()
 			self.optimizer.recordStatistics()
-			currentLength += 1
 
 
 
