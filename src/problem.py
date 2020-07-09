@@ -17,7 +17,8 @@ class Problem():
 		self.esconfig = esconfig 
 		self.performance = logger
 		self.checkPoint = checkPoint
-		self.currentResults =  pd.DataFrame(columns=['x1', 'x2', 'x3','x4','x5','x6','x7','x8','x9','x10','x11','x12','x13','x14', 'x15', 'x16','x17','x18','x19','x20', 'y', 'name'])
+		self.activeColumns = ['x'+str(x) for x in range(1,dimension+1)] + ['y', 'name']
+		self.currentResults =  pd.DataFrame(columns=self.activeColumns)
 		self.elaFetures =  pd.DataFrame(columns=['name', 'ela_distr', 'ela_level', 'ela_meta', 'basic', 'disp', 'limo', 'nbc', 'pca', 'ic'])
 		self.prevRemainingBudget = None
 		self.prevSpentBudget = None
@@ -30,11 +31,12 @@ class Problem():
 
 		self.createProblemInstance()
 		self.initializedESAlgorithm()
-	
+
+
 	def reset(self):
 		self.remainingBudget = self.totalBudget
 		self.spentBudget = 0
-		self.currentResults =  pd.DataFrame(columns=['x1', 'x2', 'x3','x4','x5','x6','x7','x8','x9','x10','x11','x12','x13','x14', 'x15', 'x16','x17','x18','x19','x20', 'y', 'name'])
+		self.currentResults =  pd.DataFrame(columns=self.activeColumns)
 		self.elaFetures =  pd.DataFrame(columns=['name', 'ela_distr', 'ela_level', 'ela_meta', 'basic', 'disp', 'limo', 'nbc', 'pca', 'ic'])
 		self.prevRemainingBudget = None
 		self.prevSpentBudget = None
@@ -213,9 +215,6 @@ class Problem():
 			self.optimizer.recordStatistics()
 
 
-
-
-				
 	def saveState(self):
 		self.prevRemainingBudget  = self.remainingBudget 
 		self.prevSpentBudget  = self.spentBudget 
