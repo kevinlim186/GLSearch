@@ -158,7 +158,7 @@ class Problem():
 					self.currentResults['name'] = name
 					self.currentResults.to_csv('temp/'+name+'.csv',index=False)
 					self.performance.importHistoricalPath('temp/'+name+'.csv')
-					self.performance.saveToCSV()
+					self.performance.saveToCSV('Function_'+str(self.function))
 
 					# If target is reached, we stop the calculation to save on CPU power
 					if minPerformance <= self.optimalValue:
@@ -177,7 +177,7 @@ class Problem():
 					self.currentResults['name'] = name
 					self.currentResults.to_csv('temp/'+name+'.csv',index=False)
 					self.performance.importHistoricalPath('temp/'+name+'.csv')
-					self.performance.saveToCSV()
+					self.performance.saveToCSV('Function_'+str(self.function))
 
 					# If target is reached, we stop the calculation to save on CPU power
 					if minPerformance <= self.optimalValue:
@@ -211,7 +211,7 @@ class Problem():
 				minPerformance = self.calculatePerformance(name)
 				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
 				self.performance.importHistoricalPath('temp/'+name+'.csv')
-				self.performance.saveToCSV()
+				self.performance.saveToCSV('Function_'+str(self.function))
 
 			#If the optimal value is not reached then continue running
 			self.optimizer.runOneGeneration()

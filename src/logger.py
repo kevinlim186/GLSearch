@@ -63,8 +63,8 @@ class Performance():
 				self.cHandler.execute(sql)
 			except Exception as e: 
 				print(e)
-		else:
-			self.elaFeatures = self.elaFeatures.append(elaFeat, ignore_index=True)
+
+		self.elaFeatures = self.elaFeatures.append(elaFeat, ignore_index=True)
 
 
 	def importHistoricalPath(self, directory):
@@ -118,10 +118,10 @@ class Performance():
 			except Exception as e: 
 				print(e)
 		
-		else:
-			self.ertPerformance = self.ertPerformance.append({'name': name, 'fce':fce, 'ert': ert}, ignore_index=True)
 
-	def saveToCSV(self):
-		fileName = self.baseDIR+ '/temp/'+ str(round(time.time()))  
+		self.ertPerformance = self.ertPerformance.append({'name': name, 'fce':fce, 'ert': ert}, ignore_index=True)
+
+	def saveToCSV(self, fileName):
+		fileName = self.baseDIR+ '/temp/'+ str(fileName)  
 		self.ertPerformance.to_csv(fileName+ '_performance.csv',index=False)
 		self.elaFeatures.to_csv(fileName+ '_elaFeatures.csv',index=False)
