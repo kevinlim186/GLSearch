@@ -4,10 +4,11 @@ from modea import Algorithms, Parameters
 import numpy as np
 from scipy.optimize import minimize, Bounds
 import pandas as pd
-from pflacco.pflacco import calculate_feature_set, create_feature_object
+import src.config as config
 
 class Problem():
 	def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger):
+		self.pflacco = config.config['flacco'] == 'True'
 		self.totalBudget = budget
 		self.remainingBudget = budget
 		self.spentBudget = 0
@@ -32,6 +33,8 @@ class Problem():
 		self.createProblemInstance()
 		self.initializedESAlgorithm()
 
+		if self.pflacco:
+			from pflacco.pflacco import calculate_feature_set, create_feature_object
 
 	def reset(self):
 		self.remainingBudget = self.totalBudget
@@ -144,14 +147,18 @@ class Problem():
 				# Get the best individuals as of this time as input to the local search. Calculate the ELA features
 				x0 = np.array(self.optimizer.best_individual.genotype.flatten())
 
-				self.calculateELA()
+				if self.pflacco:
+					self.calculateELA()
+
 
 				self.saveState()
 				
 				#Simplex Method
 				if (not targetReachedSimplex):
 					name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler',testRun)
+					
 					self.saveElaFeat(name)
+					
 					self.simplexAlgorithm(x0)
 
 					minPerformance = self.calculatePerformance(name)
@@ -329,7 +336,11 @@ class Problem():
 		self.ela_feat =  {**ela_distr, **ela_level, **ela_meta, **basic, **disp, **limo, **nbc, **pca, **ic }
 
 	def saveElaFeat(self, name):
-		self.performance.insertELAData(name, self.ela_feat)
+		#If Pflacco is bifurcated, it will save a csv of the current results before the local search
+		if self.pflacco:
+			self.performance.insertELAData(name, self.ela_feat)
+		else:
+			self.currentResults.to_csv('temp/'+name+'_pflacco.csv',index=False)
 	
 	def calculatePerformance(self, name):
 		ert, fce, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=self.optimalValue)
