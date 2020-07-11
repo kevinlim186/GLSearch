@@ -1,22 +1,23 @@
 import src.config as config
-import pymysql
+import mysql.connector
 import paramiko
 import pandas as pd
 from paramiko import SSHClient
-from sshtunnel import SSHTunnelForwarder
+from sshtunnel import SSHTunnelForwarder, socket
 import math
 import time
 import os
 import pandas as pd
 import time 
 
+
 class Performance():
 	def __init__(self):
-		if config.config['instance'] == 'local':
+		if config.config['allowSSH'] == 'True':
 			self.intializeServer()
 			time.sleep(5)
 
-		if config.config['instance'] != 'remote':
+		if config.config['allowSql'] == 'True':
 			self.intializeConnection()
 		
 		self.baseDIR = os.getcwd()
@@ -24,24 +25,26 @@ class Performance():
 		self.elaFeatures = pd.DataFrame()
 
 	def intializeServer(self):
+		sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 		server= SSHTunnelForwarder(
 			(config.config['sshHost'] , 22),
 			ssh_username=config.config['sshUser'],
 			ssh_password=config.config['sshPass'],
 			remote_bind_address=(config.config['host'], 3306),
-			local_bind_address=('127.0.0.1', 1122))
+			local_bind_address=('127.0.0.1', 1122),
+			ssh_proxy=sock)
 		server.daemon_forward_servers = True
 		server.start()
 	
 	def intializeConnection(self):
-		if config.config['instance'] == 'local':
-			self.conn = pymysql.connect(host=config.config['host'], user=config.config['dbuser'],
+		if config.config['allowSSH'] == 'True':
+			self.conn = mysql.connector.connect(host='127.0.0.1', user=config.config['dbuser'],
 				passwd=config.config['dbpassword'], db=config.config['database'],
-				port=1122,autocommit=True, local_infile=True)
+				port=1122,autocommit=True, allow_local_infile=True)
 		else:
-			self.conn = pymysql.connect(host=config.config['host'], user=config.config['dbuser'],
+			self.conn = mysql.connector.connect(host=config.config['host'], user=config.config['dbuser'],
 				passwd=config.config['dbpassword'], db=config.config['database'],
-				port=config.config['port'],autocommit=True, local_infile=True)
+				port=config.config['port'],autocommit=True, allow_local_infile=True,force_ipv6=True)
 		self.cHandler = self.conn.cursor()
 	
 
@@ -51,7 +54,7 @@ class Performance():
 		if 'inf' in elaFeat.keys():
 			elaFeat.pop('inf')
 		
-		if config.config['instance'] != 'remote':
+		if config.config['allowSql'] == 'True':
 			columns = ', '.join('`'+ e + '`' for e in elaFeat.keys())
 			values = ', '.join(str(e) for e in elaFeat.values()).replace('nan', 'NULL')
 			sql = '''
@@ -68,7 +71,7 @@ class Performance():
 
 
 	def importHistoricalPath(self, directory):
-		if config.config['instance'] != 'remote':
+		if config.config['allowSql'] == 'True':
 			sql = '''
 			LOAD DATA LOCAL INFILE '{}' INTO TABLE historicalPath
 			FIELDS TERMINATED BY ','
@@ -107,7 +110,7 @@ class Performance():
 		if ert == None or ert == 'inf':
 			ert = 'NULL'
 		
-		if config.config['instance'] != 'remote':
+		if config.config['allowSql'] == 'True':
 			sql = '''
 			insert into performance (name, fce, ert)
 			values ('{}', {}, {})
