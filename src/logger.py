@@ -125,6 +125,6 @@ class Performance():
 		self.ertPerformance = self.ertPerformance.append({'name': name, 'fce':fce, 'ert': ert}, ignore_index=True)
 
 	def saveToCSV(self, fileName):
-		fileName = self.baseDIR+ '/temp/'+ str(fileName)  
+		fileName = self.baseDIR+ '/perf/'+ str(fileName)  
 		self.ertPerformance.to_csv(fileName+ '_performance.csv',index=False)
 		self.elaFeatures.to_csv(fileName+ '_elaFeatures.csv',index=False)

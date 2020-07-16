@@ -123,8 +123,8 @@ class Problem():
 	
 
 	def runTest(self):
-		#Runs three independent tests
-		for i in range(1,4):
+		#Runs five independent tests
+		for i in range(1,6):
 			self.reset()
 			self.runOptimizer(i)
 	
@@ -175,7 +175,7 @@ class Problem():
 				
 
 				#Gradient Descent Method 0.1
-				elif (not targetReachedBFGS10):
+				if (not targetReachedBFGS10):
 					name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1',testRun)
 					self.saveElaFeat(name)
 					self.bfgsAlgorithm(x0, 0.1)
@@ -193,7 +193,7 @@ class Problem():
 					self.loadState()
 
 				#Gradient Descent Method 0.3
-				elif (not targetReachedBFGS30):
+				if (not targetReachedBFGS30):
 					name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3',testRun)
 					self.saveElaFeat(name)
 					self.bfgsAlgorithm(x0, 0.3)
@@ -202,6 +202,7 @@ class Problem():
 					self.currentResults['name'] = name
 					self.currentResults.to_csv('temp/'+name+'.csv',index=False)
 					self.performance.importHistoricalPath('temp/'+name+'.csv')
+					self.performance.saveToCSV('Function_'+str(self.function))
 
 					# If target is reached, we stop the calculation to save on CPU power
 					if minPerformance <= self.optimalValue:
@@ -219,10 +220,21 @@ class Problem():
 				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
 				self.performance.importHistoricalPath('temp/'+name+'.csv')
 				self.performance.saveToCSV('Function_'+str(self.function))
-
+			
 			#If the optimal value is not reached then continue running
 			self.optimizer.runOneGeneration()
 			self.optimizer.recordStatistics()
+
+
+		
+		name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
+
+		self.currentResults['name'] = name
+		minPerformance = self.calculatePerformance(name)
+		self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+		self.performance.importHistoricalPath('temp/'+name+'.csv')
+		self.performance.saveToCSV('Function_'+str(self.function))
+
 
 
 	def saveState(self):
@@ -272,16 +284,18 @@ class Problem():
 
 	def simplexAlgorithm(self, population):
 		maxiter = self.remainingBudget
-		x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
+		#x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
 		opt={'maxfev': maxiter, 'disp': False, 'return_all': False}
 
-		minimize(self.problemInstance, x0=population, method='nelder-mead', bounds = x_bounds, options=opt)
+		#minimize(self.problemInstance, x0=population, method='nelder-mead', bounds = x_bounds, options=opt)
+		minimize(self.problemInstance, x0=population, method='nelder-mead', options=opt)
 
 	def bfgsAlgorithm(self, population, stepSize):
-		x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
+		#x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
 		opt={'maxiter' : self.remainingBudget, 'disp': False, 'return_all': False, 'eps': stepSize}
 
-		minimize(self.problemInstance,tol=1e-8,  x0=population, method='BFGS', bounds = x_bounds, options=opt)
+		#minimize(self.problemInstance,tol=1e-8,  x0=population, method='BFGS', bounds = x_bounds, options=opt)
+		minimize(self.problemInstance,tol=1e-8,  x0=population, method='BFGS', options=opt)
 	
 	def calculateELA(self):
 		sample = self.currentResults.iloc[:,0:self.dimension].values
