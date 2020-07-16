@@ -242,13 +242,13 @@ class Problem():
 		temp = 'F_' + str(self.function) +'_I_'+ str(self.instance) +'_D_'+ str(self.dimension)+'.csv'
 		self.prevRemainingBudget  = self.remainingBudget 
 		self.prevSpentBudget  = self.spentBudget 
-		self.currentResults.to_csv('temp/'+temp, index=False)
+		self.currentResults.to_csv('temp1/'+temp, index=False)
 
 	def loadState(self):
 		temp = 'F_' + str(self.function) +'_I_'+ str(self.instance) +'_D_'+ str(self.dimension)+'.csv'
 		self.remainingBudget = self.prevRemainingBudget
 		self.spentBudget = self.prevSpentBudget 
-		self.currentResults = pd.read_csv('temp/'+ temp)ß
+		self.currentResults = pd.read_csv('temp1/'+ temp)ß
 
 	def initializedESAlgorithm(self):
 		representation = self.ensureFullLengthRepresentation(self.esconfig)
