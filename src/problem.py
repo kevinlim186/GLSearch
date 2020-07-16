@@ -5,6 +5,7 @@ import numpy as np
 from scipy.optimize import minimize, Bounds
 import pandas as pd
 import src.config as config
+import os
 
 class Problem():
 	def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger):
@@ -210,7 +211,7 @@ class Problem():
 					
 					self.loadState()
 				
-				
+			
 			if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue and not targetReachedEA:
 				targetReachedEA = True
 				name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
@@ -238,14 +239,17 @@ class Problem():
 
 
 	def saveState(self):
+		temp = 'F_' + self.function +'_I_'+ self.instance +'_D_'+ self.dimension+'.csv'
 		self.prevRemainingBudget  = self.remainingBudget 
 		self.prevSpentBudget  = self.spentBudget 
-		self.currentResults.to_csv('temp/tempPath.csv', index=False)
+		self.currentResults.to_csv('temp/'+temp, index=False)
 
 	def loadState(self):
+		temp = 'F_' + self.function +'_I_'+ self.instance +'_D_'+ self.dimension+'.csv'
 		self.remainingBudget = self.prevRemainingBudget
 		self.spentBudget = self.prevSpentBudget 
-		self.currentResults = pd.read_csv('temp/tempPath.csv')
+		self.currentResults = pd.read_csv('temp/'+ temp)
+		os.remove('temp/'+ temp)
 
 	def initializedESAlgorithm(self):
 		representation = self.ensureFullLengthRepresentation(self.esconfig)
