@@ -239,13 +239,13 @@ class Problem():
 
 
 	def saveState(self):
-		temp = 'F_' + self.function +'_I_'+ self.instance +'_D_'+ self.dimension+'.csv'
+		temp = 'F_' + str(self.function) +'_I_'+ str(self.instance) +'_D_'+ str(self.dimension)+'.csv'
 		self.prevRemainingBudget  = self.remainingBudget 
 		self.prevSpentBudget  = self.spentBudget 
 		self.currentResults.to_csv('temp/'+temp, index=False)
 
 	def loadState(self):
-		temp = 'F_' + self.function +'_I_'+ self.instance +'_D_'+ self.dimension+'.csv'
+		temp = 'F_' + str(self.function) +'_I_'+ str(self.instance) +'_D_'+ str(self.dimension)+'.csv'
 		self.remainingBudget = self.prevRemainingBudget
 		self.spentBudget = self.prevSpentBudget 
 		self.currentResults = pd.read_csv('temp/'+ temp)
