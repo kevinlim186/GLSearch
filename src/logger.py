@@ -106,15 +106,30 @@ class Performance():
 			except Exception as e: 
 				print(e)
 		
-	def insertPerformance(self, name, ert, fce):
-		if ert == None or ert == 'inf':
-			ert = 'NULL'
-		
+	def insertPerformance(self, name, ert8, ert7, ert6, ert5, ert4, ert3, ert2, ert1, fce):
+		if ert8 == None or ert8 == 'inf':
+			ert8 = 'NULL'
+		if ert7 == None or ert7 == 'inf':
+			ert7 = 'NULL'
+		if ert6 == None or ert6 == 'inf':
+			ert6 = 'NULL'
+		if ert5 == None or ert5 == 'inf':
+			ert5 = 'NULL'
+		if ert4 == None or ert4 == 'inf':
+			ert4 = 'NULL'
+		if ert3 == None or ert3 == 'inf':
+			ert3 = 'NULL'
+		if ert2 == None or ert2 == 'inf':
+			ert2 = 'NULL'
+		if ert1 == None or ert1 == 'inf':
+			ert1 = 'NULL'
+
+
 		if config.config['allowSql'] == 'True':
 			sql = '''
 			insert into performance (name, fce, ert)
 			values ('{}', {}, {})
-			'''.format (name, fce, ert)
+			'''.format (name, fce, ert8)
 
 			try:
 				self.cHandler.execute(sql)
@@ -122,7 +137,7 @@ class Performance():
 				print(e)
 		
 
-		self.ertPerformance = self.ertPerformance.append({'name': name, 'fce':fce, 'ert': ert}, ignore_index=True)
+		self.ertPerformance = self.ertPerformance.append({'name': name, 'fce':fce, 'ert-8': ert8, 'ert-7': ert7, 'ert-6': ert6, 'ert-5': ert5, 'ert-4': ert4, 'ert-3': ert3, 'ert-2': ert2, 'ert-1': ert1}, ignore_index=True)
 
 	def saveToCSV(self, fileName):
 		fileName = self.baseDIR+ '/perf/'+ str(fileName)  
