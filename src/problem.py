@@ -248,8 +248,7 @@ class Problem():
 		temp = 'F_' + str(self.function) +'_I_'+ str(self.instance) +'_D_'+ str(self.dimension)+'.csv'
 		self.remainingBudget = self.prevRemainingBudget
 		self.spentBudget = self.prevSpentBudget 
-		self.currentResults = pd.read_csv('temp/'+ temp)
-		os.remove('temp/'+ temp)
+		self.currentResults = pd.read_csv('temp/'+ temp)ß
 
 	def initializedESAlgorithm(self):
 		representation = self.ensureFullLengthRepresentation(self.esconfig)
