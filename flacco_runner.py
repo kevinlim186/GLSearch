@@ -13,7 +13,7 @@ files = [val for val in files if val.endswith("pflacco.csv")]
 
 for i in range(len(files)):
 	func= int(files[i].split("_")[1].replace('F',''))
-	dim= int(files[i].split("_")[6].replace('D',''))
+	dim= int(files[i].split("_")[-6].replace('D',''))
 	filename = files[i].replace('_pflacco.csv', '')
 
 	if func in function :
