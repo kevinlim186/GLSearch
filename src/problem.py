@@ -6,10 +6,11 @@ from scipy.optimize import minimize, Bounds
 import pandas as pd
 import src.config as config
 import os
+from pflacco.pflacco import calculate_feature_set, create_feature_object
 
 class Problem():
-	def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger):
-		self.pflacco = config.config['flacco'] == 'True'
+	def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco):
+		self.pflacco = pflacco
 		self.totalBudget = budget
 		self.remainingBudget = budget
 		self.spentBudget = 0
@@ -21,7 +22,7 @@ class Problem():
 		self.checkPoint = checkPoint
 		self.activeColumns = ['x'+str(x) for x in range(1,dimension+1)] + ['y', 'name']
 		self.currentResults =  pd.DataFrame(columns=self.activeColumns)
-		self.elaFetures =  pd.DataFrame(columns=['name', 'ela_distr', 'ela_level', 'ela_meta', 'basic', 'disp', 'limo', 'nbc', 'pca', 'ic'])
+		self.elaFetures =  pd.DataFrame()
 		self.prevRemainingBudget = None
 		self.prevSpentBudget = None
 
@@ -34,14 +35,11 @@ class Problem():
 		self.createProblemInstance()
 		self.initializedESAlgorithm()
 
-		if self.pflacco:
-			from pflacco.pflacco import calculate_feature_set, create_feature_object
-
 	def reset(self):
 		self.remainingBudget = self.totalBudget
 		self.spentBudget = 0
 		self.currentResults =  pd.DataFrame(columns=self.activeColumns)
-		self.elaFetures =  pd.DataFrame(columns=['name', 'ela_distr', 'ela_level', 'ela_meta', 'basic', 'disp', 'limo', 'nbc', 'pca', 'ic'])
+		self.elaFetures =  pd.DataFrame()
 		self.prevRemainingBudget = None
 		self.prevSpentBudget = None
 		self.ela_feat = None
