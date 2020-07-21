@@ -26,7 +26,7 @@ class Suites:
 	def runProblem (self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco):
 			problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger,pflacco)
 			problem.runTest()
-			problem.saveElaFeat()
+			problem.saveElaFeat('Function_'+str(function))
 
 
 		
