@@ -156,7 +156,7 @@ class Problem():
 				if (not targetReachedSimplex):
 					name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler',testRun)
 					
-					self.saveElaFeat(name)
+					#self.saveElaFeat(name)
 					
 					self.simplexAlgorithm(x0)
 
@@ -176,7 +176,7 @@ class Problem():
 				#Gradient Descent Method 0.1
 				if (not targetReachedBFGS10):
 					name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1',testRun)
-					self.saveElaFeat(name)
+					#self.saveElaFeat(name)
 					self.bfgsAlgorithm(x0, 0.1)
 
 					minPerformance = self.calculatePerformance(name)
@@ -194,7 +194,7 @@ class Problem():
 				#Gradient Descent Method 0.3
 				if (not targetReachedBFGS30):
 					name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3',testRun)
-					self.saveElaFeat(name)
+					#self.saveElaFeat(name)
 					self.bfgsAlgorithm(x0, 0.3)
 
 					self.calculatePerformance(name)
