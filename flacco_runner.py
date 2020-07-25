@@ -42,10 +42,9 @@ def _printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1,
 		print()
 
 for i in range(len(files)):
+	_printProgressBar(i, len(files))
 	func= int(files[i].split("_")[1].replace('F',''))
 	if func in function :
-		_printProgressBar(i, len(files))
-	
 		dim= int(files[i].split("_")[-5].replace('D',''))
 		endRef = int(files[i].split("_")[-1].replace('B','').replace('.csv', ''))
 		
