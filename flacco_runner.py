@@ -3,13 +3,22 @@ from src.logger import Performance
 import os
 import pandas as pd 
 
-function = [5,6]
-fileExtension = 'Function_4_5'
+#choose for parallel run
+function = [1,2,3,4,5]
+#function = [10,11,12,13,14]
+#function = [15,16,18,19]
+#function = [20,22,23,24]
+
+fileExtension = 'Function'
+for i in function:
+	fileExtension = fileExtension + "_" + str(i)
+
+
 performance = Performance()
 
 baseDIR = "./temp/"
 files = os.listdir(baseDIR)
-files = [val for val in files if val.endswith("pflacco.csv")]
+files = [val for val in files if val.endswith(".csv")]
 
 def _printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 50, fill = '█', printEnd = "\r"):
 	"""
@@ -34,13 +43,23 @@ def _printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1,
 
 for i in range(len(files)):
 	func= int(files[i].split("_")[1].replace('F',''))
-	dim= int(files[i].split("_")[-6].replace('D',''))
-	filename = files[i].replace('_pflacco.csv', '')
-	_printProgressBar(i, len(files))
 	if func in function :
-		problem = Problem(1, func, [1], dim, [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1], 1, performance,True)
-		problem.currentResults = pd.read_csv(baseDIR+files[i])
-		problem.calculateELA()
-		problem.saveElaFeat(filename)
+		_printProgressBar(i, len(files))
+	
+		dim= int(files[i].split("_")[-5].replace('D',''))
+		endRef = int(files[i].split("_")[-1].replace('B','').replace('.csv', ''))
+		
+
+		#limit the number of features to 50D, 100D, 200D 
+		for j in [50,100,200]:
+			begRef = endRef - j
+			sample = j * dim
+			filename = files[i].replace('.csv', '_ela_sample_' + str(j))
+
+			problem = Problem(1, func, [1], dim, [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1], 1, performance,True)
+			historicalPath = pd.read_csv(baseDIR+files[i]).iloc[begRef:endRef,]
+			problem.currentResults = pd.read_csv(baseDIR+files[i])
+			problem.calculateELA()
+			problem.saveElaFeat(filename)
 
 performance.saveToCSVELA(fileExtension)
