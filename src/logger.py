@@ -67,6 +67,7 @@ class Performance():
 			except Exception as e: 
 				print(e)
 
+		elaFeat['name'] = name
 		self.elaFeatures = self.elaFeatures.append(elaFeat, ignore_index=True)
 
 

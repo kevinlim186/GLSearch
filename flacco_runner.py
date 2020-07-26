@@ -19,6 +19,7 @@ performance = Performance()
 baseDIR = "./temp/"
 files = os.listdir(baseDIR)
 files = [val for val in files if val.endswith(".csv")]
+errorlog = pd.DataFrame()
 
 def _printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 50, fill = '█', printEnd = "\r"):
 	"""
@@ -51,14 +52,17 @@ for i in range(len(files)):
 
 		#limit the number of features to 50D, 100D, 200D 
 		for j in [50,100,200]:
-			begRef = endRef - j
 			sample = j * dim
+			begRef = endRef - sample
 			filename = files[i].replace('.csv', '_ela_sample_' + str(j))
 
 			problem = Problem(1, func, [1], dim, [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1], 1, performance,True)
 			historicalPath = pd.read_csv(baseDIR+files[i]).iloc[begRef:endRef,]
-			problem.currentResults = pd.read_csv(baseDIR+files[i])
-			problem.calculateELA()
-			problem.saveElaFeat(filename)
-
-performance.saveToCSVELA(fileExtension)
+			problem.currentResults = historicalPath
+			try:
+				problem.calculateELA()
+				problem.saveElaFeat(filename)
+				performance.saveToCSVELA(fileExtension)
+			except:
+				errorlog.append({'name':filename}, ignore_index = True)
+				errorlog.to_csv('./perf/error_log.csv',index=False)
