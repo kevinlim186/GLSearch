@@ -988,7 +988,7 @@ class _FStepEllipsoid(BBOBFunction):
             x1 = x[0]
         idx = np.abs(x) > .5
         x[idx] = np.round(x[idx])
-        x[np.negative(idx)] = np.round(self.alpha * x[np.negative(idx)]) / self.alpha
+        x[np.logical_not(idx)] = np.round(self.alpha * x[np.logical_not(idx)]) / self.alpha
         x = dot(x, self.rotation)
 
         # COMPUTATION core
