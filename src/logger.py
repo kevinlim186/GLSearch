@@ -107,7 +107,7 @@ class Performance():
 			except Exception as e: 
 				print(e)
 		
-	def insertPerformance(self, name, ert8, ert7, ert6, ert5, ert4, ert3, ert2, ert1, ert0, ertp1, ertp2, ertp3, ertp4,. fce):
+	def insertPerformance(self, name, ert8, ert7, ert6, ert5, ert4, ert3, ert2, ert1, ert0, ertp1, ertp2, ertp3, ertp4, fce):
 		if ert8 == None or ert8 == 'inf':
 			ert8 = 'NULL'
 		if ert7 == None or ert7 == 'inf':
