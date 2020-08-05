@@ -21,7 +21,7 @@ class Performance():
 			self.intializeConnection()
 		
 		self.baseDIR = os.getcwd()
-		self.ertPerformance = pd.DataFrame(columns=['name', 'fce', 'ert'])
+		self.ertPerformance = pd.DataFrame(columns=['name', 'fce'])
 		self.elaFeatures = pd.DataFrame()
 
 	def intializeServer(self):
@@ -107,7 +107,7 @@ class Performance():
 			except Exception as e: 
 				print(e)
 		
-	def insertPerformance(self, name, ert8, ert7, ert6, ert5, ert4, ert3, ert2, ert1, fce):
+	def insertPerformance(self, name, ert8, ert7, ert6, ert5, ert4, ert3, ert2, ert1, ert0, ertp1, ertp2, ertp3, fce):
 		if ert8 == None or ert8 == 'inf':
 			ert8 = 'NULL'
 		if ert7 == None or ert7 == 'inf':
@@ -124,7 +124,14 @@ class Performance():
 			ert2 = 'NULL'
 		if ert1 == None or ert1 == 'inf':
 			ert1 = 'NULL'
-
+		if ert0 == None or ert0 == 'inf':
+			ert0 = 'NULL'
+		if ertp1 == None or ertp1 == 'inf':
+			ertp1 = 'NULL'
+		if ertp2 == None or ertp2 == 'inf':
+			ertp2 = 'NULL'
+		if ertp3 == None or ertp3 == 'inf':
+			ertp3 = 'NULL'
 
 		if config.config['allowSql'] == 'True':
 			sql = '''
@@ -138,7 +145,7 @@ class Performance():
 				print(e)
 		
 
-		self.ertPerformance = self.ertPerformance.append({'name': name, 'fce':fce, 'ert-8': ert8, 'ert-7': ert7, 'ert-6': ert6, 'ert-5': ert5, 'ert-4': ert4, 'ert-3': ert3, 'ert-2': ert2, 'ert-1': ert1}, ignore_index=True)
+		self.ertPerformance = self.ertPerformance.append({'name': name, 'fce':fce, 'ert-8': ert8, 'ert-7': ert7, 'ert-6': ert6, 'ert-5': ert5, 'ert-4': ert4, 'ert-3': ert3, 'ert-2': ert2, 'ert-1': ert1, 'ert0':ert0 , 'ert1': ertp1, 'ert2':ertp2, 'ert3':ertp3}, ignore_index=True)
 
 	def saveToCSVPerformance(self, fileName):
 		fileName = self.baseDIR+ '/perf/'+ str(fileName)  
