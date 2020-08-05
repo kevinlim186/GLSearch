@@ -382,8 +382,10 @@ class Problem():
 		ert2, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e2)))
 
 		ert3, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e3)))
+
+		ert4, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e4)))
 		
-		self.performance.insertPerformance(name, ert8, ert7, ert6, ert5, ert4, ert3, ert2, ert1, ert0, ert1, ert2,ert3, fce)
+		self.performance.insertPerformance(name, ert8, ert7, ert6, ert5, ert4, ert3, ert2, ert1, ert0, ert1, ert2,ert3, ert4, fce)
 
 		return minValue
 	
