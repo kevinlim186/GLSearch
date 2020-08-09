@@ -121,7 +121,7 @@ class Problem():
 			self.optimalValue = 0 + 1e-8
 	
 
-	def runTest(self):
+	def runDataGathering(self):
 		#Runs five independent tests
 		for i in range(1,6):
 			self.reset()
@@ -215,7 +215,6 @@ class Problem():
 				name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
 		
 				self.currentResults['name'] = name
-				minPerformance = self.calculatePerformance(name)
 				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
 				self.performance.importHistoricalPath('temp/'+name+'.csv')
 				self.performance.saveToCSVPerformance('Function_'+str(self.function))
@@ -234,7 +233,31 @@ class Problem():
 		self.performance.importHistoricalPath('temp/'+name+'.csv')
 		self.performance.saveToCSVPerformance('Function_'+str(self.function))
 
+	def runTest(self):
+		#Runs five independent tests
+		for i in range(1,6):
+			self.reset()
+			self.runPerformanceTest(i)
 
+	def runPerformanceTest(self, testRun):
+		currentLength = 0
+		targetReachedEA = False
+		#Stop the iteration if target is reached OR budget is reached
+		while self.totalBudget > self.spentBudget and not (targetReachedEA):
+			self._printProgressBar(self.spentBudget, self.totalBudget,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
+			currentLength += 1
+			if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue and not targetReachedEA:
+				targetReachedEA = True
+				
+				#If the optimal value is not reached then continue running
+			self.optimizer.runOneGeneration()
+			self.optimizer.recordStatistics()
+		name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Test',testRun)
+		self.currentResults['name'] = name
+		self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+		self.performance.importHistoricalPath('temp/'+name+'.csv')
+		self.performance.saveToCSVPerformance('Function_Test_'+str(self.function))
+		_ = self.calculatePerformance(name)
 
 	def saveState(self):
 		temp = 'F_' + str(self.function) +'_I_'+ str(self.instance) +'_D_'+ str(self.dimension)+'.csv'
@@ -377,15 +400,15 @@ class Problem():
 		
 		ert0, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e0)))
 
-		ert1, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e1)))
+		ertp1, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e1)))
 
-		ert2, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e2)))
+		ertp2, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e2)))
 
-		ert3, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e3)))
+		ertp3, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e3)))
 
-		ert4, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e4)))
+		ertp4, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e4)))
 		
-		self.performance.insertPerformance(name, ert8, ert7, ert6, ert5, ert4, ert3, ert2, ert1, ert0, ert1, ert2,ert3, ert4, fce)
+		self.performance.insertPerformance(name, ert8, ert7, ert6, ert5, ert4, ert3, ert2, ert1, ert0, ertp1, ertp2,ertp3, ertp4, fce)
 
 		return minValue
 	
