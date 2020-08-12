@@ -5,9 +5,9 @@ import pickle
 
 #choose algorithm here
 algorithm= 'Local:bfgs0.1' #terminal 12
-#algorithm= 'Local:bfgs0.3'
-#algorithm= 'Local:Base'
-#algorithm = 'Local:nedler'
+#algorithm= 'Local:bfgs0.3' #terminal 13
+#algorithm= 'Local:Base' #terminal 14
+#algorithm = 'Local:nedler' #terminal 15
 
 
 ela50 = pd.read_csv("./train50.csv")
@@ -64,10 +64,14 @@ for i in range(len(columns)):
 ela50 = ela50[ela50['algo']==algorithm]
 
 
-X_train = ela50.iloc[:,7:-1].values
-y_train = ela50['performance'].values
+#X_train = ela50.iloc[:,7:-1].values
+#y_train = ela50['performance'].values
 
-model =  autosklearn.regression.AutoSklearnRegressor()
+X_train = ela50.iloc[1:30000,7:-1].values
+y_train = ela50['performance'].iloc[1:30000,].values
+
+model =  autosklearn.regression.AutoSklearnRegressor(time_left_for_this_task=86400,ensemble_nbest=1,
+                      ensemble_size=1, resampling_strategy='cv')
 print("training model")
 model.fit(X_train, y_train)
 print("Done training. Model is saved")
