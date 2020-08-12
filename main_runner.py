@@ -1,8 +1,10 @@
 from src.suites import Suites
 from src.logger import Performance
+from sklearn.svm import SVR
 
 performance = Performance()
 
+sr = SVR('fasfa')
 name = "Test_best_solver"
 esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1] 
 
