@@ -4,14 +4,13 @@ import numpy as np
 import pickle
 
 #choose algorithm here
-algorithm= 'Local:bfgs0.1'
+algorithm= 'Local:bfgs0.1' #terminal 12
 #algorithm= 'Local:bfgs0.3'
 #algorithm= 'Local:Base'
 #algorithm = 'Local:nedler'
 
 
-ela50 = pd.read_csv("./GLSearch/train50.csv")
-columns = ela50.columns
+ela50 = pd.read_csv("./train50.csv")
 
 ela50 = ela50.drop(columns=[
     'fce_x',
@@ -55,13 +54,21 @@ ela50 = ela50.drop(columns=[
     'ic.eps.ratio',
 ])
 
+
 #remove samples with null values
+columns = ela50.columns
 for i in range(len(columns)):
     ela50 = ela50[ela50[columns[i]].notnull()]
+
+#Filter the data based on the algorithm being trained
+ela50 = ela50[ela50['algo']==algorithm]
+
 
 X_train = ela50.iloc[:,7:-1].values
 y_train = ela50['performance'].values
 
 model =  autosklearn.regression.AutoSklearnRegressor()
-model.fit(Xtrain, ytrain)
+print("training model")
+model.fit(X_train, y_train)
+print("Done training. Model is saved")
 pickle.dump(model, open('./models/'+algorithm, 'wb'))
