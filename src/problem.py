@@ -7,9 +7,10 @@ import pandas as pd
 import src.config as config
 import os
 from pflacco.pflacco import calculate_feature_set, create_feature_object
+from pyDOE import lhs
 
 class Problem():
-	def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco):
+	def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco, localSearch=None):
 		self.pflacco = pflacco
 		self.totalBudget = budget
 		self.remainingBudget = budget
@@ -25,6 +26,7 @@ class Problem():
 		self.elaFetures =  pd.DataFrame()
 		self.prevRemainingBudget = None
 		self.prevSpentBudget = None
+		self.localSearch = localSearch
 
 		self.ela_feat = None
 
@@ -243,21 +245,56 @@ class Problem():
 		currentLength = 0
 		targetReachedEA = False
 		#Stop the iteration if target is reached OR budget is reached
-		while self.totalBudget > self.spentBudget and not (targetReachedEA):
-			self._printProgressBar(self.spentBudget, self.totalBudget,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
-			currentLength += 1
-			if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue and not targetReachedEA:
-				targetReachedEA = True
-				
-				#If the optimal value is not reached then continue running
-			self.optimizer.runOneGeneration()
-			self.optimizer.recordStatistics()
-		name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Test',testRun)
-		self.currentResults['name'] = name
-		self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-		self.performance.importHistoricalPath('temp/'+name+'.csv')
-		self.performance.saveToCSVPerformance('Function_Test_'+str(self.function))
-		_ = self.calculatePerformance(name)
+		if (self.localSearch ==  None):
+			while self.totalBudget > self.spentBudget and not (targetReachedEA):
+				self._printProgressBar(self.spentBudget, self.totalBudget,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
+				currentLength += 1
+				if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue and not targetReachedEA:
+					targetReachedEA = True
+					
+					#If the optimal value is not reached then continue running
+				self.optimizer.runOneGeneration()
+				self.optimizer.recordStatistics()
+			name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Test',testRun)
+			self.currentResults['name'] = name
+			self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+			self.performance.importHistoricalPath('temp/'+name+'.csv')
+			
+		elif self.localSearch=='bfgs0.1':
+			for i in [1000,2000,5000]:
+				print('Running test using local search bfgs 0.1 on function '+str(self.function) +' with instance '+str(self.instance) + ' dimension '+str(self.dimension) + ' LHS Run '+str(i))
+				x0 = self.generateLHSBestIndividuals(i)
+				self.bfgsAlgorithm(x0, 0.1)
+				name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1_LHS'+str(i)+'_',testRun)
+				_ = self.calculatePerformance(name)
+				self.currentResults['name'] = name
+				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+				self.performance.importHistoricalPath('temp/'+name+'.csv')
+
+
+		elif self.localSearch=='bfgs0.3':
+			for i in [1000,2000,5000]:
+				print('Running test using local search bfgs 0.3 on function '+str(self.function) +' with instance '+str(self.instance) + ' dimension '+str(self.dimension)+ ' LHS Run '+str(i))
+				x0 = self.generateLHSBestIndividuals(i)
+				self.bfgsAlgorithm(x0, 0.3)
+				name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3_LHS'+str(i)+'_',testRun)
+				_ = self.calculatePerformance(name)
+				self.currentResults['name'] = name
+				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+				self.performance.importHistoricalPath('temp/'+name+'.csv')
+
+
+		
+		elif self.localSearch=='nedler':
+			for i in [1000,2000,5000]:
+				print('Running test using local search nedler on function '+str(self.function) +' with instance '+str(self.instance) + ' dimension '+str(self.dimension)+ ' LHS Run '+str(i))
+				x0 = self.generateLHSBestIndividuals(i)
+				self.simplexAlgorithm(x0)
+				name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler_LHS'+str(i)+'_',testRun)
+				_ = self.calculatePerformance(name)
+				self.currentResults['name'] = name
+				self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+				self.performance.importHistoricalPath('temp/'+name+'.csv')
 
 	def saveState(self):
 		temp = 'F_' + str(self.function) +'_I_'+ str(self.instance) +'_D_'+ str(self.dimension)+'.csv'
@@ -310,15 +347,12 @@ class Problem():
 		maxiter = self.remainingBudget
 		#x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
 		opt={'maxfev': maxiter, 'disp': False, 'return_all': False}
-
-		#minimize(self.problemInstance, x0=population, method='nelder-mead', bounds = x_bounds, options=opt)
 		minimize(self.problemInstance, x0=population, method='nelder-mead', options=opt)
 
 	def bfgsAlgorithm(self, population, stepSize):
 		#x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
 		opt={'maxiter' : self.remainingBudget, 'disp': False, 'return_all': False, 'eps': stepSize}
-
-		#minimize(self.problemInstance,tol=1e-8,  x0=population, method='BFGS', bounds = x_bounds, options=opt)
+		
 		minimize(self.problemInstance,tol=1e-8,  x0=population, method='BFGS', options=opt)
 	
 	def calculateELA(self):
@@ -473,3 +507,15 @@ class Problem():
 		std_dev_ERT = np.std(min_indices)
 
 		return ERT, FCE, std_dev_ERT, std_dev_FCE, minValue
+
+	def generateLHSBestIndividuals(self, samples):
+		sample = lhs(self.dimension, samples=samples)*10-5
+		bestValue = np.inf
+		bestgenoType = None
+
+		for i in sample:
+			currentRes = self.problemInstance(i)
+			if currentRes < bestValue:
+				bestValue = currentRes
+				bestgenoType = i
+		return bestgenoType

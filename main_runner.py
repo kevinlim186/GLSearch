@@ -1,11 +1,18 @@
 from src.suites import Suites
 from src.logger import Performance
-from sklearn.svm import SVR
+
 
 performance = Performance()
+name = 'nedler'
+localSearch = 'nedler'
 
-sr = SVR('fasfa')
-name = "Test_best_solver"
+#name = 'bfgs0.1'
+#localSearch = 'bfgs0.1'
+
+#name = 'bfgs0.3'
+#localSearch = 'bfgs0.3'
+
+#name = "Test_best_solver"
 esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1] 
 
 #name = "Test_CMA-ES"
@@ -48,7 +55,8 @@ for i in range(6,8):
 '''
 
 for i in range(1,25):
-	suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10,20], esconfig=[0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1], function=i, performance=performance, pflacco=False)
+	suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10,20], esconfig=esconfig, function=i, performance=performance, pflacco=False, localSearch=localSearch)
 	suite.runTestSuite()
 
 performance.saveToCSVPerformance('Test_'+name)
+

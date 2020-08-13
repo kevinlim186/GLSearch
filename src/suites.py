@@ -1,7 +1,7 @@
 from src.problem import Problem
 
 class Suites:
-	def __init__(self, instances, baseBudget, dimensions, esconfig, function, performance, pflacco ):
+	def __init__(self, instances, baseBudget, dimensions, esconfig, function, performance, pflacco, localSearch=None ):
 		self.esconfig = esconfig
 		self.instances = instances
 		self.performance = performance
@@ -9,6 +9,7 @@ class Suites:
 		self.baseBudget = baseBudget
 		self.function = function
 		self.pflacco = pflacco
+		self.localSearch = localSearch
 	
 
 	def runDataGathering(self):
@@ -21,10 +22,10 @@ class Suites:
 			checkPoint = 500 * self.dimensions[i]
 			for j in range(maxInstanceLen):
 				instance = self.instances[j]
-				self.runProblem(budget=budget, function=self.function, instance=instance, dimension=dimension, esconfig=self.esconfig, checkPoint=checkPoint, logger=self.performance, pflacco=self.pflacco)
+				self.runProblem(budget=budget, function=self.function, instance=instance, dimension=dimension, esconfig=self.esconfig, checkPoint=checkPoint, logger=self.performance, pflacco=self.pflacco,localSearch= self.localSearch)
 
-	def runProblem (self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco):
-			problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger,pflacco)
+	def runProblem (self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco, localSearch):
+			problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger,pflacco, localSearch)
 			problem.runDataGathering()
 			problem.saveElaFeat('Function_'+str(function))
 
@@ -38,11 +39,11 @@ class Suites:
 			checkPoint = 500 * self.dimensions[i]
 			for j in range(maxInstanceLen):
 				instance = self.instances[j]
-				self.runTest(budget=budget, function=self.function, instance=instance, dimension=dimension, esconfig=self.esconfig, checkPoint=checkPoint, logger=self.performance, pflacco=self.pflacco)
+				self.runTest(budget=budget, function=self.function, instance=instance, dimension=dimension, esconfig=self.esconfig, checkPoint=checkPoint, logger=self.performance, pflacco=self.pflacco, localSearch=self.localSearch)
 
 
-	def runTest(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco):
-			problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger,pflacco)
+	def runTest(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco,localSearch):
+			problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger,pflacco,localSearch)
 			problem.runTest()
 
 
