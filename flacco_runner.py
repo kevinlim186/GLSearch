@@ -2,9 +2,11 @@ from src.problem import Problem
 from src.logger import Performance
 import os
 import pandas as pd 
+import math
+from numpy import log
 
 #choose for parallel run
-function = [1,2,3,4,5]
+function = [1,2,3,4,5] #Terminal 2
 #function = [10,11,12,13,14]
 #function = [15,16,18,19]
 #function = [20,22,23,24]
@@ -53,7 +55,7 @@ for i in range(len(files)):
 		#limit the number of features to 50D, 100D, 200D 
 		for j in [5,50,100,200]:
 #			sample = j * dim
-			_lambda = 4+floor(3*log(dim))
+			_lambda = 4+ math.floor(3*log(dim))
 			sample = _lambda * j
 			begRef = endRef - sample
 			filename = files[i].replace('.csv', '_ela_sample_populationBased' + str(j))
