@@ -51,10 +51,12 @@ for i in range(len(files)):
 		
 
 		#limit the number of features to 50D, 100D, 200D 
-		for j in [50,100,200]:
-			sample = j * dim
+		for j in [5,50,100,200]:
+#			sample = j * dim
+			_lambda = 4+floor(3*log(dim))
+			sample = _lambda * j
 			begRef = endRef - sample
-			filename = files[i].replace('.csv', '_ela_sample_' + str(j))
+			filename = files[i].replace('.csv', '_ela_sample_populationBased' + str(j))
 
 			problem = Problem(1, func, [1], dim, [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1], 1, performance,True)
 			historicalPath = pd.read_csv(baseDIR+files[i]).iloc[begRef:endRef,]
