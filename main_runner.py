@@ -1,5 +1,7 @@
 from src.suites import Suites
 from src.logger import Performance
+from src.result import Result
+import pandas as pd
 
 
 performance = Performance()
