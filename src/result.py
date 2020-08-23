@@ -122,7 +122,7 @@ class Result():
 
 		self.processedPerformance['cost'] = self.processedPerformance['performance']-self.processedPerformance['vbs']
 
-		self.classificationCost = self.processedPerformance.pivot_table(index=['function', 'dimension','instance', 'budget', 'trial'], columns = 'algo', values='cost').reset_index().sort_values(['function', 'dimension','instance', 'budget'], ascending=True)
+		self.classificationCost = self.processedPerformance.pivot_table(index=['function', 'dimension','instance', 'trial', 'budget'], columns = 'algo', values='cost').reset_index().sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
 		self.classificationCost['Local:Base'] = self.classificationCost['Local:Base'].bfill()
 		self.classificationCost['Local:bfgs0.1'] = self.classificationCost['Local:bfgs0.1'].ffill()
 		self.classificationCost['Local:bfgs0.3'] = self.classificationCost['Local:bfgs0.3'].ffill()
@@ -167,7 +167,7 @@ class Result():
 				pass
 		
 		if (algorithm==None):
-				training = self.trainingData
+			training = self.trainingData
 		else:
 			training = self.trainingData[(self.trainingData['algo']==algorithm)]
 
