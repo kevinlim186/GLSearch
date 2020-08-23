@@ -40,7 +40,7 @@ class Result():
 
 		self.processedFeatures['dim'] = self.processedFeatures['name'].apply(lambda x: x.split("_")[-1])
 		self.processedFeatures = self.processedFeatures[self.processedFeatures['dim']==size].drop(columns=['dim'])
-		self.processedFeatures['name'] = self.processedFeatures['name'].apply(lambda x: '_'.join(x['name'].split('_')[:-3]), axis=1)
+		self.processedFeatures['name'] = self.processedFeatures['name'].apply(lambda x: '_'.join(x.split('_')[:-3]))
 		
 		#split the name identifier to extract the function, instance, algorithm used and dimensions
 		self.processedFeatures['function'] =  self.processedFeatures['name'].str.extract('(_F[0-9]+)')
@@ -135,7 +135,9 @@ class Result():
 
 		return self.calculatedPerformance
 
-	def createTrainSet(self, size, algorithm=None):
+	def createTrainSet(self, size, algorithm=None, reset=False):
+		if reset:
+			self._reset()
 		if not self.processedPerf and not self.processedSolvers:
 			self._preCalculation()
 			self._calculateBestSolvers()
@@ -173,3 +175,8 @@ class Result():
 
 		return Xtrain, ycost
 
+
+	def _reset(self):
+		self.processedSolvers = False
+		self.processedPerf = False
+		self.processedELA = False
