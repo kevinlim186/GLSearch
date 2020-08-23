@@ -172,7 +172,7 @@ class Result():
 			training = self.trainingData[(self.trainingData['algo']==algorithm)]
 
 
-		Xtrain = training.iloc[:,12:-4].values
+		Xtrain = training.iloc[:,12:-10].values
 		ycost = training.iloc[:,-4:].values
 
 		return Xtrain, ycost
