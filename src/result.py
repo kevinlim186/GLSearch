@@ -93,8 +93,8 @@ class Result():
 		self.processedPerformance = self.processedPerformance[self.processedPerformance['budget'] >100]
 
 		#Calculate necessary numbers in preparation for calculate the true performance
-		self.consolidatedPerformance['ertMax'] = 10000*self.processedPerformance['dimension']
-		self.consolidatedPerformance['relERT'] = self.processedPerformance['ert-8']/self.processedPerformance['ertMax']
+		self.processedPerformance['ertMax'] = 10000*self.processedPerformance['dimension']
+		self.processedPerformance['relERT'] = self.processedPerformance['ert-8']/self.processedPerformance['ertMax']
 		maxFCE = self.processedPerformance.groupby(['function', 'instance', 'dimension','trial'])['fce'].max().reset_index()
 		self.processedPerformance = self.processedPerformance.merge(maxFCE, on=['function', 'instance', 'dimension'], how='left', suffixes=('', 'max'))
 		self.processedPerformance['fce'] =  self.processedPerformance['fce']+ 1e-8 #adjust FCE to factor in accuracy set when experiment was setup
