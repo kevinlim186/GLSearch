@@ -11,6 +11,7 @@ class Result():
 		self.processedFeatures = pd.DataFrame()
 		self.trainingData = pd.DataFrame()
 		self.SBS = ''
+		self.classificationCost = pd.DataFrame()
 		self.excludedFeatures = ['fce_x', 'ert', 'ert-1', 'ert-2', 'ert-3', 'ert-4', 'ert-5', 'ert-6', 'ert-7','ert-8', 'opt', 'ertMax', 'relERT', 'relFCE', 'vbs','sbs', 'ela_meta.quad_simple.cond', 'ic.costs_fun_evals', 'limo.avg.length','limo.avg.length.scaled','limo.avg_length.norm','limo.cor','limo.cor.norm','limo.cor.reg','limo.cor.scaled','limo.costs_fun_evals','limo.length.sd','limo.ratio.sd','limo.sd.max_min_ratio','limo.sd.max_min_ratio.scaled','limo.sd.mean','limo.sd.mean.scaled','limo.sd_mean.norm','limo.sd_mean.reg','limo.sd_ratio.norm','limo.sd_ratio.reg','nbc.costs_fun_evals','pca.costs_fun_evals','Unnamed: 0','ic.eps.ratio']
 		self.processedPerf = False
 		self.processedSolvers = False
@@ -40,19 +41,57 @@ class Result():
 		self.processedFeatures['dim'] = self.processedFeatures['name'].apply(lambda x: x.split("_")[-1])
 		self.processedFeatures = self.processedFeatures[self.processedFeatures['dim']==size].drop(columns=['dim'])
 		self.processedFeatures['name'] = self.processedFeatures.apply(lambda x: '_'.join(x['name'].split('_')[:-3]), axis=1)
+		
+		#split the name identifier to extract the function, instance, algorithm used and dimensions
+		self.processedFeatures['function'] =  self.processedFeatures['name'].str.extract('(_F[0-9]+)')
+		self.processedFeatures['function'] = self.processedFeatures['function'].apply(lambda x: x.replace('_F',''))
+
+		self.processedFeatures['instance'] =  self.processedFeatures['name'].str.extract('(_I[0-9]+)')
+		self.processedFeatures['instance'] = self.processedFeatures['instance'].apply(lambda x: x.replace('_I',''))
+
+		self.processedFeatures['dimension'] =  self.processedFeatures['name'].str.extract('(_D[0-9]+)')
+		self.processedFeatures['dimension'] = self.processedFeatures['dimension'].apply(lambda x: x.replace('_D',''))
+
+
+
+		self.processedFeatures['trial'] =  self.processedFeatures['name'].str.extract('(_T[0-9]+)')
+		self.processedFeatures['trial'] = self.processedFeatures['trial'].apply(lambda x: x.replace('_T',''))
+
+		self.processedFeatures['budget'] = self.processedFeatures['name'].str.extract('(_B[0-9]+)')
+		self.processedFeatures['budget'] = self.processedFeatures['budget'].apply(lambda x: x.replace('_B',''))
+
+		self.processedFeatures['algo'] = self.processedFeatures['name'].apply(lambda x: x[x.find('_Local')+1:x.find('_T')].replace('_',''))
+
 		self.processedELA = True
 
 	def _preCalculation(self):
 		#Non destructive preprocessing
 		self.processedPerformance = self.consolidatedPerformance
 		#split the name identifier to extract the function, instance, algorithm used and dimensions
-		self.processedPerformance['function'] = self.processedPerformance['name'].apply(lambda x: x[x.find('_F')+2:x.find('_F')+4].replace('_',''))
-		self.processedPerformance['instance'] = self.processedPerformance['name'].apply(lambda x: int(x[x.find('_I')+2:x.find('_I')+4].replace('_','')))
-		self.processedPerformance['dimension'] = self.processedPerformance['name'].apply(lambda x: int(x[x.find('_D')+2:x.find('_D')+4].replace('_','')))
-		self.processedPerformance['algo'] = self.processedPerformance['name'].apply(lambda x: x[x.find('_Local')+1:x.find('_T')].replace('_',''))
-		self.processedPerformance['trial'] =  self.processedPerformance['name'].apply(lambda x: x[x.find('_T')+2:x.find('_T')+4].replace('_',''))
+		self.processedPerformance['function'] =  self.processedPerformance['name'].str.extract('(_F[0-9]+)')
+		self.processedPerformance['function'] = self.processedPerformance['function'].apply(lambda x: x.replace('_F',''))
 
-		#Calculate necessary numbers in preparation for calcualte the true performance
+		self.processedPerformance['instance'] =  self.processedPerformance['name'].str.extract('(_I[0-9]+)')
+		self.processedPerformance['instance'] = self.processedPerformance['instance'].apply(lambda x: x.replace('_I',''))
+
+		self.processedPerformance['dimension'] =  self.processedPerformance['name'].str.extract('(_D[0-9]+)')
+		self.processedPerformance['dimension'] = self.processedPerformance['dimension'].apply(lambda x: x.replace('_D',''))
+
+
+
+		self.processedPerformance['trial'] =  self.processedPerformance['name'].str.extract('(_T[0-9]+)')
+		self.processedPerformance['trial'] = self.processedPerformance['trial'].apply(lambda x: x.replace('_T',''))
+
+		self.processedPerformance['budget'] = self.processedPerformance['name'].str.extract('(_B[0-9]+)')
+		self.processedPerformance['budget'] = self.processedPerformance['budget'].apply(lambda x: x.replace('_B',''))
+
+		self.processedPerformance['algo'] = self.processedPerformance['name'].apply(lambda x: x[x.find('_Local')+1:x.find('_T')].replace('_',''))
+
+
+		#remove first generation sample since ELA could not be computed
+		self.processedPerformance = self.processedPerformance[self.processedPerformance['budget'] >100]
+
+		#Calculate necessary numbers in preparation for calculate the true performance
 		self.consolidatedPerformance['ertMax'] = 10000*self.processedPerformance['dimension']
 		self.consolidatedPerformance['relERT'] = self.processedPerformance['ert-8']/self.processedPerformance['ertMax']
 		maxFCE = self.processedPerformance.groupby(['function', 'instance', 'dimension','trial'])['fce'].max().reset_index()
@@ -77,6 +116,15 @@ class Result():
 		sbs= sbs.rename(columns={'performance':'sbs'})
 		self.processedPerformance =  self.processedPerformance.merge(sbs, on=['function', 'instance', 'dimension','trial'], how='left',  suffixes=('', ''))
 		self.processedPerformance['VBS-SBS-Gap'] = self.processedPerformance['sbs'] - self.processedPerformance['vbs']
+
+		self.processedPerformance['cost'] = self.processedPerformance['performance']-self.processedPerformance['vbs']
+
+		self.classificationCost = self.performance.pivot_table(index=['function', 'dimension','instance', 'budget', 'trial'], columns = 'algo', values='cost').reset_index().sort_values(['function', 'dimension','instance', 'budget'], ascending=True)
+		self.classificationCost['Local:Base'] = self.classificationCost['Local:Base'].bfill()
+		self.classificationCost['Local:bfgs0.1'] = self.classificationCost['Local:bfgs0.1'].ffill()
+		self.classificationCost['Local:bfgs0.3'] = self.classificationCost['Local:bfgs0.3'].ffill()
+		self.classificationCost['Local:nedler'] = self.classificationCost['Local:nedler'].ffill()
+		self.classificationCost[['function','instance', 'dimension', 'trial', 'budget']].astype('int64')
 		self.processedSolvers = True
 
 
@@ -99,8 +147,7 @@ class Result():
 		if not self.processedELA:
 			self._elaPrecalculate(size)
 	
-		self.trainingData = self.processedPerformance.merge(self.elaFeatures, on=['name'], how='left',  suffixes=('', ''))
-		self.trainingData['class'] = self.trainingData['performance']==self.trainingData['vbs']
+		self.trainingData = self.processedFeatures.merge(self.classificationCost, on= ['function','instance','dimension','trial', 'budget'])
 
 		for feature in self.excludedFeatures:
 			try:
@@ -110,18 +157,18 @@ class Result():
 
 		for i in self.elaFeatures.columns:
 			try:
-				self.trainingData = self.trainingData[self.trainingData[columns[i]].notnull()]
+				self.trainingData = self.trainingData[self.trainingData[i].notnull()]
 
 			except:
 				pass
-
+		
 		if (algorithm==None):
-			training = self.trainingData
+				training = self.trainingData
 		else:
 			training = self.trainingData[(self.trainingData['algo']==algorithm)]
 
-		Xtrain = training.iloc[:,12:-1].values
-		ytrain = training.iloc[:,-1].values
+		Xtrain = training.iloc[:,12:-4].values
+		ycost = training.iloc[:,-4:].values
 
-		return Xtrain, ytrain
+		return Xtrain, ycost
 
