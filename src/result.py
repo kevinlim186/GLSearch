@@ -62,6 +62,8 @@ class Result():
 
 		self.processedFeatures['algo'] = self.processedFeatures['name'].apply(lambda x: x[x.find('_Local')+1:x.find('_T')].replace('_',''))
 
+		self.processedFeatures[['function','instance', 'dimension', 'trial', 'budget']]= self.processedFeatures[['function','instance', 'dimension', 'trial', 'budget']].astype('int64')
+
 		self.processedELA = True
 
 	def _preCalculation(self):
