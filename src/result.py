@@ -31,7 +31,7 @@ class Result():
 			dataframes.append(arg)
 		
 		dataframes.append(self.elaFeatures)
-		self.elaFeatures = pd.concat([self.elaFeatures, *args])
+		self.elaFeatures = pd.concat([self.elaFeatures, args])
 
 
 	def _elaPrecalculate(self, size):
@@ -87,7 +87,8 @@ class Result():
 
 		self.processedPerformance['algo'] = self.processedPerformance['name'].apply(lambda x: x[x.find('_Local')+1:x.find('_T')].replace('_',''))
 
-
+		self.processedPerformance[['function','instance', 'dimension', 'trial', 'budget']]= self.processedPerformance[['function','instance', 'dimension', 'trial', 'budget']].astype('int64')
+		
 		#remove first generation sample since ELA could not be computed
 		self.processedPerformance = self.processedPerformance[self.processedPerformance['budget'] >100]
 
@@ -124,7 +125,6 @@ class Result():
 		self.classificationCost['Local:bfgs0.1'] = self.classificationCost['Local:bfgs0.1'].ffill()
 		self.classificationCost['Local:bfgs0.3'] = self.classificationCost['Local:bfgs0.3'].ffill()
 		self.classificationCost['Local:nedler'] = self.classificationCost['Local:nedler'].ffill()
-		self.classificationCost[['function','instance', 'dimension', 'trial', 'budget']].astype('int64')
 		self.processedSolvers = True
 
 
@@ -166,6 +166,7 @@ class Result():
 				training = self.trainingData
 		else:
 			training = self.trainingData[(self.trainingData['algo']==algorithm)]
+
 
 		Xtrain = training.iloc[:,12:-4].values
 		ycost = training.iloc[:,-4:].values
