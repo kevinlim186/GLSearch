@@ -23,7 +23,7 @@ class Result():
 			dataframes.append(arg)
 		
 		dataframes.append(self.consolidatedPerformance)
-		self.consolidatedPerformance = dataframes
+		self.consolidatedPerformance = pd.concat(dataframes)
 
 	def addELA(self, *args):
 		dataframes = []
@@ -31,7 +31,7 @@ class Result():
 			dataframes.append(arg)
 		
 		dataframes.append(self.elaFeatures)
-		self.elaFeatures = dataframes
+		self.elaFeatures = pd.concat(dataframes)
 
 
 	def _elaPrecalculate(self, size):
