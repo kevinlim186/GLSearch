@@ -155,7 +155,7 @@ class Result():
 
 		for feature in self.excludedFeatures:
 			try:
-				self.trainingData.drop(columns=[feature])
+				self.trainingData = self.trainingData.drop(columns=[feature])
 			except:
 				pass
 
