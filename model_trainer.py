@@ -71,8 +71,9 @@ X_train = ela50.iloc[1:30000,7:-1].values
 y_train = ela50['performance'].iloc[1:30000,].values
 
 model =  autosklearn.regression.AutoSklearnRegressor(time_left_for_this_task=86400,ensemble_nbest=1,
-                      ensemble_size=1, resampling_strategy='cv')
+                      ensemble_size=1, resampling_strategy='holdout')
 print("training model")
 model.fit(X_train, y_train)
 print("Done training. Model is saved")
 pickle.dump(model, open('./models/'+algorithm, 'wb'))
+
