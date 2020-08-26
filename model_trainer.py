@@ -7,29 +7,34 @@ from src.models import Models
 
 
 result = Result()
+
+#Load ELA Files
+ela50 = pd.read_csv("./perf/train50.csv").rename(columns={'name':'oldname'})
+ela100 = pd.read_csv("./perf/train100.csv").rename(columns={'name':'oldname'})
+ela200 = pd.read_csv("./perf/train200.csv").rename(columns={'name':'oldname'})
+
+ela50['name'] = ela50['oldname'] + '_ela_sample_50'
+ela50 = ela50.iloc[:,23:]
+
+ela100['name'] = ela100['oldname'] + '_ela_sample_50'
+ela100 = ela100.iloc[:,23:]
+
+ela200['name'] = ela200['oldname'] + '_ela_sample_50'
+ela200 = ela200.iloc[:,23:]
+
+#load performance
+perf1 = pd.read_csv("./perf/all_performance.csv")
+
 #dateset
 dataset = '50'
 #dataset = '100'
 #dataset = '200'
 
-#Load ELA Files
-ela123 = pd.read_csv("./GLSearch/perf/Function_1_2_3_elaFeatures.csv")
-ela456 = pd.read_csv("./GLSearch/perf/Function_4_5_6_elaFeatures.csv")
-ela789 = pd.read_csv("./GLSearch/perf/Function_7_8_9_elaFeatures.csv")
-ela101112 = pd.read_csv("./GLSearch/perf/Function_10_11_12_elaFeatures.csv")
-ela131415 = pd.read_csv("./GLSearch/perf/Function_13_14_15_elaFeatures.csv")
-ela161718 = pd.read_csv("./GLSearch/perf/Function_16_17_18_elaFeatures.csv")
-ela1617181 = pd.read_csv("./GLSearch/perf/Function_16_17_18_elaFeatures_1.csv")
-ela192021 = pd.read_csv("./GLSearch/perf/Function_19_20_21_elaFeatures.csv")
-ela1920211 = pd.read_csv("./GLSearch/perf/Function_19_20_21_elaFeatures_1.csv")
-ela222324 = pd.read_csv("./GLSearch/perf/Function_22_23_24_elaFeatures.csv")
-
-#load performance
-perf1 = pd.read_csv("./perf/all_performance.csv")
+traindata= ela50
 
 
 result.addPerformance(perf1)
-result.addELA(ela123,ela456,ela789,ela101112,ela131415,ela161718,ela1617181,ela192021,ela1920211,ela222324 )
+result.addELA(traindata)
 
 Xtrain, Ytest = result.createTrainSet(dataset=dataset, algorithm=None, reset=False)
 
