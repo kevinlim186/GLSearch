@@ -1,79 +1,38 @@
-import autosklearn.regression
+#import autosklearn.regression
 import pandas as pd
 import numpy as np
 import pickle
-
-#choose algorithm here
-algorithm= 'Local:bfgs0.1' #terminal 12
-#algorithm= 'Local:bfgs0.3' #terminal 13
-#algorithm= 'Local:Base' #terminal 14
-#algorithm = 'Local:nedler' #terminal 15
+from src.result import Result
+from src.models import Models
 
 
-ela50 = pd.read_csv("./train50.csv")
+result = Result()
+#dateset
+dataset = '50'
+#dataset = '100'
+#dataset = '200'
 
-ela50 = ela50.drop(columns=[
-    'fce_x',
-    'ert',
-    'ert-1',
-    'ert-2',
-    'ert-3',
-    'ert-4',
-    'ert-5',
-    'ert-6',
-    'ert-7',
-    'ert-8',
-    'opt',
-    'ertMax',
-    'relERT',
-    'relFCE',
-    'best_performance',
-    'ela_meta.quad_simple.cond',
-    'ic.costs_fun_evals',
-    'limo.avg.length',
-    'limo.avg.length.scaled',
-    'limo.avg_length.norm',
-    'limo.cor',
-    'limo.cor.norm',
-    'limo.cor.reg',
-    'limo.cor.scaled',
-    'limo.costs_fun_evals',
-    'limo.length.sd',
-    'limo.ratio.sd',
-    'limo.sd.max_min_ratio',
-    'limo.sd.max_min_ratio.scaled',
-    'limo.sd.mean',
-    'limo.sd.mean.scaled',
-    'limo.sd_mean.norm',
-    'limo.sd_mean.reg',
-    'limo.sd_ratio.norm',
-    'limo.sd_ratio.reg',
-    'nbc.costs_fun_evals',
-    'pca.costs_fun_evals',
-    'Unnamed: 0',
-    'ic.eps.ratio',
-])
+#Load ELA Files
+ela123 = pd.read_csv("./GLSearch/perf/Function_1_2_3_elaFeatures.csv")
+ela456 = pd.read_csv("./GLSearch/perf/Function_4_5_6_elaFeatures.csv")
+ela789 = pd.read_csv("./GLSearch/perf/Function_7_8_9_elaFeatures.csv")
+ela101112 = pd.read_csv("./GLSearch/perf/Function_10_11_12_elaFeatures.csv")
+ela131415 = pd.read_csv("./GLSearch/perf/Function_13_14_15_elaFeatures.csv")
+ela161718 = pd.read_csv("./GLSearch/perf/Function_16_17_18_elaFeatures.csv")
+ela1617181 = pd.read_csv("./GLSearch/perf/Function_16_17_18_elaFeatures_1.csv")
+ela192021 = pd.read_csv("./GLSearch/perf/Function_19_20_21_elaFeatures.csv")
+ela1920211 = pd.read_csv("./GLSearch/perf/Function_19_20_21_elaFeatures_1.csv")
+ela222324 = pd.read_csv("./GLSearch/perf/Function_22_23_24_elaFeatures.csv")
+
+#load performance
+perf1 = pd.read_csv("./perf/all_performance.csv")
 
 
-#remove samples with null values
-columns = ela50.columns
-for i in range(len(columns)):
-    ela50 = ela50[ela50[columns[i]].notnull()]
+result.addPerformance(perf1)
+result.addELA(ela123,ela456,ela789,ela101112,ela131415,ela161718,ela1617181,ela192021,ela1920211,ela222324 )
 
-#Filter the data based on the algorithm being trained
-ela50 = ela50[ela50['algo']==algorithm]
+Xtrain, Ytest = result.createTrainSet(dataset=dataset, algorithm=None, reset=False)
 
 
-#X_train = ela50.iloc[:,7:-1].values
-#y_train = ela50['performance'].values
-
-X_train = ela50.iloc[1:30000,7:-1].values
-y_train = ela50['performance'].iloc[1:30000,].values
-
-model =  autosklearn.regression.AutoSklearnRegressor(time_left_for_this_task=86400,ensemble_nbest=1,
-                      ensemble_size=1, resampling_strategy='holdout')
-print("training model")
-model.fit(X_train, y_train)
-print("Done training. Model is saved")
-pickle.dump(model, open('./models/'+algorithm, 'wb'))
-
+model = Models(Xtrain,Ytest)
+model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=0.75, epoch=100, learning=0.001, output_size=len(Ytest[0]), dataset=dataset)
