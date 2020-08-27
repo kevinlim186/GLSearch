@@ -2,11 +2,19 @@ from src.suites import Suites
 from src.logger import Performance
 from src.result import Result
 import pandas as pd
+import tensorflow as tf
 
+
+def weightedCategoricalCrossentropy(self, y_true, y_pred):
+    return K.sum(y_true * y_pred, axis=-1,keepdims=True)
+
+model = tf.keras.models.load_model('./models/_Drop0.5_Hidden0.75_Epoch2000_Learning0.001_Dataset:50', custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy})
+
+name = 'Drop0.5_Hidden0.75_Epoch2000_Learning0.001_Dataset:50'
 
 performance = Performance()
-name = 'nedler'
-localSearch = 'nedler'
+#name = 'nedler'
+#localSearch = 'nedler'
 
 #name = 'bfgs0.1'
 #localSearch = 'bfgs0.1'
@@ -56,9 +64,16 @@ for i in range(6,8):
 	suite.runDataGathering()
 '''
 
+'''
 for i in range(1,25):
 	suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10,20], esconfig=esconfig, function=i, performance=performance, pflacco=False, localSearch=localSearch)
 	suite.runTestSuite()
 
 performance.saveToCSVPerformance('Test_'+name)
+'''
 
+for i in range(1,25):
+    suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10,20], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
+	suite.runTestSuite(ASP=model, size=50,restart=True)
+
+performance.saveToCSVPerformance('Test_'+name)
