@@ -74,6 +74,6 @@ performance.saveToCSVPerformance('Test_'+name)
 
 for i in range(1,25):
     suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10,20], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
-    suite.runTestSuite(ASP=model, size=50,restart=True)
+    suite.runTestModel(ASP=model, size=50,restart=True)
+    performance.saveToCSVPerformance('Test_'+name)
 
-performance.saveToCSVPerformance('Test_'+name)

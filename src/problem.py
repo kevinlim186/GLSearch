@@ -412,6 +412,9 @@ class Problem():
             ic = {}
 
         self.ela_feat =  {**ela_distr, **ela_level, **ela_meta, **basic, **disp, **limo, **nbc, **pca, **ic }
+        ela_df = pd.DataFrame()
+        ela_df = ela_df.append(self.ela_feat, ignore_index=True)
+        return ela_df
 
     def saveElaFeat(self, name):
         #If Pflacco is bifurcated, it will save a csv of the current results before the local search
@@ -530,14 +533,14 @@ class Problem():
         #Runs five independent tests
         for i in range(1,6):
             self.reset()
-            self.runASPTest(i)
+            self.runASPTest(i, ASP, size, restart)
 
 
-    def runASPTest(self, testRun):
+    def runASPTest(self, testRun, ASP, size, restart):
         checkpoints = self.getCheckPoints()
-        currentLength = 0
-        maxIndex = len(checkpoints)
-        targetReachedEA = False
+        currentLength = 1
+        maxIndex = len(checkpoints)-1
+        targetReached = False
 
 
         #Run model ES algorithm
@@ -550,10 +553,10 @@ class Problem():
 
             #Check the check point then calculate the ELA
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
-                self.calculateELA(size)
-                ela = self.ela_feat[x_labels]
+                currentLength += 1
+                ela = self.calculateELA(size)[x_labels]
 
-                index = ASP.predict(ela.reshape(1,-1)).argmax()
+                index = ASP.predict(ela.values.reshape(1,-1)).argmax()
                 selectedModel = y_labels[index]
                 
                 #if index is greater than 0, then local search must be used
@@ -563,7 +566,7 @@ class Problem():
                     if (index == 3):
                         name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler_sample'+str(size)+'_checkPoint_'+str(self.checkPoint),testRun)
                         self.simplexAlgorithm(x0)
-                        minPerformance = self.calculatePerformance(name)
+                        _ = self.calculatePerformance(name)
                         self.currentResults['name'] = name
                         self.currentResults.to_csv('temp/'+name+'.csv',index=False)
                         self.performance.importHistoricalPath('temp/'+name+'.csv')
@@ -576,7 +579,7 @@ class Problem():
                         #self.saveElaFeat(name)
                         self.bfgsAlgorithm(x0, 0.1)
 
-                        minPerformance = self.calculatePerformance(name)
+                        _ = self.calculatePerformance(name)
                         self.currentResults['name'] = name
                         self.currentResults.to_csv('temp/'+name+'.csv',index=False)
                         self.performance.importHistoricalPath('temp/'+name+'.csv')
@@ -587,22 +590,23 @@ class Problem():
                         name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3'+str(size)+'_checkPoint_'+str(self.checkPoint),testRun)
                         #self.saveElaFeat(name)
                         self.bfgsAlgorithm(x0, 0.3)
-                        self.calculatePerformance(name)
+                        _ = self.calculatePerformance(name)
                         self.currentResults['name'] = name
                         self.currentResults.to_csv('temp/'+name+'.csv',index=False)
                         self.performance.importHistoricalPath('temp/'+name+'.csv')
                         self.performance.saveToCSVPerformance('Function_'+str(self.function))
 
-                    if restart:
-                        targetReachedEA = True
+                    if not restart:
+                        targetReached = True
                 
                 #check if the target is reached
-                if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue and not targetReachedEA:
-                    targetReachedEA = True
+                if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue:
+                    targetReached = True
 
         name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
+        _ = self.calculatePerformance(name)
         
         self.currentResults['name'] = name
         self.currentResults.to_csv('test/'+name+'.csv',index=False)
         self.performance.importHistoricalPath('test/'+name+'.csv')
-        self.performance.saveToCSVPerformance('Function_'+str(self.function))
+#        self.performance.saveToCSVPerformance('Function_'+str(self.function))
