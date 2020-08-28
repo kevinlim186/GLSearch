@@ -28,8 +28,8 @@ class Models():
         return K.sum(y_true * y_pred, axis=-1,keepdims=True)
 
 
-    def trainANN(self, inputSize, dropout, hidden, epoch, dataset, learning=0.001, output_size=4):
-        model_name = '_Drop'+str(dropout)+'_Hidden'+str(hidden)+'_Epoch'+str(epoch)+'_Learning'+str(learning)+'_Dataset:'+dataset
+    def trainANN2H(self, inputSize, dropout, hidden, epoch, dataset, learning=0.001, output_size=4):
+        model_name = '_Drop'+str(dropout)+'_Hidden'+str(hidden)+'_Epoch'+str(epoch)+'_Learning'+str(learning)+'_Dataset:'+dataset+'_2Hidden'
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
         model = Sequential()
         model.add(Dense(int(round(inputSize*hidden/dropout,0)), input_shape=(inputSize,), activation='relu'))
@@ -47,3 +47,23 @@ class Models():
         model.fit(self.features, self.y_cost, epochs=epoch, callbacks=[csv_logger])
         model.save('./models/'+model_name)
 
+    def trainANN3H(self, inputSize, dropout, hidden, epoch, dataset, learning=0.001, output_size=4):
+        model_name = '_Drop'+str(dropout)+'_Hidden'+str(hidden)+'_Epoch'+str(epoch)+'_Learning'+str(learning)+'_Dataset:'+dataset+'_3Hidden'
+        csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
+        model = Sequential()
+        model.add(Dense(int(round(inputSize*hidden/dropout,0)), input_shape=(inputSize,), activation='relu'))
+        model.add(Dropout(dropout))
+        model.add(Dense(int(round(inputSize*hidden/dropout,0)), activation='relu'))
+        model.add(Dropout(dropout))
+        model.add(Dense(int(round(inputSize*hidden/dropout,0)), activation='relu'))
+        model.add(Dropout(dropout))
+        model.add(Dense(int(round(inputSize*hidden/dropout,0)), activation='relu'))
+        model.add(Dropout(dropout))
+        model.add(Dense(output_size, activation='softmax'))
+        opt = tf.keras.optimizers.Adam(learning_rate=0.01)
+
+        model.compile(loss=self.weightedCategoricalCrossentropy, optimizer=opt, metrics=['accuracy', self.weightedCategoricalCrossentropy])
+        model.summary()
+
+        model.fit(self.features, self.y_cost, epochs=epoch, callbacks=[csv_logger])
+        model.save('./models/'+model_name)
