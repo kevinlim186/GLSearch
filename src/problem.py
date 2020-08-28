@@ -559,10 +559,10 @@ class Problem():
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
                 currentLength += 1
                 self.calculateELA(size=size, sanitize=True)
-                ela = self.elaFetures[x_labels]
+                ela = self.elaFetures[x_labels].iloc[-1,]
 
                 index = ASP.predict(ela.values.reshape(1,-1)).argmax()
-                selectedModel = y_labels[index]
+                #selectedModel = y_labels[index]
                 
                 #if index is greater than 0, then local search must be used
                 if (index > 0):
@@ -579,7 +579,6 @@ class Problem():
 
                     #Check if BFGS 0.1
                     if (index==1):
-                        targetReachedSimplex = True
                         name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1'+str(size)+'_checkPoint_'+str(self.checkPoint),testRun)
                         #self.saveElaFeat(name)
                         self.bfgsAlgorithm(x0, 0.1)
