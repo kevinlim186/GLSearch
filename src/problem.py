@@ -9,6 +9,7 @@ import os
 from pflacco.pflacco import calculate_feature_set, create_feature_object
 from pyDOE import lhs
 from src.interface import y_labels, x_labels
+import math
 
 class Problem():
     def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco, localSearch=None):
@@ -356,7 +357,7 @@ class Problem():
         
         minimize(self.problemInstance,tol=1e-8,  x0=population, method='BFGS', options=opt)
     
-    def calculateELA(self, size=None):
+    def calculateELA(self, size=None, sanitize=False):
         if size is None:
             sample = self.currentResults.iloc[:,0:self.dimension].values
             obj_values = self.currentResults['y'].values
@@ -412,9 +413,12 @@ class Problem():
             ic = {}
 
         self.ela_feat =  {**ela_distr, **ela_level, **ela_meta, **basic, **disp, **limo, **nbc, **pca, **ic }
-        ela_df = pd.DataFrame()
-        ela_df = ela_df.append(self.ela_feat, ignore_index=True)
-        return ela_df
+
+
+        self.elaFetures = self.elaFetures.append(self.ela_feat, ignore_index=True)
+        
+        if sanitize == True:
+            self.sanitizeELAFeatures()
 
     def saveElaFeat(self, name):
         #If Pflacco is bifurcated, it will save a csv of the current results before the local search
@@ -554,7 +558,8 @@ class Problem():
             #Check the check point then calculate the ELA
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
                 currentLength += 1
-                ela = self.calculateELA(size)[x_labels]
+                self.calculateELA(size=size, sanitize=True)
+                ela = self.elaFetures[x_labels]
 
                 index = ASP.predict(ela.values.reshape(1,-1)).argmax()
                 selectedModel = y_labels[index]
@@ -610,3 +615,30 @@ class Problem():
         self.currentResults.to_csv('test/'+name+'.csv',index=False)
         self.performance.importHistoricalPath('test/'+name+'.csv')
 #        self.performance.saveToCSVPerformance('Function_'+str(self.function))
+
+    def sanitizeELAFeatures(self):
+        #some ela features are infinity. They are replaced by the average value
+        self.elaFetures.replace([np.inf, -np.inf], np.nan,  inplace=True)
+
+        #get the function, instance and dimension with missing values
+        for label in x_labels:
+            missingMask = self.elaFetures[label].isna()
+            missingList = pd.DataFrame()
+            missingList['missing'] = self.elaFetures[missingMask]['function'].astype(str) + '_' + self.elaFetures[missingMask]['dimension'].astype(str) +'_'+ self.elaFetures[missingMask]['instance'].astype(str)
+
+            #check if there are missing values otherwise, no cleaning needed
+            if len(missingList['missing'])>0:
+                for missing in missingList['missing'].unique():
+                    attr = missing.split('_')
+
+                #get average value and replace na
+                    meanMask = (self.elaFetures[label].notnull()) & (self.elaFetures['function']== int(attr[0])) & (self.elaFetures['dimension']== int(attr[1])) & (self.elaFetures['instance']== int(attr[2]))
+                    mean = self.elaFetures[meanMask][label].mean()
+                    
+                #check first if mean for that instance can be used, otherwise, the mean for the dimension will be used    
+                    if not math.isnan(mean):
+                        self.elaFetures[label] = self.elaFetures[label].fillna(mean)
+                    else:
+                        meanMask = (self.elaFetures[label].notnull()) & (self.elaFetures['function']== int(attr[0])) & (self.elaFetures['dimension']== int(attr[1]))
+                        mean = self.elaFetures[meanMask][label].mean()
+                        self.elaFetures[label] = self.elaFetures[label].fillna(mean)
