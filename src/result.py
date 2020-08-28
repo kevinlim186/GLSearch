@@ -10,7 +10,7 @@ class Result():
         self.consolidatedPerformance = pd.DataFrame()
         self.processedPerformance = pd.DataFrame()
         self.calculatedPerformance = pd.DataFrame()
-        self.elaFeatures = pd.DataFrame()
+        self.elaFeatures = pd.DataFrame(columns=x_labels)
         self.processedFeatures = pd.DataFrame()
         self.trainingData = pd.DataFrame()
         self.SBS = ''
