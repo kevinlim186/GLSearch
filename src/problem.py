@@ -623,22 +623,10 @@ class Problem():
         #get the function, instance and dimension with missing values
         for label in x_labels:
             missingMask = self.elaFetures[label].isna()
-            missingList = pd.DataFrame()
-            missingList['missing'] = self.elaFetures[missingMask]['function'].astype(str) + '_' + self.elaFetures[missingMask]['dimension'].astype(str) +'_'+ self.elaFetures[missingMask]['instance'].astype(str)
+            missingList = self.elaFetures[missingMask].values
 
             #check if there are missing values otherwise, no cleaning needed
-            if len(missingList['missing'])>0:
-                for missing in missingList['missing'].unique():
-                    attr = missing.split('_')
-
+            if len(missingList)>0:
                 #get average value and replace na
-                    meanMask = (self.elaFetures[label].notnull()) & (self.elaFetures['function']== int(attr[0])) & (self.elaFetures['dimension']== int(attr[1])) & (self.elaFetures['instance']== int(attr[2]))
-                    mean = self.elaFetures[meanMask][label].mean()
-                    
-                #check first if mean for that instance can be used, otherwise, the mean for the dimension will be used    
-                    if not math.isnan(mean):
-                        self.elaFetures[label] = self.elaFetures[label].fillna(mean)
-                    else:
-                        meanMask = (self.elaFetures[label].notnull()) & (self.elaFetures['function']== int(attr[0])) & (self.elaFetures['dimension']== int(attr[1]))
-                        mean = self.elaFetures[meanMask][label].mean()
-                        self.elaFetures[label] = self.elaFetures[label].fillna(mean)
+                mean = self.elaFetures[label].mean()
+                self.elaFetures[label] = self.elaFetures[label].fillna(mean)
