@@ -8,13 +8,16 @@ import pandas as pd
 import math
 import tensorflow as tf
 from keras.callbacks import CSVLogger
-#import autosklearn.regression
+from sklearn.ensemble import RandomForestClassifier
 import pickle
+from sklearn.feature_selection import RFE
+from src.interface import y_labels, x_labels
 
 class Models():
     def __init__(self, features, y_cost):
         self.features = features
         self.y_cost = y_cost
+        self.y_class = None
 
     def weightedCategoricalCrossentropy(self, y_true, y_pred):
     #    y_cost = y_true * y_pred
@@ -25,7 +28,7 @@ class Models():
     #	costMatrix = y_cost * probabilityMatrix
 
     #	cost = y_label * K.log(y_pred) - costMatrix 
-        return K.sum(y_true * y_pred, axis=-1,keepdims=True)
+        return K.sum(y_true * y_pred, axis=-1)
 
 
     def trainANN2H(self, inputSize, dropout, hidden, epoch, dataset, learning=0.001, output_size=4):
@@ -67,3 +70,23 @@ class Models():
 
         model.fit(self.features, self.y_cost, epochs=epoch, callbacks=[csv_logger])
         model.save('./models/'+model_name)
+    
+    def inferClass(self):
+        #convert cost to class-- the algorithm with the least cost is the optimal cost
+#       self.y_class = np.zeros_like(self.y_cost)
+#       self.y_class[np.arange(len(self.y_cost)), a.argmin(self.y_cost)] = 1
+        self.y_class = self.y_class.argmin(1)
+
+    def trainRandomForest(self):
+        name = "randomForest"
+        self.inferClass()
+        model = RandomForestClassifier(n_estimators=500)
+        selector = RFE(model, n_features_to_select=15, step=1)
+        selector = selector.fit(self.features, self.y_class)
+        selectedFeaturesIndex = selector.support_
+        selectedFeatures =  selectedFeaturesIndex * x_labels
+
+        model.fit(self.features[selectedFeaturesIndex], self.y_class)
+
+        pickle.dump(model, open('./models/'+name, 'wb'))
+        np.save('./models/'+name+'feat', selectedFeatures)
