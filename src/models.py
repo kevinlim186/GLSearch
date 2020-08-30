@@ -77,16 +77,21 @@ class Models():
 #       self.y_class[np.arange(len(self.y_cost)), a.argmin(self.y_cost)] = 1
         self.y_class = self.y_cost.argmin(1)
 
-    def trainRandomForest(self):
-        name = "randomForest"
-        self.inferClass()
-        model = RandomForestClassifier(n_estimators=500)
-        selector = RFE(model, n_features_to_select=15, step=1)
-        selector = selector.fit(self.features, self.y_class)
-        selectedFeaturesIndex = selector.support_
-        selectedFeatures =  selectedFeaturesIndex * x_labels
+    def trainRandomForest(self, selection=True):
+
+        if selection:
+            name = "randomForest_noSelection"
+            self.inferClass()
+            model = RandomForestClassifier(n_estimators=500)
+            selector = RFE(model, n_features_to_select=15, step=1)
+            selector = selector.fit(self.features, self.y_class)
+            selectedFeaturesIndex = selector.support_
+            selectedFeatures =  np.array(x_labels)[selectedFeaturesIndex]
+
+        else:
+            numFeatures = len(self.features)
+            selectedFeaturesIndex = np.full(numFeatures, True)
 
         model.fit(self.features[selectedFeaturesIndex], self.y_class)
-
         pickle.dump(model, open('./models/'+name, 'wb'))
         np.save('./models/'+name+'feat', selectedFeatures)
