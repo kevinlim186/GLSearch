@@ -31,8 +31,12 @@ class Models():
         return K.sum(y_true * y_pred, axis=-1)
 
 
-    def trainANN2H(self, inputSize, dropout, hidden, epoch, dataset, learning=0.001, output_size=4):
-        model_name = '_Drop'+str(dropout)+'_Hidden'+str(hidden)+'_Epoch'+str(epoch)+'_Learning'+str(learning)+'_Dataset:'+dataset+'_2Hidden'
+    def trainANN(self, inputSize, dropout, hidden, epoch, size, learning=0.001, output_size=4, loss='WCategoricalCrossentropy'):
+        if loss == 'WCategoricalCrossentropy':
+            lossFunc = self.weightedCategoricalCrossentropy
+        else:
+            lossFunc = loss
+        model_name = '_Drop'+str(dropout)+'_Hidden'+str(hidden)+'_Epoch'+str(epoch)+'_Learning'+str(learning)+'_Size:'+str(size)+'_Loss'+loss
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
         model = Sequential()
         model.add(Dense(int(round(inputSize*hidden/dropout,0)), input_shape=(inputSize,), activation='relu'))
@@ -44,45 +48,24 @@ class Models():
         model.add(Dense(output_size, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.01)
 
-        model.compile(loss=self.weightedCategoricalCrossentropy, optimizer=opt, metrics=['accuracy', self.weightedCategoricalCrossentropy])
+        model.compile(loss=lossFunc, optimizer=opt)
         model.summary()
 
         model.fit(self.features, self.y_cost, epochs=epoch, callbacks=[csv_logger])
         model.save('./models/'+model_name)
 
-    def trainANN3H(self, inputSize, dropout, hidden, epoch, dataset, learning=0.001, output_size=4):
-        model_name = '_Drop'+str(dropout)+'_Hidden'+str(hidden)+'_Epoch'+str(epoch)+'_Learning'+str(learning)+'_Dataset:'+dataset+'_3Hidden'
-        csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
-        model = Sequential()
-        model.add(Dense(int(round(inputSize*hidden/dropout,0)), input_shape=(inputSize,), activation='relu'))
-        model.add(Dropout(dropout))
-        model.add(Dense(int(round(inputSize*hidden/dropout,0)), activation='relu'))
-        model.add(Dropout(dropout))
-        model.add(Dense(int(round(inputSize*hidden/dropout,0)), activation='relu'))
-        model.add(Dropout(dropout))
-        model.add(Dense(int(round(inputSize*hidden/dropout,0)), activation='relu'))
-        model.add(Dropout(dropout))
-        model.add(Dense(output_size, activation='softmax'))
-        opt = tf.keras.optimizers.Adam(learning_rate=0.01)
-
-        model.compile(loss=self.weightedCategoricalCrossentropy, optimizer=opt, metrics=['accuracy', self.weightedCategoricalCrossentropy])
-        model.summary()
-
-        model.fit(self.features, self.y_cost, epochs=epoch, callbacks=[csv_logger])
-        model.save('./models/'+model_name)
-    
     def inferClass(self):
         #convert cost to class-- the algorithm with the least cost is the optimal cost
 #       self.y_class = np.zeros_like(self.y_cost)
 #       self.y_class[np.arange(len(self.y_cost)), a.argmin(self.y_cost)] = 1
         self.y_class = self.y_cost.argmin(1)
 
-    def trainRandomForest(self, selection=True):
+    def trainRandomForest(self, size, selection=True):
         self.inferClass()
         model = RandomForestClassifier(n_estimators=500)
         if selection:
             print("Features are being selectioned")
-            name = "randomForest_Selection"
+            name = "randomForest_Selection_" + size
             selector = RFE(model, n_features_to_select=15, step=1)
             selector = selector.fit(self.features, self.y_class)
             selectedFeaturesIndex = selector.support_

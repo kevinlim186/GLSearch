@@ -40,7 +40,8 @@ Xtrain, Ytest = result.createTrainSet(dataset=dataset, algorithm=None, reset=Fal
 
 
 model = Models(Xtrain,Ytest)
-
-#model.trainANN2H(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=2000, learning=0.001, output_size=len(Ytest[0]), dataset=dataset)
-
 model.trainRandomForest()
+
+#model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=2000, size=dataset,learning=0.001, output_size=len(Ytest[0]), loss='WCategoricalCrossentropy')
+
+#model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=2000, size=dataset,learning=0.001, output_size=len(Ytest[0]), loss='categorical_crossentropy')
