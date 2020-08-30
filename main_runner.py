@@ -3,16 +3,19 @@ from src.logger import Performance
 from src.result import Result
 import pandas as pd
 import tensorflow as tf
+import pickle
 
-modelSelected = 'annExpected'
-modelLocation = ''
+#modelSelected = 'annExpected'
+#modelLocation = ''
 
-modelSelected = 'annCross'
-modelLocation = ''
+#modelSelected = 'annCross'
+#modelLocation = ''
 
 
-modelSelected = 'forest
-modelLocation = ''
+modelSelected = 'forest'
+modelLocation = 'randomForest_noSelection50'
+#modelLocation = 'randomForest_noSelection100'
+#modelLocation = 'randomForest_noSelection200'
 
 
 if modelSelected =='annExpected':
@@ -24,7 +27,7 @@ if modelSelected =='annExpected':
 elif modelSelected == 'annCross':
     model = tf.keras.models.load_model('./models/'+modelLocation)
 
-elif modelSelected='forest':
+elif modelSelected=='forest':
     model = pickle.load(open('./models/'+modelLocation, 'rb'))
 
 name = modelLocation
