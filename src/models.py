@@ -63,7 +63,7 @@ class Models():
 
     def oneHotEncode(self):
         self.y_class = np.zeros_like(self.y_cost)
-        self.y_class[np.arange(len(self.y_cost)), np.argmin(self.y_cost)] = 1
+        self.y_class[np.arange(len(self.y_cost)), self.y_cost.argmin(1)] = 1
 
     def trainRandomForest(self, size, selection=True):
         self.inferClass()
