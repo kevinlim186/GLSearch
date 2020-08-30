@@ -37,7 +37,7 @@ class Models():
             y_true = self.y_cost
         else:
             lossFunc = loss
-            self.inferClass()
+            self.oneHotEncode()
             y_true = self.y_class
         model_name = '_Drop'+str(dropout)+'_Hidden'+str(hidden)+'_Epoch'+str(epoch)+'_Learning'+str(learning)+'_Size:'+str(size)+'_Loss'+loss
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
@@ -59,9 +59,11 @@ class Models():
 
     def inferClass(self):
         #convert cost to class-- the algorithm with the least cost is the optimal cost
-#       self.y_class = np.zeros_like(self.y_cost)
-#       self.y_class[np.arange(len(self.y_cost)), a.argmin(self.y_cost)] = 1
         self.y_class = self.y_cost.argmin(1)
+
+    def oneHotEncode(self):
+        self.y_class = np.zeros_like(self.y_cost)
+        self.y_class[np.arange(len(self.y_cost)), np.argmin(self.y_cost)] = 1
 
     def trainRandomForest(self, size, selection=True):
         self.inferClass()

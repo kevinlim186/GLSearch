@@ -6,9 +6,8 @@ from src.result import Result
 from src.models import Models
 
 
-result = Result()
-
 #Load ELA Files
+result = Result()
 ela50 = pd.read_csv("./perf/train50.csv").rename(columns={'name':'oldname'})
 ela100 = pd.read_csv("./perf/train100.csv").rename(columns={'name':'oldname'})
 ela200 = pd.read_csv("./perf/train200.csv").rename(columns={'name':'oldname'})
