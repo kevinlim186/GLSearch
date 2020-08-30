@@ -80,7 +80,8 @@ class Models():
     def trainRandomForest(self, selection=True):
 
         if selection:
-            name = "randomForest_noSelection"
+            print("Features are being selectioned")
+            name = "randomForest_Selection"
             self.inferClass()
             model = RandomForestClassifier(n_estimators=500)
             selector = RFE(model, n_features_to_select=15, step=1)
@@ -89,9 +90,12 @@ class Models():
             selectedFeatures =  np.array(x_labels)[selectedFeaturesIndex]
 
         else:
+            name = "randomForest_noSelection"
             numFeatures = len(self.features)
             selectedFeaturesIndex = np.full(numFeatures, True)
+            selectedFeatures = x_labels
 
+        print("Training the model")
         model.fit(self.features[selectedFeaturesIndex], self.y_class)
         pickle.dump(model, open('./models/'+name, 'wb'))
         np.save('./models/'+name+'feat', selectedFeatures)
