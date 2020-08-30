@@ -34,8 +34,11 @@ class Models():
     def trainANN(self, inputSize, dropout, hidden, epoch, size, learning=0.001, output_size=4, loss='WCategoricalCrossentropy'):
         if loss == 'WCategoricalCrossentropy':
             lossFunc = self.weightedCategoricalCrossentropy
+            y_true = self.y_cost
         else:
             lossFunc = loss
+            self.inferClass()
+            y_true = self.y_class
         model_name = '_Drop'+str(dropout)+'_Hidden'+str(hidden)+'_Epoch'+str(epoch)+'_Learning'+str(learning)+'_Size:'+str(size)+'_Loss'+loss
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
         model = Sequential()
@@ -51,7 +54,7 @@ class Models():
         model.compile(loss=lossFunc, optimizer=opt)
         model.summary()
 
-        model.fit(self.features, self.y_cost, epochs=epoch, callbacks=[csv_logger])
+        model.fit(self.features, y_true, epochs=epoch, callbacks=[csv_logger])
         model.save('./models/'+model_name)
 
     def inferClass(self):
