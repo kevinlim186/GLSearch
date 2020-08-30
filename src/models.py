@@ -78,12 +78,11 @@ class Models():
         self.y_class = self.y_cost.argmin(1)
 
     def trainRandomForest(self, selection=True):
-
+        self.inferClass()
+        model = RandomForestClassifier(n_estimators=500)
         if selection:
             print("Features are being selectioned")
             name = "randomForest_Selection"
-            self.inferClass()
-            model = RandomForestClassifier(n_estimators=500)
             selector = RFE(model, n_features_to_select=15, step=1)
             selector = selector.fit(self.features, self.y_class)
             selectedFeaturesIndex = selector.support_
