@@ -77,7 +77,7 @@ class Models():
             selectedFeatures =  np.array(x_labels)[selectedFeaturesIndex]
 
         else:
-            name = "randomForest_noSelection"
+            name = "randomForest_noSelection" + size
             numFeatures = len(self.features)
             selectedFeaturesIndex = np.full(numFeatures, True)
             selectedFeatures = x_labels
