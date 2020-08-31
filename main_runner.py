@@ -17,6 +17,10 @@ modelLocation = 'randomForest_noSelection50'
 #modelLocation = 'randomForest_noSelection100'
 #modelLocation = 'randomForest_noSelection200'
 
+size = 50
+#size = 100
+#size = 200
+
 
 if modelSelected =='annExpected':
     def weightedCategoricalCrossentropy(self, y_true, y_pred):
@@ -78,6 +82,6 @@ esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1]
 
 for i in range(1,25):
     suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10,20], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
-    suite.runTestModel(ASP=model, size=50,restart=True)
+    suite.runTestModel(ASP=model, size=size,restart=False)
     performance.saveToCSVPerformance('Test_'+name)
 
