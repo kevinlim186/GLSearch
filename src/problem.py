@@ -44,7 +44,7 @@ class Problem():
         self.remainingBudget = self.totalBudget
         self.spentBudget = 0
         self.currentResults =  pd.DataFrame(columns=self.activeColumns)
-        self.elaFetures =  pd.DataFrame()
+        self.elaFetures =  pd.DataFrame(columns=x_labels)
         self.prevRemainingBudget = None
         self.prevSpentBudget = None
         self.ela_feat = None
