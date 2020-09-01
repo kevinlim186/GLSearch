@@ -638,3 +638,7 @@ class Problem():
                 #get average value and replace na
                 mean = self.elaFetures[label].mean()
                 self.elaFetures[label] = self.elaFetures[label].fillna(mean)
+                
+            #check if the value is still missing. Impute a value of 0 if there is still nan.
+            if (np.isnan(sum(self.elaFetures[label]))):
+                self.elaFetures[label] = self.elaFetures[label].fillna(0)
