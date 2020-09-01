@@ -29,6 +29,7 @@ class Problem():
         self.prevRemainingBudget = None
         self.prevSpentBudget = None
         self.localSearch = localSearch
+        self.x_labels = x_labels
 
         self.ela_feat = None
 
@@ -545,6 +546,11 @@ class Problem():
         currentLength = 1
         maxIndex = len(checkpoints)-1
         targetReached = False
+        if features is not None:
+            x_labels = features
+        else:
+            x_labels = self.x_labels 
+
 
 
         #Run model ES algorithm
@@ -554,8 +560,6 @@ class Problem():
             #If the optimal value is not reached then continue running
             self.optimizer.runOneGeneration()
             self.optimizer.recordStatistics()
-            if features is not None:
-                x_labels = features
 
             #Check the check point then calculate the ELA
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
@@ -622,7 +626,7 @@ class Problem():
         self.elaFetures.replace([np.inf, -np.inf], np.nan,  inplace=True)
 
         #get the function, instance and dimension with missing values
-        for label in x_labels:
+        for label in self.x_labels:
             missingMask = self.elaFetures[label].isna()
             missingList = self.elaFetures[missingMask].values
 
