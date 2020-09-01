@@ -95,9 +95,11 @@ esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1]
 #esconfig = [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2]
 
 
+if (size is not None):
+    for i in range(1,25):
+        suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10,20], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
+        suite.runTestModel(ASP=model, size=size,restart=False, features= features)
+        performance.saveToCSVPerformance('Test_'+name)
 
-for i in range(1,25):
-    suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10,20], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
-    suite.runTestModel(ASP=model, size=size,restart=False, features= features)
-    performance.saveToCSVPerformance('Test_'+name)
-
+else:
+    print("Please specify the size")
