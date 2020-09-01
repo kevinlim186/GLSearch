@@ -75,7 +75,7 @@ class Models():
             selector = selector.fit(self.features, self.y_class)
             selectedFeaturesIndex = selector.support_
             selectedFeatures =  np.array(x_labels)[selectedFeaturesIndex]
-            features = np.array()
+            features = np.array([])
             for arr in self.features:
                 features = np.append(features, arr[selectedFeaturesIndex])
             features = features.reshape(-1,15)

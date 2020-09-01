@@ -46,7 +46,7 @@ class Suites:
             problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger,pflacco,localSearch)
             problem.runTest()
 
-    def runTestModel(self,  ASP, size,restart):
+    def runTestModel(self,  ASP, size,restart, features):
         maxDimensionLen = len(self.dimensions)
         maxInstanceLen = len(self.instances)
         
@@ -56,10 +56,10 @@ class Suites:
             checkPoint = 500 * self.dimensions[i]
             for j in range(maxInstanceLen):
                 instance = self.instances[j]
-                self.runModelTest(budget=budget, function=self.function, instance=instance, dimension=dimension, esconfig=self.esconfig, checkPoint=checkPoint, logger=self.performance, pflacco=self.pflacco, localSearch=self.localSearch,  ASP=ASP, size=size,restart=restart)
+                self.runModelTest(budget=budget, function=self.function, instance=instance, dimension=dimension, esconfig=self.esconfig, checkPoint=checkPoint, logger=self.performance, pflacco=self.pflacco, localSearch=self.localSearch,  ASP=ASP, size=size,restart=restart, features=features)
 
 
-    def runModelTest(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco,localSearch, ASP, size,restart):
+    def runModelTest(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco,localSearch, ASP, size,restart, features):
             problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger,pflacco,localSearch)
-            problem.runASPBattery(ASP, size,restart)
+            problem.runASPBattery(ASP, size,restart, features)
         

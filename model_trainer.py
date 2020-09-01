@@ -12,13 +12,13 @@ dataset = '50'
 
 #define the model
 #modelSelected='ANNCross0.75'
-#modelSelected='ANNExpected0.75'
+modelSelected='ANNExpected0.75'
 #modelSelected='ANNCross125'
 #modelSelected='ANNExpected125'
-modelSelected='Forest'
+#modelSelected='Forest'
 #modelSelected='ForestFeature'
 
-
+print(dataset+ ' for ' +  modelSelected)
 
 
 #Load ELA Files
@@ -55,13 +55,13 @@ Xtrain, Ytest = result.createTrainSet(dataset=dataset, algorithm=None, reset=Fal
 
 model = Models(Xtrain,Ytest)
 if modelSelected =='ANNCross0.75':
-    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*0.75, epoch=2000, size=dataset,learning=0.001, output_size=len(Ytest[0]), loss='categorical_crossentropy')
+    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*0.75, epoch=50, size=dataset,learning=0.001, output_size=len(Ytest[0]), loss='categorical_crossentropy')
 elif modelSelected =='ANNCross125':
-    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=2000, size=dataset,learning=0.001, output_size=len(Ytest[0]), loss='categorical_crossentropy')
+    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=50, size=dataset,learning=0.001, output_size=len(Ytest[0]), loss='categorical_crossentropy')
 elif modelSelected =='ANNExpected0.75':
-    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*0.75, epoch=2000, size=dataset,learning=0.001, output_size=len(Ytest[0]), loss='WCategoricalCrossentropy')
+    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*0.75, epoch=50, size=dataset,learning=0.001, output_size=len(Ytest[0]), loss='WCategoricalCrossentropy')
 elif modelSelected =='ANNExpected125':
-    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=2000, size=dataset,learning=0.001, output_size=len(Ytest[0]), loss='WCategoricalCrossentropy')
+    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=50, size=dataset,learning=0.001, output_size=len(Ytest[0]), loss='WCategoricalCrossentropy')
 elif modelSelected =='Forest':
     model.trainRandomForest(size=dataset, selection=False)
 elif modelSelected == 'ForestFeature':

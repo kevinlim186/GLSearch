@@ -4,6 +4,7 @@ from src.result import Result
 import pandas as pd
 import tensorflow as tf
 import pickle
+import numpy as np
 
 #modelSelected = 'annExpected'
 #modelLocation = ''
@@ -11,15 +12,24 @@ import pickle
 #modelSelected = 'annCross'
 #modelLocation = ''
 
+#features = None
+#features = np.load('./models/randomForest_Selection_50feat.npy')
+#features = np.load('./models/randomForest_Selection_100feat.npy')
+features = np.load('./models/randomForest_Selection_200feat.npy')
+
+
 
 modelSelected = 'forest'
-modelLocation = 'randomForest_noSelection50'
+#modelLocation = 'randomForest_noSelection50'
 #modelLocation = 'randomForest_noSelection100'
 #modelLocation = 'randomForest_noSelection200'
+#modelLocation = 'randomForest_Selection_50'
+#modelLocation = 'randomForest_Selection_100'
+modelLocation = 'randomForest_Selection_200'
 
-size = 50
+#size = 50
 #size = 100
-#size = 200
+size = 200
 
 
 if modelSelected =='annExpected':
@@ -36,6 +46,7 @@ elif modelSelected=='forest':
 
 name = modelLocation
 performance = Performance()
+print(name)
 #name = 'nedler'
 #localSearch = 'nedler'
 
@@ -82,6 +93,6 @@ esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1]
 
 for i in range(1,25):
     suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10,20], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
-    suite.runTestModel(ASP=model, size=size,restart=False)
+    suite.runTestModel(ASP=model, size=size,restart=False, features= features)
     performance.saveToCSVPerformance('Test_'+name)
 

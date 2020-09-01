@@ -25,7 +25,7 @@ class Problem():
         self.checkPoint = checkPoint
         self.activeColumns = ['x'+str(x) for x in range(1,dimension+1)] + ['y', 'name']
         self.currentResults =  pd.DataFrame(columns=self.activeColumns)
-        self.elaFetures =  pd.DataFrame()
+        self.elaFetures =  pd.DataFrame(columns=x_labels)
         self.prevRemainingBudget = None
         self.prevSpentBudget = None
         self.localSearch = localSearch
@@ -533,14 +533,14 @@ class Problem():
                 bestgenoType = i
         return bestgenoType
 
-    def runASPBattery(self,ASP, size,restart= False):
+    def runASPBattery(self,ASP, size,restart= False, features=None):
         #Runs five independent tests
         for i in range(1,6):
             self.reset()
-            self.runASPTest(i, ASP, size, restart)
+            self.runASPTest(i, ASP, size, restart, features)
 
 
-    def runASPTest(self, testRun, ASP, size, restart):
+    def runASPTest(self, testRun, ASP, size, restart, features):
         checkpoints = self.getCheckPoints()
         currentLength = 1
         maxIndex = len(checkpoints)-1
@@ -554,6 +554,8 @@ class Problem():
             #If the optimal value is not reached then continue running
             self.optimizer.runOneGeneration()
             self.optimizer.recordStatistics()
+            if features is not None:
+                x_labels = features
 
             #Check the check point then calculate the ELA
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
