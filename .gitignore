@@ -9,3 +9,4 @@ temp/*
 config.py
 perf/*
 models/*
+test.py

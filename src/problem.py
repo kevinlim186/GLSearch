@@ -539,14 +539,14 @@ class Problem():
                 bestgenoType = i
         return bestgenoType
 
-    def runASPBattery(self,ASP, size,restart= False, features=None):
+    def runASPBattery(self,ASP, ASPName, size, restart= False, features=None):
         #Runs five independent tests
         for i in range(1,6):
             self.reset()
-            self.runASPTest(i, ASP, size, restart, features)
+            self.runASPTest(i, ASP,ASPName, size, restart, features)
 
 
-    def runASPTest(self, testRun, ASP, size, restart, features):
+    def runASPTest(self, testRun, ASP,ASPName, size, restart, features):
         checkpoints = self.getCheckPoints()
         currentLength = 1
         maxIndex = len(checkpoints)-1
@@ -557,6 +557,9 @@ class Problem():
             x_labels = self.x_labels 
 
 
+        #default name is the base. If the algorithm selects the local search, the name will be overridden.
+        name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base'+ASPName,testRun)
+                
 
         #Run model ES algorithm
         while self.totalBudget > self.spentBudget and not (targetReached):
@@ -574,42 +577,28 @@ class Problem():
 
                 index = ASP.predict(ela.values.reshape(1,-1)).argmax()
                 #selectedModel = y_labels[index]
-                
+
+
                 #if index is greater than 0, then local search must be used
                 if (index > 0):
                     x0 = np.array(self.optimizer.best_individual.genotype.flatten())
 
                     if (index == 3):
-                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler_sample'+str(size)+'_checkPoint_'+str(self.checkPoint),testRun)
+                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler_sample'+str(size)+'_'+ASPName+'_checkPoint_'+str(self.checkPoint),testRun)
                         self.simplexAlgorithm(x0)
-                        _ = self.calculatePerformance(name)
-                        self.currentResults['name'] = name
-                        self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-                        self.performance.importHistoricalPath('temp/'+name+'.csv')
-                        self.performance.saveToCSVPerformance('Function_'+str(self.function))
 
                     #Check if BFGS 0.1
                     if (index==1):
-                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1'+str(size)+'_checkPoint_'+str(self.checkPoint),testRun)
+                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1'+str(size)+'_'+ASPName+'_checkPoint_'+str(self.checkPoint),testRun)
                         #self.saveElaFeat(name)
                         self.bfgsAlgorithm(x0, 0.1)
 
-                        _ = self.calculatePerformance(name)
-                        self.currentResults['name'] = name
-                        self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-                        self.performance.importHistoricalPath('temp/'+name+'.csv')
-                        self.performance.saveToCSVPerformance('Function_'+str(self.function))
 
                      #Check if BFGS 0.3
                     if (index==2):
-                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3'+str(size)+'_checkPoint_'+str(self.checkPoint),testRun)
+                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3'+str(size)+'_'+ASPName+'_checkPoint_'+str(self.checkPoint),testRun)
                         #self.saveElaFeat(name)
                         self.bfgsAlgorithm(x0, 0.3)
-                        _ = self.calculatePerformance(name)
-                        self.currentResults['name'] = name
-                        self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-                        self.performance.importHistoricalPath('temp/'+name+'.csv')
-                        self.performance.saveToCSVPerformance('Function_'+str(self.function))
 
                     if not restart:
                         targetReached = True
@@ -618,13 +607,12 @@ class Problem():
                 if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue:
                     targetReached = True
 
-        name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
         _ = self.calculatePerformance(name)
         
-        self.currentResults['name'] = name
-        self.currentResults.to_csv('test/'+name+'.csv',index=False)
-        self.performance.importHistoricalPath('test/'+name+'.csv')
-#        self.performance.saveToCSVPerformance('Function_'+str(self.function))
+        #self.currentResults['name'] = name
+        #self.currentResults.to_csv('test/'+name+'.csv',index=False)
+        #self.performance.importHistoricalPath('test/'+name+'.csv')
+        self.performance.saveToCSVPerformance('Test_'+name)
 
     def sanitizeELAFeatures(self):
         #some ela features are infinity. They are replaced by the average value

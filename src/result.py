@@ -72,24 +72,25 @@ class Result():
         #Non destructive preprocessing
         self.processedPerformance = self.consolidatedPerformance
         #split the name identifier to extract the function, instance, algorithm used and dimensions
-        self.processedPerformance['function'] =  self.processedPerformance['name'].str.extract('(_F[0-9]+)')
+        self.processedPerformance['function'] =  self.processedPerformance['name'].str.extract('(_F[0-9]+)').astype(str)
         self.processedPerformance['function'] = self.processedPerformance['function'].apply(lambda x: x.replace('_F',''))
 
-        self.processedPerformance['instance'] =  self.processedPerformance['name'].str.extract('(_I[0-9]+)')
+        self.processedPerformance['instance'] =  self.processedPerformance['name'].str.extract('(_I[0-9]+)').astype(str)
         self.processedPerformance['instance'] = self.processedPerformance['instance'].apply(lambda x: x.replace('_I',''))
 
-        self.processedPerformance['dimension'] =  self.processedPerformance['name'].str.extract('(_D[0-9]+)')
+        self.processedPerformance['dimension'] =  self.processedPerformance['name'].str.extract('(_D[0-9]+)').astype(str)
         self.processedPerformance['dimension'] = self.processedPerformance['dimension'].apply(lambda x: x.replace('_D',''))
 
 
 
-        self.processedPerformance['trial'] =  self.processedPerformance['name'].str.extract('(_T[0-9]+)')
+        self.processedPerformance['trial'] =  self.processedPerformance['name'].str.extract('(_T[0-9]+)').astype(str)
         self.processedPerformance['trial'] = self.processedPerformance['trial'].apply(lambda x: x.replace('_T',''))
 
-        self.processedPerformance['budget'] = self.processedPerformance['name'].str.extract('(_B[0-9]+)')
+        self.processedPerformance['budget'] = self.processedPerformance['name'].str.extract('(_B[0-9]+)').astype(str)
         self.processedPerformance['budget'] = self.processedPerformance['budget'].apply(lambda x: x.replace('_B',''))
 
-        self.processedPerformance['algo'] = self.processedPerformance['name'].apply(lambda x: x[x.find('_Local')+1:x.find('_T')].replace('_',''))
+ 
+        self.processedPerformance['algo'] = self.processedPerformance['name'].astype(str).apply(lambda x: x[x.find('_Local')+1:x.find('_T')].replace('_',''))
 
         self.processedPerformance[['function','instance', 'dimension', 'trial', 'budget']]= self.processedPerformance[['function','instance', 'dimension', 'trial', 'budget']].astype('int64')
 
@@ -125,23 +126,25 @@ class Result():
         self.processedPerformance['cost'] = self.processedPerformance['performance']-self.processedPerformance['vbs']
 
 
+        try:
+            self.classificationCost = self.processedPerformance.pivot_table(index=['function', 'dimension','instance', 'trial', 'budget'], columns = 'algo', values='cost').reset_index().sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
+            
+            #Backward fill first the base runner to have a reference value
+            self.classificationCost['Local:Base'] = self.classificationCost['Local:Base'].bfill()
 
-        self.classificationCost = self.processedPerformance.pivot_table(index=['function', 'dimension','instance', 'trial', 'budget'], columns = 'algo', values='cost').reset_index().sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
+
+            #if Base runner got the optimal value first, the performance of the local search must be based on the previous value
+            self.classificationCost['Local:bfgs0.1'] = self.classificationCost.apply(lambda x: np.nan if x['Local:bfgs0.1']==x['Local:Base'] else x['Local:bfgs0.1'],axis=1 )
+            self.classificationCost['Local:bfgs0.3'] = self.classificationCost.apply(lambda x: np.nan if x['Local:bfgs0.3']==x['Local:Base'] else x['Local:bfgs0.3'], axis=1 )
+            self.classificationCost['Local:nedler'] = self.classificationCost.apply(lambda x: np.nan if x['Local:nedler']==x['Local:Base'] else x['Local:nedler'], axis=1 )
+
+            #fill values based on performance of the runners
         
-        #Backward fill first the base runner to have a reference value
-        self.classificationCost['Local:Base'] = self.classificationCost['Local:Base'].bfill()
-
-
-        #if Base runner got the optimal value first, the performance of the local search must be based on the previous value
-        self.classificationCost['Local:bfgs0.1'] = self.classificationCost.apply(lambda x: np.nan if x['Local:bfgs0.1']==x['Local:Base'] else x['Local:bfgs0.1'],axis=1 )
-        self.classificationCost['Local:bfgs0.3'] = self.classificationCost.apply(lambda x: np.nan if x['Local:bfgs0.3']==x['Local:Base'] else x['Local:bfgs0.3'], axis=1 )
-        self.classificationCost['Local:nedler'] = self.classificationCost.apply(lambda x: np.nan if x['Local:nedler']==x['Local:Base'] else x['Local:nedler'], axis=1 )
-
-        #fill values based on performance of the runners
-      
-        self.classificationCost['Local:bfgs0.1'] = self.classificationCost['Local:bfgs0.1'].ffill()
-        self.classificationCost['Local:bfgs0.3'] = self.classificationCost['Local:bfgs0.3'].ffill()
-        self.classificationCost['Local:nedler'] = self.classificationCost['Local:nedler'].ffill()
+            self.classificationCost['Local:bfgs0.1'] = self.classificationCost['Local:bfgs0.1'].ffill()
+            self.classificationCost['Local:bfgs0.3'] = self.classificationCost['Local:bfgs0.3'].ffill()
+            self.classificationCost['Local:nedler'] = self.classificationCost['Local:nedler'].ffill()
+        except:
+            print('Classification cost could not be computed.')
         self.processedSolvers = True
 
 
