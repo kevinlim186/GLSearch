@@ -12,10 +12,10 @@ features = None
 #features = np.load('./models/randomForest_Selection_100feat.npy')
 #features = np.load('./models/randomForest_Selection_200feat.npy')
 
-modelSelected = 'forest'
+#modelSelected = 'forest'
 #modelLocation = 'randomForest_noSelection50'
 #modelLocation = 'randomForest_noSelection100'
-modelLocation = 'randomForest_noSelection200'
+#modelLocation = 'randomForest_noSelection200'
 
 #modelSelected = 'forest'
 #modelLocation = 'randomForest_Selection_50'
@@ -27,14 +27,14 @@ modelLocation = 'randomForest_noSelection200'
 #modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:100_LossWCategoricalCrossentropy'
 #modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:200_LossWCategoricalCrossentropy'
 
-#modelSelected = 'annCross'
-#modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:50_Losscategorical_crossentropy'
+modelSelected = 'annCross'
+modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:50_Losscategorical_crossentropy'
 #modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:100_Losscategorical_crossentropy'
 #modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:200_Losscategorical_crossentropy'
 
-#size = 50
+size = 50
 #size = 100
-size = 200
+#size = 200
 
 
 if modelSelected =='annExpected':
