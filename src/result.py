@@ -136,13 +136,13 @@ class Result():
         self.classificationCost['Local:nedler_perf' ] = self.classificationCost['Local:nedler_perf' ].ffill()
 
         #calculate VBS
-        self.classification['vbs'] = self.classificationCost[['Local:Base_perf', 'Local:bfgs0.1_perf','Local:bfgs0.3_perf',  'Local:nedler_perf']].min(axis=1)
+        self.classificationCos['vbs'] = self.classificationCost[['Local:Base_perf', 'Local:bfgs0.1_perf','Local:bfgs0.3_perf',  'Local:nedler_perf']].min(axis=1)
 
         #calculate cost for each algorithm
-        self.classificationCost['Local:Base'] = self.classificationCost['Local:Base_perf'] - self.classification['vbs']
-        self.classificationCost['Local:bfgs0.1'] = self.classificationCost['Local:bfgs0.1_perf'] - self.classification['vbs']
-        self.classificationCost['Local:bfgs0.3'] = self.classificationCost['Local:bfgs0.3_perf'] - self.classification['vbs']
-        self.classificationCost['Local:nedler'] = self.classificationCost['Local:nedler_perf' ] - self.classification['vbs']
+        self.classificationCost['Local:Base'] = self.classificationCost['Local:Base_perf'] - self.classificationCos['vbs']
+        self.classificationCost['Local:bfgs0.1'] = self.classificationCost['Local:bfgs0.1_perf'] - self.classificationCos'vbs']
+        self.classificationCost['Local:bfgs0.3'] = self.classificationCost['Local:bfgs0.3_perf'] - self.classificationCos['vbs']
+        self.classificationCost['Local:nedler'] = self.classificationCost['Local:nedler_perf' ] - self.classificationCos['vbs']
 
         #calculate SBS and SBS-VBS-Ga-
         self.classificationCost['sbs']  = self.classificationCost[sbsAlgo]
