@@ -106,14 +106,17 @@ class Result():
 
         #Calculate performance based on Rajn's performance measure; 
         self.processedPerformance['performance'] = self.processedPerformance.apply(lambda x: x['relERT'] if x['relERT'] >0  else x['relFCE'], axis=1)
+
+        #Remove duplicate computation of ERT 
+        self.processedPerformance = self.processedPerformance.groupby(by=['function', 'dimension','instance', 'trial', 'budget'])[x_labels].mean().reset_index(drop=True)
         self.processedPerf = True
 
 
     def _calculateBestSolvers(self):
         #calcluate the virtual best solver
-        vbs = self.processedPerformance.groupby(['function', 'dimension', 'instance','trial'])['performance'].min().reset_index()
+        vbs = self.processedPerformance.groupby(['function', 'dimension', 'instance','trial','budget'])['performance'].min().reset_index()
         vbs=vbs.rename(columns={'performance':'vbs'})
-        self.processedPerformance = self.processedPerformance.merge(vbs, on=['function', 'instance', 'dimension','trial'], how='left',  suffixes=('', ''))
+        self.processedPerformance = self.processedPerformance.merge(vbs, on=['function', 'instance', 'dimension','trial','budget'], how='left',  suffixes=('', ''))
 
         #calculate the single best solver
         sbs =  self.processedPerformance.groupby(['algo'])['performance'].mean().reset_index()
