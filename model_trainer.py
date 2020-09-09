@@ -6,14 +6,14 @@ from src.result import Result
 from src.models import Models
 
 #dateset
-dataset = '50'
+#dataset = '50'
 #dataset = '100'
-#dataset = '200'
+dataset = '200'
 
 #define the model
 #modelSelected='ANNCross0.75'
-modelSelected='ANNExpected0.75'
-#modelSelected='ANNCross125'
+#modelSelected='ANNExpected0.75'
+modelSelected='ANNCross125'
 #modelSelected='ANNExpected125'
 #modelSelected='Forest'
 #modelSelected='ForestFeature'
