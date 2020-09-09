@@ -107,8 +107,6 @@ class Result():
         #Calculate performance based on Rajn's performance measure; 
         self.processedPerformance['performance'] = self.processedPerformance.apply(lambda x: x['relERT'] if x['relERT'] >0  else x['relFCE'], axis=1)
 
-        #Remove duplicate computation of ERT 
-        self.processedPerformance = self.processedPerformance.groupby(by=['function', 'dimension','instance', 'trial', 'budget'])[x_labels].mean().reset_index(drop=True)
         self.processedPerf = True
 
 
