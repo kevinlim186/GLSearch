@@ -115,42 +115,39 @@ class Result():
         sbs =  self.processedPerformance.groupby(['algo'])['performance'].mean().reset_index()
         sbsAlgo = sbs.min()['algo']
 
-        try:
-            #We need to pivot first and fill the missing values otherwise algorithm that finished first will be underrepresented.
-            self.classificationCost = self.processedPerformance.pivot_table(index=['function', 'dimension','instance', 'trial', 'budget'], columns = 'algo', values='performance').reset_index().sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
-            
-            #rename the to performance column
-            self.classificationCost = self.classificationCost.rename(columns={'Local:Base':'Local:Base_perf','Local:bfgs0.1':'Local:bfgs0.1_perf', 'Local:bfgs0.3':'Local:bfgs0.3_perf', 'Local:nedler':'Local:nedler_perf' })
+        #We need to pivot first and fill the missing values otherwise algorithm that finished first will be underrepresented.
+        self.classificationCost = self.processedPerformance.pivot_table(index=['function', 'dimension','instance', 'trial', 'budget'], columns = 'algo', values='performance').reset_index().sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
+        
+        #rename the to performance column
+        self.classificationCost = self.classificationCost.rename(columns={'Local:Base':'Local:Base_perf','Local:bfgs0.1':'Local:bfgs0.1_perf', 'Local:bfgs0.3':'Local:bfgs0.3_perf', 'Local:nedler':'Local:nedler_perf' })
 
-            #Backward fill first the base runner to have a reference value
-            self.classificationCost['Local:Base_perf'] = self.classificationCost['Local:Base_perf'].bfill()
+        #Backward fill first the base runner to have a reference value
+        self.classificationCost['Local:Base_perf'] = self.classificationCost['Local:Base_perf'].bfill()
 
 
-            #if Base runner got the optimal value first, the performance of the local search must be based on the previous value
-            self.classificationCost['Local:bfgs0.1_perf'] = self.classificationCost.apply(lambda x: np.nan if x['Local:bfgs0.1']==x['Local:Base_perf'] else x['Local:bfgs0.1_perf'],axis=1 )
-            self.classificationCost['Local:bfgs0.3_perf'] = self.classificationCost.apply(lambda x: np.nan if x['Local:bfgs0.3_perf']==x['Local:Base_perf'] else x['Local:bfgs0.3_perf'], axis=1 )
-            self.classificationCost['Local:nedler_perf' ] = self.classificationCost.apply(lambda x: np.nan if x['Local:nedler_perf' ]==x['Local:Base_perf'] else x['Local:nedler_perf' ], axis=1 )
+        #if Base runner got the optimal value first, the performance of the local search must be based on the previous value
+        self.classificationCost['Local:bfgs0.1_perf'] = self.classificationCost.apply(lambda x: np.nan if x['Local:bfgs0.1']==x['Local:Base_perf'] else x['Local:bfgs0.1_perf'],axis=1 )
+        self.classificationCost['Local:bfgs0.3_perf'] = self.classificationCost.apply(lambda x: np.nan if x['Local:bfgs0.3_perf']==x['Local:Base_perf'] else x['Local:bfgs0.3_perf'], axis=1 )
+        self.classificationCost['Local:nedler_perf' ] = self.classificationCost.apply(lambda x: np.nan if x['Local:nedler_perf' ]==x['Local:Base_perf'] else x['Local:nedler_perf' ], axis=1 )
 
-            #fill values based on performance of the runners
-            self.classificationCost['Local:bfgs0.1_perf'] = self.classificationCost['Local:bfgs0.1_perf'].ffill()
-            self.classificationCost['Local:bfgs0.3_perf'] = self.classificationCost['Local:bfgs0.3_perf'].ffill()
-            self.classificationCost['Local:nedler_perf' ] = self.classificationCost['Local:nedler_perf' ].ffill()
+        #fill values based on performance of the runners
+        self.classificationCost['Local:bfgs0.1_perf'] = self.classificationCost['Local:bfgs0.1_perf'].ffill()
+        self.classificationCost['Local:bfgs0.3_perf'] = self.classificationCost['Local:bfgs0.3_perf'].ffill()
+        self.classificationCost['Local:nedler_perf' ] = self.classificationCost['Local:nedler_perf' ].ffill()
 
-            #calculate VBS
-            self.classification['vbs'] = self.classificationCost[['Local:Base_perf', 'Local:bfgs0.1_perf','Local:bfgs0.3_perf',  'Local:nedler_perf']].min(axis=1)
+        #calculate VBS
+        self.classification['vbs'] = self.classificationCost[['Local:Base_perf', 'Local:bfgs0.1_perf','Local:bfgs0.3_perf',  'Local:nedler_perf']].min(axis=1)
 
-            #calculate cost for each algorithm
-            self.classificationCost['Local:Base'] = self.classificationCost['Local:Base_perf'] - self.classification['vbs']
-            self.classificationCost['Local:bfgs0.1'] = self.classificationCost['Local:bfgs0.1_perf'] - self.classification['vbs']
-            self.classificationCost['Local:bfgs0.3'] = self.classificationCost['Local:bfgs0.3_perf'] - self.classification['vbs']
-            self.classificationCost['Local:nedler'] = self.classificationCost['Local:nedler_perf' ] - self.classification['vbs']
+        #calculate cost for each algorithm
+        self.classificationCost['Local:Base'] = self.classificationCost['Local:Base_perf'] - self.classification['vbs']
+        self.classificationCost['Local:bfgs0.1'] = self.classificationCost['Local:bfgs0.1_perf'] - self.classification['vbs']
+        self.classificationCost['Local:bfgs0.3'] = self.classificationCost['Local:bfgs0.3_perf'] - self.classification['vbs']
+        self.classificationCost['Local:nedler'] = self.classificationCost['Local:nedler_perf' ] - self.classification['vbs']
 
-            #calculate SBS and SBS-VBS-Ga-
-            self.classificationCost['sbs']  = self.classificationCost[sbsAlgo]
-            self.processedPerformance['VBS-SBS-Gap'] = self.processedPerformance['sbs'] - self.processedPerformance['vbs']
+        #calculate SBS and SBS-VBS-Ga-
+        self.classificationCost['sbs']  = self.classificationCost[sbsAlgo]
+        self.processedPerformance['VBS-SBS-Gap'] = self.processedPerformance['sbs'] - self.processedPerformance['vbs']
 
-        except:
-            print('Classification cost could not be computed.')
         self.processedSolvers = True
 
 
