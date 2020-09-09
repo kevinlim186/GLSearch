@@ -577,7 +577,7 @@ class Problem():
                 ela = self.elaFetures[x_labels].iloc[-1,]
 
                 index = ASP.predict(ela.values.reshape(1,-1)).argmax()
-                #selectedModel = y_labels[index]
+                print("Selected algorihtm "+ y_labels[index])
 
 
                 #if index is greater than 0, then local search must be used
