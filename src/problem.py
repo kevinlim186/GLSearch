@@ -613,7 +613,7 @@ class Problem():
         #self.currentResults['name'] = name
         #self.currentResults.to_csv('test/'+name+'.csv',index=False)
         #self.performance.importHistoricalPath('test/'+name+'.csv')
-        self.performance.saveToCSVPerformance('Test_'+name)
+        #self.performance.saveToCSVPerformance('Test_'+name)
 
     def sanitizeELAFeatures(self):
         #some ela features are infinity. They are replaced by the average value
