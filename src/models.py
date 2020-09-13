@@ -20,7 +20,7 @@ class Models():
         self.features, self.y_cost = shuffle(features, y_cost)
         self.y_class = None
 
-    def weightedCategoricalCrossentropy(y_true, y_pred):
+    def weightedCategoricalCrossentropy(self, y_true, y_pred):
     #    y_cost = y_true * y_pred
     #	y_cost = (y_true-y_label) * 1e5
     #	condition = tf.equal(y_pred, tf.math.reduce_max(y_pred, axis=1, keepdims=True))

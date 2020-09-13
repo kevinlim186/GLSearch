@@ -575,6 +575,8 @@ class Problem():
                 currentLength += 1
                 self.calculateELA(size=size, sanitize=True)
                 ela = self.elaFetures[x_labels].iloc[-1,]
+                
+                print(ela.values)
 
                 index = ASP.predict(ela.values.reshape(1,-1)).argmax()
                 print("Selected algorihtm "+ y_labels[index])
