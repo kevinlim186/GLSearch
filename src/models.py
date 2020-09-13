@@ -12,24 +12,24 @@ from sklearn.ensemble import RandomForestClassifier
 import pickle
 from sklearn.feature_selection import RFE
 from src.interface import y_labels, x_labels
+from sklearn.utils import shuffle
 
 class Models():
     def __init__(self, features, y_cost):
-        self.features = features
-        self.y_cost = y_cost
+        #shuffle the data upon loading
+        self.features, self.y_cost = shuffle(features, y_cost)
         self.y_class = None
 
-    def weightedCategoricalCrossentropy(self, y_true, y_pred):
+    def weightedCategoricalCrossentropy(y_true, y_pred):
     #    y_cost = y_true * y_pred
     #	y_cost = (y_true-y_label) * 1e5
     #	condition = tf.equal(y_pred, tf.math.reduce_max(y_pred, axis=1, keepdims=True))
     #	probabilityMatrix = tf.where(condition, tf.zeros_like(y_pred), y_pred)
-        
+
     #	costMatrix = y_cost * probabilityMatrix
 
     #	cost = y_label * K.log(y_pred) - costMatrix 
-        return K.sum(y_true * y_pred, axis=-1)
-
+        return K.sum(K.sum(y_true*y_pred, axis=1))
 
     def trainANN(self, inputSize, dropout, hidden, epoch, size, learning=0.001, output_size=4, loss='WCategoricalCrossentropy'):
         if loss == 'WCategoricalCrossentropy':
@@ -44,10 +44,8 @@ class Models():
         model = Sequential()
         model.add(Dense(int(round(inputSize*hidden/dropout,0)), input_shape=(inputSize,), activation='relu'))
         model.add(Dropout(dropout))
-        model.add(Dense(int(round(inputSize*hidden/dropout,0)), activation='relu'))
-        model.add(Dropout(dropout))
-        model.add(Dense(int(round(inputSize*hidden/dropout,0)), activation='relu'))
-        model.add(Dropout(dropout))
+        model.add(Dense(int(round(inputSize*hidden,0)), activation='relu'))
+        model.add(Dense(int(round(inputSize*hidden,0)), activation='relu'))
         model.add(Dense(output_size, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.01)
 
