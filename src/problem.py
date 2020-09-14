@@ -145,6 +145,9 @@ class Problem():
 
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
                 currentLength += 1
+
+                name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
+                self.calculatePerformance(name)
                 # Get the best individuals as of this time as input to the local search. Calculate the ELA features
                 x0 = np.array(self.optimizer.best_individual.genotype.flatten())
 
@@ -197,6 +200,7 @@ class Problem():
 
         
         name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
+        self.calculatePerformance(name)
 
 
     def runTest(self):
