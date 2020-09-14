@@ -149,15 +149,15 @@ class Problem():
                 x0 = np.array(self.optimizer.best_individual.genotype.flatten())
 
                 if self.pflacco:
-                    for s in size:
+                    for i, s in enumerate(size):
+                        elaName = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler',testRun)+ '_ela_' + str(i)
                         self.calculateELA(size=s)
+                        self.saveElaFeat(elaName)
 
                 self.saveState()
                 
                 #Simplex Method
                 name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler',testRun)
-                
-                #self.saveElaFeat(name)
                 
                 self.simplexAlgorithm(x0)
 
@@ -165,7 +165,7 @@ class Problem():
                 self.loadState()
                 
                 name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1',testRun)
-                #self.saveElaFeat(name)
+
                 self.bfgsAlgorithm(x0, 0.1)
 
                 self.calculatePerformance(name)
@@ -174,7 +174,6 @@ class Problem():
 
                 #Gradient Descent Method 0.3
                 name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3',testRun)
-                #self.saveElaFeat(name)
                 self.bfgsAlgorithm(x0, 0.3)
 
                 self.calculatePerformance(name)
