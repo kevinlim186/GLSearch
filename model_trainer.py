@@ -12,8 +12,8 @@ dataset = '200'
 
 #define the model
 #modelSelected='ANNCross0.75'
-modelSelected='ANNExpected0.75'
-#modelSelected='ANNCross125'
+#modelSelected='ANNExpected0.75'
+modelSelected='ANNCross125'
 #modelSelected='ANNExpected125'
 #modelSelected='Forest'
 #modelSelected='ForestFeature'

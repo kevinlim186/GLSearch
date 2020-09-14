@@ -25,7 +25,7 @@ performance = Performance()
 esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1] 
 
 for i in function:
-    suite = Suites(instances=[1,2], baseBudget=100, dimensions=[2,3], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
+    suite = Suites(instances=[1,2,3,4,5], baseBudget=10000, dimensions=[2,3,5,10,20], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
     suite.runDataGathering()
     performance.saveToCSVPerformance('Performance_Gathering_'+file)
     performance.saveToCSVELA('ELA_Gathering_'+file)
