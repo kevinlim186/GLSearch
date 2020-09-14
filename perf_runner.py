@@ -1,27 +1,43 @@
 from src.problem import Problem 
 from src.logger import Performance
+from src.suites import Suites
 import os
 import pandas as pd 
 import math
+from numpy import log
 
-allocation = [0,1]
-#allocation = [.1,.2]
-#allocation = [.2,.3]
-#allocation = [.3,.4]
-#allocation = [.4,.5]
-#allocation = [.6,.7]
-#allocation = [.7,.8]
-#allocation = [.9,1]
+function = [1,2]
+#function = [3,4]
+#function = [5,6]
+#function = [7,8]
+#function = [9,10]
+#function = [11,12]
+#function = [13,14]
+#function = [15,16]
+#function = [17,18]
+#function = [19,20]
+#function = [21,22]
+#unction = [23,24]
 
-fileExtension = 'allocation_'+str(allocation[0])+'_'+str(allocation[1])
+file= 'allocation_'+str(function[0])+'_'+str(function[1])
 performance = Performance()
 
+esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1] 
+
+for i in function:
+    suite = Suites(instances=[1,2], baseBudget=100, dimensions=[2,3], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
+    suite.runDataGathering()
+    performance.saveToCSVPerformance('Performance_Gathering_'+file)
+    performance.saveToCSVELA('ELA_Gathering_'+file)
+
+'''
 baseDIR = "./temp/"
 files = os.listdir(baseDIR)
 files = [val for val in files if val.endswith(".csv")]
 total = len(files)
 files = files[math.ceil(total*allocation[0]):math.floor(total*allocation[1])]
 errorlog =pd.DataFrame()
+
 
 def _printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 50, fill = '█', printEnd = "\r"):
 	"""
@@ -63,3 +79,6 @@ for i in range(len(files)):
 	except:
 		errorlog.append({'name':filename}, ignore_index = True)
 		errorlog.to_csv('./perf/error_log.csv',index=False)
+
+
+'''

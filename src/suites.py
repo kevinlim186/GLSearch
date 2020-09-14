@@ -1,4 +1,6 @@
 from src.problem import Problem
+import math
+from numpy import log
 
 class Suites:
     def __init__(self, instances, baseBudget, dimensions, esconfig, function, performance, pflacco, localSearch=None ):
@@ -26,7 +28,8 @@ class Suites:
 
     def runProblem (self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco, localSearch):
             problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger,pflacco, localSearch)
-            problem.runDataGathering()
+            genSize = 4+ math.floor(3*log(dimension))
+            problem.runDataGathering(size= [50,100,200, genSize*5, genSize*50, genSize*100])
             problem.saveElaFeat('Function_'+str(function))
 
     def runTestSuite(self):

@@ -126,103 +126,70 @@ class Problem():
             self.optimalValue = 0 + 1e-8
     
 
-    def runDataGathering(self):
+    def runDataGathering(self, size):
         #Runs five independent tests
         for i in range(1,6):
             self.reset()
-            self.runOptimizer(i)
+            self.runOptimizer(i, size)
     
-    def runOptimizer(self, testRun):
+    def runOptimizer(self, testRun, size):
         checkpoints = self.getCheckPoints()
         currentLength = 0
         maxIndex = len(checkpoints)
         targetReachedEA = False
-        targetReachedSimplex = False
-        targetReachedBFGS10 = False
-        targetReachedBFGS30 = False
 
         #Stop the iteration if target is reached OR budget is reached
-        while self.totalBudget > self.spentBudget and not (targetReachedEA and targetReachedSimplex and targetReachedBFGS10 and targetReachedBFGS30):
+        while self.totalBudget > self.spentBudget and not targetReachedEA:
             
             self._printProgressBar(self.spentBudget, self.totalBudget,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
 
-            if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex and not (targetReachedSimplex and targetReachedBFGS10 and targetReachedBFGS30)):
+            if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
                 currentLength += 1
                 # Get the best individuals as of this time as input to the local search. Calculate the ELA features
                 x0 = np.array(self.optimizer.best_individual.genotype.flatten())
 
                 if self.pflacco:
-                    self.calculateELA()
-
+                    for s in size:
+                        self.calculateELA(size=s)
 
                 self.saveState()
                 
                 #Simplex Method
-                if (not targetReachedSimplex):
-                    name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler',testRun)
-                    
-                    #self.saveElaFeat(name)
-                    
-                    self.simplexAlgorithm(x0)
-
-                    minPerformance = self.calculatePerformance(name)
-                    self.currentResults['name'] = name
-                    self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-                    self.performance.importHistoricalPath('temp/'+name+'.csv')
-                    self.performance.saveToCSVPerformance('Function_'+str(self.function))
-
-                    # If target is reached, we stop the calculation to save on CPU power
-                    if minPerformance <= self.optimalValue:
-                        targetReachedSimplex = True
-                    
-                    self.loadState()
+                name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler',testRun)
                 
+                #self.saveElaFeat(name)
+                
+                self.simplexAlgorithm(x0)
 
-                #Gradient Descent Method 0.1
-                if (not targetReachedBFGS10):
-                    name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1',testRun)
-                    #self.saveElaFeat(name)
-                    self.bfgsAlgorithm(x0, 0.1)
+                self.calculatePerformance(name)
+                self.loadState()
+                
+                name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1',testRun)
+                #self.saveElaFeat(name)
+                self.bfgsAlgorithm(x0, 0.1)
 
-                    minPerformance = self.calculatePerformance(name)
-                    self.currentResults['name'] = name
-                    self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-                    self.performance.importHistoricalPath('temp/'+name+'.csv')
-                    self.performance.saveToCSVPerformance('Function_'+str(self.function))
+                self.calculatePerformance(name)
 
-                    # If target is reached, we stop the calculation to save on CPU power
-                    if minPerformance <= self.optimalValue:
-                        targetReachedBFGS10 = True
-                    
-                    self.loadState()
+                self.loadState()
 
                 #Gradient Descent Method 0.3
-                if (not targetReachedBFGS30):
-                    name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3',testRun)
-                    #self.saveElaFeat(name)
-                    self.bfgsAlgorithm(x0, 0.3)
+                name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3',testRun)
+                #self.saveElaFeat(name)
+                self.bfgsAlgorithm(x0, 0.3)
 
-                    self.calculatePerformance(name)
-                    self.currentResults['name'] = name
-                    self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-                    self.performance.importHistoricalPath('temp/'+name+'.csv')
-                    self.performance.saveToCSVPerformance('Function_'+str(self.function))
-
-                    # If target is reached, we stop the calculation to save on CPU power
-                    if minPerformance <= self.optimalValue:
-                        targetReachedBFGS30 = True
+                self.calculatePerformance(name)
                     
-                    self.loadState()
+                self.loadState()
                 
             
             if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue and not targetReachedEA:
                 targetReachedEA = True
                 name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
         
-                self.currentResults['name'] = name
-                self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-                self.performance.importHistoricalPath('temp/'+name+'.csv')
-                self.performance.saveToCSVPerformance('Function_'+str(self.function))
+                #self.currentResults['name'] = name
+                #self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+                #self.performance.importHistoricalPath('temp/'+name+'.csv')
+                #self.performance.saveToCSVPerformance('Function_'+str(self.function))
             
             #If the optimal value is not reached then continue running
             self.optimizer.runOneGeneration()
@@ -232,11 +199,6 @@ class Problem():
         
         name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
 
-        self.currentResults['name'] = name
-        minPerformance = self.calculatePerformance(name)
-        self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-        self.performance.importHistoricalPath('temp/'+name+'.csv')
-        self.performance.saveToCSVPerformance('Function_'+str(self.function))
 
     def runTest(self):
         #Runs five independent tests
