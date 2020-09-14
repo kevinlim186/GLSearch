@@ -153,7 +153,7 @@ class Problem():
 
                 if self.pflacco:
                     for i, s in enumerate(size):
-                        elaName = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler',testRun)+ '_ela_' + str(i)
+                        elaName = self.getProblemName(self.function, self.instance, self.spentBudget,'NONE',testRun)+ '_ela_' + str(i)
                         self.calculateELA(size=s)
                         self.saveElaFeat(elaName)
 
