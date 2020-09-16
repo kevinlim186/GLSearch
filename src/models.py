@@ -114,7 +114,7 @@ class Models():
         model_name = '_Drop'+str(0)+'_Hidden'+str(2)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss'+'CategoricalCrossentropy'
 
         self.oneHotEncode()
-        X_, Y_ = createTestSet(2, self.features, self.y_class)
+        X_, Y_ = self.createTestSet(2, self.features, self.y_class)
         model = Sequential()
         model.add(LSTM(52, activation='relu', input_shape=(2, 52),return_sequences=True))
         model.add(LSTM(52, activation='relu'))
