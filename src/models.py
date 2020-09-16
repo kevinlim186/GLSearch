@@ -15,9 +15,9 @@ from src.interface import y_labels, x_labels
 from sklearn.utils import shuffle
 
 class Models():
-    def __init__(self, features, y_cost, shuffle=False):
+    def __init__(self, features, y_cost, _shuffle=False):
         #shuffle the data upon loading
-        if shuffle:
+        if _shuffle:
             self.features, self.y_cost = shuffle(features, y_cost)
         else:
             self.features = features
