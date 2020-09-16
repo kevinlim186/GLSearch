@@ -1,7 +1,7 @@
 import numpy as np
 import keras.backend as K
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.layers import Dense, Dropout, LSTM,TimeDistributed
 from keras.optimizers import SGD
 from keras.utils import plot_model
 import pandas as pd
@@ -88,3 +88,38 @@ class Models():
         model.fit(features, self.y_class)
         pickle.dump(model, open('./models/'+name, 'wb'))
         np.save('./models/'+name+'feat', selectedFeatures)
+
+    #Misclassication helper function
+    def countMisclassification(self, ytrue, ypred):
+        misclassification = 0
+        totalLength= len(ytrue)
+        for i in range(totalLength):
+            
+            if ytrue[i].argmax(0)!=ypred[i].argmax(0):
+                misclassification += 1
+        return misclassification, misclassification/totalLength
+        
+        
+    #FOR LSTM Test Set
+    def createTestSet(self, n_step, x_test, y_test):
+        x_arr = []
+        y_arr = []
+        
+        for i in range(len(x_test)-n_step):
+            x_arr.append(x_test[i:i+n_step])
+            y_arr.append(y_test[i+n_step])
+        return np.array(x_arr), np.array(y_arr)
+
+    def trainLSTM(self, size):
+        model_name = '_Drop'+str(0)+'_Hidden'+str(2)+'_Epoch'+str(100)+'_Learning'+str(0.1%)+'_Size:'+str(size)+'_Loss'+'CategoricalCrossentropy'
+
+        self.oneHotEncode()
+        X_, Y_ = createTestSet(2, self.features, self.y_class)
+        model = Sequential()
+        model.add(LSTM(52, activation='relu', input_shape=(2, 52),return_sequences=True))
+        model.add(LSTM(52, activation='relu'))
+        model.add(Dense(4, activation='softmax'))
+        opt = tf.keras.optimizers.Adam(learning_rate=0.001)
+        model.compile(optimizer=opt, loss='CategoricalCrossentropy')
+        model.fit(X_, Y_, epochs=100)
+        model.save('./models/'+model_name)
