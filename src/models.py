@@ -15,9 +15,13 @@ from src.interface import y_labels, x_labels
 from sklearn.utils import shuffle
 
 class Models():
-    def __init__(self, features, y_cost):
+    def __init__(self, features, y_cost, shuffle=False):
         #shuffle the data upon loading
-        self.features, self.y_cost = shuffle(features, y_cost)
+        if shuffle:
+            self.features, self.y_cost = shuffle(features, y_cost)
+        else:
+            self.features = features
+            self.y_cost = y_cost
         self.y_class = None
 
     def weightedCategoricalCrossentropy(self, y_true, y_pred):
@@ -121,5 +125,5 @@ class Models():
         model.add(Dense(4, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.001)
         model.compile(optimizer=opt, loss='CategoricalCrossentropy')
-        model.fit(X_, Y_, epochs=100)
+        model.fit(X_, Y_, epochs=1000)
         model.save('./models/'+model_name)
