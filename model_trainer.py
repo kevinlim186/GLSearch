@@ -10,6 +10,11 @@ dataset = '50'
 #dataset = '100'
 #dataset = '200'
 
+
+#Interface
+interface = None
+interface = ['ela meta.lin simple.adj r2', 'nbc.nb fitness.cor', 'ela meta.lin simple.intercept', 'dim', 'ela meta.quad w interact.adj r2', 'nbc.nn nb.sd ratio', 'ela meta.lin w interact.adj r2', 'ela meta.quad simple.adj r2', 'budget.used']
+
 #define the model
 #modelSelected='ANNCross0.75'
 #modelSelected='ANNExpected0.75'
@@ -49,7 +54,7 @@ elif dataset == '200':
 result.addPerformance(perf1)
 result.addELA(traindata)
 
-Xtrain, Ytrain = result.createTrainSet(dataset=dataset, algorithm=None, reset=False)
+Xtrain, Ytrain = result.createTrainSet(dataset=dataset, algorithm=None, reset=False, interface=interface)
 
 if modelSelected =='ANNCross0.75':
     model = Models(Xtrain,Ytrain,_shuffle=True)
