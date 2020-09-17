@@ -522,7 +522,6 @@ class Problem():
         else:
             x_labels = self.x_labels 
 
-
         #default name is the base. If the algorithm selects the local search, the name will be overridden.
         name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base'+ASPName,testRun)
                 
@@ -539,11 +538,22 @@ class Problem():
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
                 currentLength += 1
                 self.calculateELA(size=size, sanitize=True)
-                ela = self.elaFetures[x_labels].iloc[-1,]
                 
-                print(ela.values)
+                if "RNN" in ASPName:
+                    #We need to have two check points for the RNN to work
+                    if len(self.elaFetures) <2:
+                        index = 0
+                    else:  
+                        ela1 = self.elaFetures[x_labels].iloc[-1,]
+                        ela2 = self.elaFetures[x_labels].iloc[-2,]
+                        ela = [ela1,ela2]
+                        index = ASP.predict(ela.values.reshape(1,2,52)).argmax()
 
-                index = ASP.predict(ela.values.reshape(1,-1)).argmax()
+                else:
+                    
+                    ela = self.elaFetures[x_labels].iloc[-1,]
+                    index = ASP.predict(ela.values.reshape(1,-1)).argmax()
+                
                 print("Selected algorihtm "+ y_labels[index])
 
 
