@@ -51,20 +51,26 @@ result.addELA(traindata)
 
 Xtrain, Ytrain = result.createTrainSet(dataset=dataset, algorithm=None, reset=False)
 
-model = Models(Xtrain,Ytrain,_shuffle=True)
 if modelSelected =='ANNCross0.75':
+    model = Models(Xtrain,Ytrain,_shuffle=True)
     model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*0.75, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='categorical_crossentropy')
 elif modelSelected =='ANNCross125':
+    model = Models(Xtrain,Ytrain,_shuffle=True)
     model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='categorical_crossentropy')
 elif modelSelected =='ANNExpected0.75':
+    model = Models(Xtrain,Ytrain,_shuffle=True)
     model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*0.75, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='WCategoricalCrossentropy')
 elif modelSelected =='ANNExpected125':
+    model = Models(Xtrain,Ytrain,_shuffle=True)
     model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='WCategoricalCrossentropy')
 elif modelSelected =='Forest':
+    model = Models(Xtrain,Ytrain,_shuffle=True)
     model.trainRandomForest(size=dataset, selection=False)
 elif modelSelected == 'ForestFeature':
+    model = Models(Xtrain,Ytrain,_shuffle=True)
     model.trainRandomForest(size=dataset, selection=True)
 elif modelSelected =='LSTM':
+    model = Models(Xtrain,Ytrain,_shuffle=False)
     model.trainLSTM(size=dataset)
 
 

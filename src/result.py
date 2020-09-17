@@ -175,7 +175,7 @@ class Result():
 
         return self.calculatedPerformance
 
-    def createTrainSet(self, dataset, algorithm=None, reset=False):
+    def createTrainSet(self, dataset, algorithm=None, reset=False, interface=None):
         if reset:
             self._reset()
         if not self.processedPerf and not self.processedSolvers:
@@ -188,9 +188,17 @@ class Result():
 
         if not self.processedELA:
             self._elaPrecalculate(dataset)
+
+        if interface == None:
+            inputeInterface = x_labels
+        else:
+            inputeInterface = interface
     
         self.trainingData = self.processedFeatures.merge(self.classificationCost, on= ['function','instance','dimension','trial', 'budget'])
-                
+        
+        #add the percentage of budget used
+        self.trainingData['budget.used'] = self.trainingData['budget'] / (10000*self.trainingData['dimension'])
+ 
         #Remove first generation
         self.trainingData = self.trainingData[self.trainingData['budget'] >self.trainingData['dimension']* 500 + 400]
 
@@ -198,7 +206,7 @@ class Result():
         self.trainingData.replace([np.inf, -np.inf], np.nan,  inplace=True)
 
         #get the function, instance and dimension with missing values
-        for label in x_labels:
+        for label in inputeInterface:
             missingMask = self.trainingData[label].isna()
             missingList = self.trainingData[missingMask]['function'].astype(str) + '_' + self.trainingData[missingMask]['dimension'].astype(str) +'_'+ self.trainingData[missingMask]['instance'].astype(str)
 
@@ -223,7 +231,7 @@ class Result():
             training = self.trainingData[(self.trainingData['algo']==algorithm)]
 
 
-        Xtrain = training[x_labels].values
+        Xtrain = training[inputeInterface].values
         ycost = training[y_labels].values
 
         return Xtrain, ycost
