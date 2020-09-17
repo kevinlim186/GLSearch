@@ -115,7 +115,7 @@ class Models():
         return np.array(x_arr), np.array(y_arr)
 
     def trainLSTM(self, size):
-        model_name = '_Drop'+str(0)+'_Hidden'+str(2)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss'+'CategoricalCrossentropy'
+        model_name = '_RNN_Hidden'+str(2)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss'+'CategoricalCrossentropy'
 
         self.oneHotEncode()
         X_, Y_ = self.createTestSet(2, self.features, self.y_class)

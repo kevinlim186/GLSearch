@@ -1,6 +1,7 @@
 from src.suites import Suites
 from src.logger import Performance
 from src.result import Result
+import keras.backend as K
 import pandas as pd
 import tensorflow as tf
 import pickle
@@ -34,8 +35,10 @@ modelSelected = 'annCross'
 
 #modelLocation = '_Drop0.5_Hidden105_Epoch50_Learning0.001_Size:50_Losscategorical_crossentropy'
 #modelLocation = '_Drop0.5_Hidden105_Epoch50_Learning0.001_Size:100_Losscategorical_crossentropy'
-modelLocation = '_Drop0.5_Hidden105_Epoch50_Learning0.001_Size:200_Losscategorical_crossentropy'
+#modelLocation = '_Drop0.5_Hidden105_Epoch50_Learning0.001_Size:200_Losscategorical_crossentropy'
 
+modelSelected = 'RNN'
+modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:50_Losscategorical_crossentropy'
 
 
 #size = 50
@@ -49,7 +52,7 @@ if modelSelected =='annExpected':
 
     model = tf.keras.models.load_model('./models/'+modelLocation, custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy})
 
-elif modelSelected == 'annCross':
+elif (modelSelected == 'annCross') or (modelSelected == 'RNN'):
     model = tf.keras.models.load_model('./models/'+modelLocation)
 
 elif modelSelected=='forest':
