@@ -548,9 +548,8 @@ class Problem():
                         ela1 = self.elaFetures[x_labels].iloc[-1,]
                         ela2 = self.elaFetures[x_labels].iloc[-2,]
                         ela = np.array([ela1,ela2])
-                        print(ela)
                         index = ASP.predict(ela.reshape(1,2,52)).argmax()
-            
+
                 else:
                     
                     ela = self.elaFetures[x_labels].iloc[-1,]
