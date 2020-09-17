@@ -6,7 +6,7 @@ import pandas as pd
 import math
 from numpy import log
 
-function = [1,2]
+#function = [1,2]
 #function = [3,4]
 #function = [5,6]
 #function = [7,8]
@@ -17,7 +17,7 @@ function = [1,2]
 #function = [17,18]
 #function = [19,20]
 #function = [21,22]
-#unction = [23,24]
+function = [23,24]
 
 file= 'allocation_'+str(function[0])+'_'+str(function[1])
 performance = Performance()

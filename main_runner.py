@@ -28,7 +28,7 @@ features = None
 #modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:100_LossWCategoricalCrossentropy'
 #modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:200_LossWCategoricalCrossentropy'
 
-modelSelected = 'annCross'
+#modelSelected = 'annCross'
 #modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:50_Losscategorical_crossentropy'
 #modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:100_Losscategorical_crossentropy'
 #modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:200_Losscategorical_crossentropy'
@@ -38,12 +38,12 @@ modelSelected = 'annCross'
 #modelLocation = '_Drop0.5_Hidden105_Epoch50_Learning0.001_Size:200_Losscategorical_crossentropy'
 
 modelSelected = 'RNN'
-modelLocation = '_Drop0.5_Hidden39.0_Epoch50_Learning0.001_Size:50_Losscategorical_crossentropy'
+modelLocation = '_RNN_Hidden2_Epoch1000_Learning0.001_Size:50_LossCategoricalCrossentropy'
 
 
-#size = 50
+size = 50
 #size = 100
-size = 200
+#size = 200
 
 
 if modelSelected =='annExpected':

@@ -540,18 +540,21 @@ class Problem():
                 self.calculateELA(size=size, sanitize=True)
                 
                 if "RNN" in ASPName:
+                    print("calulating ELA ASP")
                     #We need to have two check points for the RNN to work
                     if len(self.elaFetures) <2:
                         index = 0
                     else:  
                         ela1 = self.elaFetures[x_labels].iloc[-1,]
                         ela2 = self.elaFetures[x_labels].iloc[-2,]
-                        ela = [ela1,ela2]
-                        index = ASP.predict(ela.values.reshape(1,2,52)).argmax()
-
+                        ela = np.array([ela1,ela2])
+                        print(ela)
+                        index = ASP.predict(ela.reshape(1,2,52)).argmax()
+            
                 else:
                     
                     ela = self.elaFetures[x_labels].iloc[-1,]
+                    print(ela)
                     index = ASP.predict(ela.values.reshape(1,-1)).argmax()
                 
                 print("Selected algorihtm "+ y_labels[index])

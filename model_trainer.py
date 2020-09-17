@@ -16,8 +16,8 @@ dataset = '50'
 #modelSelected='ANNCross125'
 #modelSelected='ANNExpected125'
 #modelSelected='Forest'
-#modelSelected='ForestFeature'
-modelSelected = 'LSTM'
+modelSelected='ForestFeature'
+#modelSelected = 'LSTM'
 
 print(dataset+ ' for ' +  modelSelected)
 
@@ -51,7 +51,7 @@ result.addELA(traindata)
 
 Xtrain, Ytrain = result.createTrainSet(dataset=dataset, algorithm=None, reset=False)
 
-model = Models(Xtrain,Ytrain)
+model = Models(Xtrain,Ytrain,_shuffle=True)
 if modelSelected =='ANNCross0.75':
     model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*0.75, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='categorical_crossentropy')
 elif modelSelected =='ANNCross125':
