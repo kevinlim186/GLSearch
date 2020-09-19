@@ -248,6 +248,10 @@ class Result():
 
 
     def createRNNSet(self, n_step, dataFrame, inputeInterface):
+
+        #make sure that the dataframe is sorted
+        dataFrame = dataFrame.sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
+        
         x_arr = []
         y_arr = []
         functions = dataFrame['function'].unique()
