@@ -251,17 +251,13 @@ class Result():
 
         #make sure that the dataframe is sorted
         dataFrame = dataFrame.sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
-        
         x_arr = []
         y_arr = []
+        
         functions = dataFrame['function'].unique()
         instance = dataFrame['instance'].unique()
         dimension = dataFrame['dimension'].unique()
         trial = dataFrame['trial'].unique()
-
-        #convert to one hot encoded data
-        ycost = np.zeros_like(dataFrame[y_labels].values)
-        ycost[np.arange(len(dataFrame[y_labels].values)), dataFrame[y_labels].values.argmin(1)] = 1
 
         #we need to filter the running window based on Function, Dimension, Instance and Trial
         for f in functions:
@@ -269,10 +265,15 @@ class Result():
                 for i in instance:
                     for t in trial:
                         subset =  dataFrame[(dataFrame['function']==f) & (dataFrame['dimension']==d) & (dataFrame['instance']==i) & (dataFrame['trial']==t)]
-                        for i in range(len(subset)-n_step+1):
-                            x_arr.append(subset[inputeInterface].iloc[i:i+n_step].values)
-                            y_arr.append(ycost[i+n_step])
-        return np.array(x_arr), np.array(y_arr)
+                        for s in range(len(subset)-n_step+1):
+                            x_arr.append(subset[inputeInterface].iloc[s:s+n_step].values)
+                            y_arr.append(subset[y_labels].iloc[s+n_step-1].values)
+                            
+        #convert to one hot encoded data
+        ycost = np.zeros_like(np.array(y_arr))
+        ycost[np.arange(len(np.array(y_arr))), np.array(y_arr).argmin(1)] = 1
+
+        return np.array(x_arr), ycost
 
     def _reset(self):
         self.processedSolvers = False
