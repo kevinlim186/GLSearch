@@ -238,7 +238,7 @@ class Result():
         else:
             training = self.trainingData[(self.trainingData['algo']==algorithm)]
 
-        if RNN is not None:
+        if RNN is None:
             Xtrain = training[inputeInterface].values
             ycost = training[y_labels].values
         else:
