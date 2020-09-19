@@ -13,7 +13,7 @@ dataset = '50'
 
 #Interface
 interface = None
-interface = ['ela meta.lin simple.adj r2', 'nbc.nb fitness.cor', 'ela meta.lin simple.intercept', 'dim', 'ela meta.quad w interact.adj r2', 'nbc.nn nb.sd ratio', 'ela meta.lin w interact.adj r2', 'ela meta.quad simple.adj r2', 'budget.used']
+#interface = ['ela meta.lin simple.adj r2', 'nbc.nb fitness.cor', 'ela meta.lin simple.intercept', 'dim', 'ela meta.quad w interact.adj r2', 'nbc.nn nb.sd ratio', 'ela meta.lin w interact.adj r2', 'ela meta.quad simple.adj r2', 'budget.used']
 
 #define the model
 #modelSelected='ANNCross0.75'
@@ -21,8 +21,9 @@ interface = ['ela meta.lin simple.adj r2', 'nbc.nb fitness.cor', 'ela meta.lin s
 #modelSelected='ANNCross125'
 #modelSelected='ANNExpected125'
 #modelSelected='Forest'
-modelSelected='ForestFeature'
-#modelSelected = 'LSTM'
+#modelSelected='ForestFeature'
+modelSelected = 'LSTM'
+stepSize =2
 
 print(dataset+ ' for ' +  modelSelected)
 
@@ -54,28 +55,31 @@ elif dataset == '200':
 result.addPerformance(perf1)
 result.addELA(traindata)
 
-Xtrain, Ytrain = result.createTrainSet(dataset=dataset, algorithm=None, reset=False, interface=interface)
-
-if modelSelected =='ANNCross0.75':
-    model = Models(Xtrain,Ytrain,_shuffle=True)
-    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*0.75, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='categorical_crossentropy')
-elif modelSelected =='ANNCross125':
-    model = Models(Xtrain,Ytrain,_shuffle=True)
-    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='categorical_crossentropy')
-elif modelSelected =='ANNExpected0.75':
-    model = Models(Xtrain,Ytrain,_shuffle=True)
-    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*0.75, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='WCategoricalCrossentropy')
-elif modelSelected =='ANNExpected125':
-    model = Models(Xtrain,Ytrain,_shuffle=True)
-    model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='WCategoricalCrossentropy')
-elif modelSelected =='Forest':
-    model = Models(Xtrain,Ytrain,_shuffle=True)
-    model.trainRandomForest(size=dataset, selection=False)
-elif modelSelected == 'ForestFeature':
-    model = Models(Xtrain,Ytrain,_shuffle=True)
-    model.trainRandomForest(size=dataset, selection=True)
-elif modelSelected =='LSTM':
+if modelSelected =='LSTM':
+    Xtrain, Ytrain = result.createTrainSet(dataset=dataset, algorithm=None, reset=False, interface=interface, RNN=stepSize)
     model = Models(Xtrain,Ytrain,_shuffle=False)
-    model.trainLSTM(size=dataset)
+    model.trainLSTM(stepSize=stepSize, size=dataset)
+
+else:
+    Xtrain, Ytrain = result.createTrainSet(dataset=dataset, algorithm=None, reset=False, interface=interface)
+
+    if modelSelected =='ANNCross0.75':
+        model = Models(Xtrain,Ytrain,_shuffle=True)
+        model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*0.75, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='categorical_crossentropy')
+    elif modelSelected =='ANNCross125':
+        model = Models(Xtrain,Ytrain,_shuffle=True)
+        model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='categorical_crossentropy')
+    elif modelSelected =='ANNExpected0.75':
+        model = Models(Xtrain,Ytrain,_shuffle=True)
+        model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*0.75, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='WCategoricalCrossentropy')
+    elif modelSelected =='ANNExpected125':
+        model = Models(Xtrain,Ytrain,_shuffle=True)
+        model.trainANN(inputSize=len(Xtrain[0]), dropout=0.5, hidden=len(Xtrain[0])*2+1, epoch=50, size=dataset,learning=0.001, output_size=len(Ytrain[0]), loss='WCategoricalCrossentropy')
+    elif modelSelected =='Forest':
+        model = Models(Xtrain,Ytrain,_shuffle=True)
+        model.trainRandomForest(size=dataset, selection=False)
+    elif modelSelected == 'ForestFeature':
+        model = Models(Xtrain,Ytrain,_shuffle=True)
+        model.trainRandomForest(size=dataset, selection=True)
 
 
