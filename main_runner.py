@@ -38,7 +38,8 @@ features = None
 #modelLocation = '_Drop0.5_Hidden105_Epoch50_Learning0.001_Size:200_Losscategorical_crossentropy'
 
 modelSelected = 'RNN'
-modelLocation = '_RNN_Hidden2_Epoch1000_Learning0.001_Size:50_LossCategoricalCrossentropy'
+#modelLocation = '_RNN_Hidden2_Epoch1000_Learning0.001_Size:50_LossCategoricalCrossentropy'
+modelLocation = '_RNN_Hidden2_StepSize2_Epoch100_Learning0.001_Size:50_LossCategoricalCrossentropy'
 
 
 size = 50
