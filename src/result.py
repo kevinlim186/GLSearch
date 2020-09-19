@@ -170,12 +170,20 @@ class Result():
 
     def calculatePerformance(self):
         self._preCalculation()
-        self._calculateBestSolvers()
-        self.calculatedPerformance =  self.processedPerformance.groupby(['function', 'dimension', 'algo']).agg({'performance':['mean', 'min', 'max', 'std'], 'vbs':['mean'], 'sbs':['mean']}).reset_index()
+        self.classificationCost = self.processedPerformance.pivot_table(index=['function', 'dimension','instance', 'trial'], columns = 'algo', values='performance').reset_index().sort_values(['function', 'dimension','instance', 'trial'], ascending=True)
 
-        return self.calculatedPerformance
+        #VBS should be based on the base runners
+        baseRunners = ['Local:Test', 'Local:bfgs0.1-LHS1000', 'Local:bfgs0.1-LHS2000', 'Local:bfgs0.1-LHS5000', 'Local:bfgs0.3-LHS1000', 'Local:bfgs0.3-LHS2000', 'Local:bfgs0.3-LHS5000', 'Local:nedler-LHS1000', 'Local:nedler-LHS2000', 'Local:nedler-LHS5000']
+        self.classificationCost['vbs'] = self.classificationCost[baseRunners].min(axis=1)
 
-    def createTrainSet(self, dataset, algorithm=None, reset=False, interface=None):
+        sbs = self.classificationCost[baseRunners].mean(axis=0).idxmin(axis=0)
+        self.classificationCost['sbs_'+str(sbs)]  = self.classificationCost[sbs]
+        self.classificationCost['VBS-SBS-Gap'] = self.classificationCost['sbs_'+str(sbs)] - self.classificationCost['vbs']
+
+
+        return self.classificationCost
+
+    def createTrainSet(self, dataset, algorithm=None, reset=False, interface=None, RNN=None):
         if reset:
             self._reset()
         if not self.processedPerf and not self.processedSolvers:
@@ -230,12 +238,37 @@ class Result():
         else:
             training = self.trainingData[(self.trainingData['algo']==algorithm)]
 
-
-        Xtrain = training[inputeInterface].values
-        ycost = training[y_labels].values
-
+        if RNN is not None:
+            Xtrain = training[inputeInterface].values
+            ycost = training[y_labels].values
+        else:
+            Xtrain, ycost = self.createRNNSet(RNN, training, inputeInterface)
+        
         return Xtrain, ycost
 
+
+    def createRNNSet(self, n_step, dataFrame, inputeInterface):
+        x_arr = []
+        y_arr = []
+        functions = dataFrame['function'].unique()
+        instance = dataFrame['instance'].unique()
+        dimension = dataFrame['dimension'].unique()
+        trial = dataFrame['trial'].unique()
+
+        #convert to one hot encoded data
+        ycost = np.zeros_like(dataFrame[y_labels].values)
+        ycost[np.arange(len(dataFrame[y_labels].values)), dataFrame[y_labels].values(1)] = 1
+
+        #we need to filter the running window based on Function, Dimension, Instance and Trial
+        for f in functions:
+            for d in dimension:
+                for i in instance:
+                    for t in trial:
+                        subset =  dataFrame[(dataFrame['function']==f) & (dataFrame['dimension']==d) & (dataFrame['instance']==i) & (dataFrame['trial']==t)]
+                        for i in range(len(subset)-n_step+1):
+                            x_arr.append(subset[inputeInterface].iloc[i:i+n_step])
+                            y_arr.append(ycost[i+n_step])
+        return np.array(x_arr), np.array(y_arr)
 
     def _reset(self):
         self.processedSolvers = False
