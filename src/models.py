@@ -117,7 +117,7 @@ class Models():
     def trainLSTM(self, stepSize ,size):
         model_name = '_RNN_Hidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss'+'CategoricalCrossentropy'
 
-        numFeatures = len(self.features[0])
+        numFeatures = len(self.features[0][0])
         #self.oneHotEncode()
         #X_, Y_ = self.createTestSet(2, self.features, self.y_class)
         model = Sequential()
