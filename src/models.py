@@ -120,7 +120,7 @@ class Models():
         #self.oneHotEncode()
         #X_, Y_ = self.createTestSet(2, self.features, self.y_class)
         model = Sequential()
-        model.add(LSTM(52, activation='relu', input_shape=(2, 52),return_sequences=True))
+        model.add(LSTM(52, activation='relu', input_shape=(stepSize,len(self.features[0])),return_sequences=True))
         model.add(LSTM(52, activation='relu'))
         model.add(Dense(4, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.001)
