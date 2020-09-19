@@ -257,7 +257,7 @@ class Result():
 
         #convert to one hot encoded data
         ycost = np.zeros_like(dataFrame[y_labels].values)
-        ycost[np.arange(len(dataFrame[y_labels].values)), dataFrame[y_labels].values(1)] = 1
+        ycost[np.arange(len(dataFrame[y_labels].values)), dataFrame[y_labels].values.argmin(1)] = 1
 
         #we need to filter the running window based on Function, Dimension, Instance and Trial
         for f in functions:
