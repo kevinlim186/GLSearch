@@ -266,7 +266,7 @@ class Result():
                     for t in trial:
                         subset =  dataFrame[(dataFrame['function']==f) & (dataFrame['dimension']==d) & (dataFrame['instance']==i) & (dataFrame['trial']==t)]
                         for i in range(len(subset)-n_step+1):
-                            x_arr.append(subset[inputeInterface].iloc[i:i+n_step])
+                            x_arr.append(subset[inputeInterface].iloc[i:i+n_step].values)
                             y_arr.append(ycost[i+n_step])
         return np.array(x_arr), np.array(y_arr)
 
