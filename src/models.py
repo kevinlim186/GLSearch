@@ -117,11 +117,12 @@ class Models():
     def trainLSTM(self, stepSize ,size):
         model_name = '_RNN_Hidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss'+'CategoricalCrossentropy'
 
+        numFeatures = len(self.features[0])
         #self.oneHotEncode()
         #X_, Y_ = self.createTestSet(2, self.features, self.y_class)
         model = Sequential()
-        model.add(LSTM(52, activation='relu', input_shape=(stepSize,len(self.features[0])),return_sequences=True))
-        model.add(LSTM(52, activation='relu'))
+        model.add(LSTM(numFeatures, activation='relu', input_shape=(stepSize,numFeatures),return_sequences=True))
+        model.add(LSTM(numFeatures, activation='relu'))
         model.add(Dense(4, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.001)
         model.compile(optimizer=opt, loss='CategoricalCrossentropy')
