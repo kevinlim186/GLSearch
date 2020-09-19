@@ -125,5 +125,5 @@ class Models():
         model.add(Dense(4, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.001)
         model.compile(optimizer=opt, loss='CategoricalCrossentropy')
-        model.fit(X_, Y_, epochs=1000)
+        model.fit(self.features, self.y_cost, epochs=1000)
         model.save('./models/'+model_name)
