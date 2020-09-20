@@ -386,6 +386,7 @@ class Problem():
 
         self.ela_feat =  {**ela_distr, **ela_level, **ela_meta, **basic, **disp, **limo, **nbc, **pca, **ic }
 
+        self.ela_feat['budget.used'] = self.spentBudget / self.totalBudget
 
         self.elaFetures = self.elaFetures.append(self.ela_feat, ignore_index=True)
         
@@ -548,7 +549,9 @@ class Problem():
                         ela1 = self.elaFetures[x_labels].iloc[-1,]
                         ela2 = self.elaFetures[x_labels].iloc[-2,]
                         ela = np.array([ela1,ela2])
-                        index = ASP.predict(ela.reshape(1,2,len(x_labels))).argmax()
+                        print(ela1)
+                        print(ela2)
+                        index = ASP.predict(ela.reshape(1,2,52)).argmax()
 
                 else:
                     
