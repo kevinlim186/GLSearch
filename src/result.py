@@ -170,7 +170,14 @@ class Result():
 
     def calculatePerformance(self):
         self._preCalculation()
-        self.classificationCost = self.processedPerformance.pivot_table(index=['function', 'dimension','instance', 'trial'], columns = 'algo', values='performance').reset_index().sort_values(['function', 'dimension','instance', 'trial'], ascending=True)
+        #remove the algorithm selected to have a meaningful performance aggregation
+        self.processedPerformance['_algo'] =  self.processedPerformance['algo'].replace(to_replace=r'^Local:nedler[^-]', value='', regex=True)
+        self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^Local:Base[^-]', value='', regex=True)
+        self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^Local:bfgs0.1[^-]', value='', regex=True)
+        self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^Local:bfgs0.3[^-]', value='', regex=True)
+        self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^ample[0-9]*[^-]', value='', regex=True)
+
+        self.classificationCost = self.processedPerformance.pivot_table(index=['function', 'dimension','instance', 'trial'], columns = '_algo', values='performance').reset_index().sort_values(['function', 'dimension','instance', 'trial'], ascending=True)
 
         #VBS should be based on the base runners
         baseRunners = ['Local:Test', 'Local:bfgs0.1-LHS1000', 'Local:bfgs0.1-LHS2000', 'Local:bfgs0.1-LHS5000', 'Local:bfgs0.3-LHS1000', 'Local:bfgs0.3-LHS2000', 'Local:bfgs0.3-LHS5000', 'Local:nedler-LHS1000', 'Local:nedler-LHS2000', 'Local:nedler-LHS5000']

@@ -524,7 +524,7 @@ class Problem():
             x_labels = self.x_labels 
 
         #default name is the base. If the algorithm selects the local search, the name will be overridden.
-        name = self.getProblemName(self.function, self.instance, self.spentBudget, ':Base'+ASPName,testRun)
+        name = self.getProblemName(self.function, self.instance, self.spentBudget, ':Base_sample'+str(size)+'_'+ASPName,testRun)
                 
 
         #Run model ES algorithm
