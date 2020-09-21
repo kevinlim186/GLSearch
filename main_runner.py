@@ -12,7 +12,7 @@ import numpy as np
 #features = np.load('./models/randomForest_Selection_50feat.npy')
 #features = np.load('./models/randomForest_Selection_100feat.npy')
 #features = np.load('./models/randomForest_Selection_200feat.npy')
-features = ['ela_meta.lin_simple.adj_r2', 'nbc.nb_fitness.cor', 'ela_meta.lin_simple.intercept', 'dim', 'ela_meta.quad_w_interact.adj_r2', 'nbc.nn_nb.sd_ratio', 'ela_meta.lin_w_interact.adj_r2', 'ela_meta.quad_simple.adj_r2', 'budget.used']
+features = ['ela_meta.lin_simple.adj_r2', 'nbc.nb_fitness.cor', 'ela_meta.lin_simple.intercept', 'basic.dim', 'ela_meta.quad_w_interact.adj_r2', 'nbc.nn_nb.sd_ratio', 'ela_meta.lin_w_interact.adj_r2', 'ela_meta.quad_simple.adj_r2', 'budget.used']
 
 modelSelected = 'forest'
 modelLocation = 'randomForest_noSelection50'
