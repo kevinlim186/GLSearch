@@ -8,13 +8,14 @@ import pickle
 import numpy as np
 
 
-features = None
+#features = None
 #features = np.load('./models/randomForest_Selection_50feat.npy')
 #features = np.load('./models/randomForest_Selection_100feat.npy')
 #features = np.load('./models/randomForest_Selection_200feat.npy')
+features = ['ela_meta.lin_simple.adj_r2', 'nbc.nb_fitness.cor', 'ela_meta.lin_simple.intercept', 'dim', 'ela_meta.quad_w_interact.adj_r2', 'nbc.nn_nb.sd_ratio', 'ela_meta.lin_w_interact.adj_r2', 'ela_meta.quad_simple.adj_r2', 'budget.used']
 
-#modelSelected = 'forest'
-#modelLocation = 'randomForest_noSelection50'
+modelSelected = 'forest'
+modelLocation = 'randomForest_noSelection50'
 #modelLocation = 'randomForest_noSelection100'
 #modelLocation = 'randomForest_noSelection200'
 
@@ -37,9 +38,9 @@ features = None
 #modelLocation = '_Drop0.5_Hidden105_Epoch50_Learning0.001_Size:100_Losscategorical_crossentropy'
 #modelLocation = '_Drop0.5_Hidden105_Epoch50_Learning0.001_Size:200_Losscategorical_crossentropy'
 
-modelSelected = 'RNN'
+#modelSelected = 'RNN'
 #modelLocation = '_RNN_Hidden2_Epoch1000_Learning0.001_Size:50_LossCategoricalCrossentropy'
-modelLocation = '_RNN_Hidden2_StepSize2_Epoch1000_Learning0.001_Size:50_LossCategoricalCrossentropy'
+#modelLocation = '_RNN_Hidden2_StepSize2_Epoch1000_Learning0.001_Size:50_LossCategoricalCrossentropy'
 
 
 size = 50

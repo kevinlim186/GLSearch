@@ -13,7 +13,7 @@ dataset = '50'
 
 #Interface
 interface = None
-#interface = ['ela meta.lin simple.adj r2', 'nbc.nb fitness.cor', 'ela meta.lin simple.intercept', 'dim', 'ela meta.quad w interact.adj r2', 'nbc.nn nb.sd ratio', 'ela meta.lin w interact.adj r2', 'ela meta.quad simple.adj r2', 'budget.used']
+#interface = ['ela_meta.lin_simple.adj_r2', 'nbc.nb_fitness.cor', 'ela_meta.lin_simple.intercept', 'dim', 'ela_meta.quad_w_interact.adj_r2', 'nbc.nn_nb.sd_ratio', 'ela_meta.lin_w_interact.adj_r2', 'ela_meta.quad_simple.adj_r2', 'budget.used']
 
 #define the model
 #modelSelected='ANNCross0.75'
