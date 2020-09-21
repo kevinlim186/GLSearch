@@ -524,7 +524,7 @@ class Problem():
             x_labels = self.x_labels 
 
         #default name is the base. If the algorithm selects the local search, the name will be overridden.
-        name = self.getProblemName(self.function, self.instance, self.spentBudget, ':Base_sample'+str(size)+'_'+ASPName,testRun)
+        name = self.getProblemName(self.function, self.instance, self.spentBudget, ':Base'+ASPName,testRun)
                 
 
         #Run model ES algorithm
@@ -565,19 +565,19 @@ class Problem():
                     x0 = np.array(self.optimizer.best_individual.genotype.flatten())
 
                     if (index == 3):
-                        name = self.getProblemName(self.function, self.instance, self.spentBudget,':nedler_sample'+str(size)+'_'+ASPName,testRun)
+                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler'+ASPName,testRun)
                         self.simplexAlgorithm(x0)
 
                     #Check if BFGS 0.1
                     if (index==1):
-                        name = self.getProblemName(self.function, self.instance, self.spentBudget,':bfgs0.1_sample'+str(size)+'_'+ASPName,testRun)
+                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1'+ASPName,testRun)
                         #self.saveElaFeat(name)
                         self.bfgsAlgorithm(x0, 0.1)
 
 
                      #Check if BFGS 0.3
                     if (index==2):
-                        name = self.getProblemName(self.function, self.instance, self.spentBudget,':bfgs0.3_sample'+str(size)+'_'+ASPName,testRun)
+                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3'+ASPName,testRun)
                         #self.saveElaFeat(name)
                         self.bfgsAlgorithm(x0, 0.3)
 
