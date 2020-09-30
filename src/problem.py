@@ -168,21 +168,14 @@ class Problem():
                 self.calculatePerformance(name)
                 self.loadState()
                 
-                name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1',testRun)
+                name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs',testRun)
 
-                self.bfgsAlgorithm(x0, 0.1)
+                self.bfgsAlgorithm(x0)
 
                 self.calculatePerformance(name)
 
                 self.loadState()
 
-                #Gradient Descent Method 0.3
-                name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3',testRun)
-                self.bfgsAlgorithm(x0, 0.3)
-
-                self.calculatePerformance(name)
-                    
-                self.loadState()
                 
             
             if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue and not targetReachedEA:
@@ -229,29 +222,16 @@ class Problem():
             self.currentResults.to_csv('temp/'+name+'.csv',index=False)
             self.performance.importHistoricalPath('temp/'+name+'.csv')
             
-        elif self.localSearch=='bfgs0.1':
+        elif self.localSearch=='bfgs':
             for i in [1000,2000,5000]:
-                print('Running test using local search bfgs 0.1 on function '+str(self.function) +' with instance '+str(self.instance) + ' dimension '+str(self.dimension) + ' LHS Run '+str(i))
+                print('Running test using local search bfgs on function '+str(self.function) +' with instance '+str(self.instance) + ' dimension '+str(self.dimension) + ' LHS Run '+str(i))
                 x0 = self.generateLHSBestIndividuals(i)
-                self.bfgsAlgorithm(x0, 0.1)
-                name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1_LHS'+str(i)+'_',testRun)
+                self.bfgsAlgorithm(x0)
+                name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs_LHS'+str(i)+'_',testRun)
                 _ = self.calculatePerformance(name)
                 self.currentResults['name'] = name
                 self.currentResults.to_csv('temp/'+name+'.csv',index=False)
                 self.performance.importHistoricalPath('temp/'+name+'.csv')
-
-
-        elif self.localSearch=='bfgs0.3':
-            for i in [1000,2000,5000]:
-                print('Running test using local search bfgs 0.3 on function '+str(self.function) +' with instance '+str(self.instance) + ' dimension '+str(self.dimension)+ ' LHS Run '+str(i))
-                x0 = self.generateLHSBestIndividuals(i)
-                self.bfgsAlgorithm(x0, 0.3)
-                name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3_LHS'+str(i)+'_',testRun)
-                _ = self.calculatePerformance(name)
-                self.currentResults['name'] = name
-                self.currentResults.to_csv('temp/'+name+'.csv',index=False)
-                self.performance.importHistoricalPath('temp/'+name+'.csv')
-
 
         
         elif self.localSearch=='nedler':
@@ -318,9 +298,9 @@ class Problem():
         opt={'maxfev': maxiter, 'disp': False, 'return_all': False}
         minimize(self.problemInstance, x0=population, method='nelder-mead', options=opt)
 
-    def bfgsAlgorithm(self, population, stepSize):
+    def bfgsAlgorithm(self, population):
         #x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
-        opt={'maxiter' : self.remainingBudget, 'disp': False, 'return_all': False, 'eps': stepSize}
+        opt={'maxiter' : self.remainingBudget, 'disp': False, 'return_all': False}
         
         minimize(self.problemInstance,tol=1e-8,  x0=population, method='BFGS', options=opt)
     
@@ -564,22 +544,16 @@ class Problem():
                 if (index > 0):
                     x0 = np.array(self.optimizer.best_individual.genotype.flatten())
 
-                    if (index == 3):
+                     #Check if BFGS
+                    if (index==1):
+                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs'+ASPName,testRun)
+                        #self.saveElaFeat(name)
+                        self.bfgsAlgorithm(x0)
+
+                    if (index == 2):
                         name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler'+ASPName,testRun)
                         self.simplexAlgorithm(x0)
 
-                    #Check if BFGS 0.1
-                    if (index==1):
-                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.1'+ASPName,testRun)
-                        #self.saveElaFeat(name)
-                        self.bfgsAlgorithm(x0, 0.1)
-
-
-                     #Check if BFGS 0.3
-                    if (index==2):
-                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs0.3'+ASPName,testRun)
-                        #self.saveElaFeat(name)
-                        self.bfgsAlgorithm(x0, 0.3)
 
                     if not restart:
                         targetReached = True
