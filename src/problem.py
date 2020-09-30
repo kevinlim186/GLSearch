@@ -101,6 +101,7 @@ class Problem():
             def functionInstance(x):
                 self.remainingBudget = self.remainingBudget - 1
                 self.spentBudget = self.spentBudget + 1
+
                 result = function(x)
     
                 data = {}
@@ -308,7 +309,7 @@ class Problem():
         return representation
 
     def getCheckPoints(self):
-        checkpoints = range(1, self.totalBudget + self.checkPoint , self.checkPoint)
+        checkpoints = range(self.checkPoint, self.totalBudget + self.checkPoint , self.checkPoint)
         return checkpoints
 
     def simplexAlgorithm(self, population):
@@ -344,10 +345,9 @@ class Problem():
         except:
             ela_distr = {}
         
-        try:
-            ela_level = calculate_feature_set(featureObj, 'ela_level')
-        except:
-            ela_level = {}
+
+        ela_level = calculate_feature_set(featureObj, 'ela_level')
+
 
         try:
             ela_meta = calculate_feature_set(featureObj, 'ela_meta')
@@ -374,7 +374,7 @@ class Problem():
         except:
             nbc = {}
         
-        try:
+        try: 
             pca = calculate_feature_set(featureObj, 'pca')
         except:
             pca ={}
