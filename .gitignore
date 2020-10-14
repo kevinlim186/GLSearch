@@ -12,3 +12,4 @@ perf/*
 models/*
 test.py
 perf.csv
+Exploration.ipynb

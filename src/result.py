@@ -13,7 +13,6 @@ class Result():
         self.elaFeatures = pd.DataFrame(columns=x_labels)
         self.processedFeatures = pd.DataFrame()
         self.trainingData = pd.DataFrame()
-        self.SBS = ''
         self.classificationCost = pd.DataFrame()
         self.processedPerf = False
         self.processedSolvers = False
@@ -42,7 +41,7 @@ class Result():
 
         self.processedFeatures['dim'] = self.processedFeatures['name'].apply(lambda x: x.split("_")[-1])
         self.processedFeatures = self.processedFeatures[self.processedFeatures['dim']==dataset].drop(columns=['dim'])
-        self.processedFeatures['name'] = self.processedFeatures['name'].apply(lambda x: '_'.join(x.split('_')[:-3]))
+        #self.processedFeatures['name'] = self.processedFeatures['name'].apply(lambda x: '_'.join(x.split('_')[:-3]))
         
         #split the name identifier to extract the function, instance, algorithm used and dimensions
         self.processedFeatures['function'] =  self.processedFeatures['name'].str.extract('(_F[0-9]+)')
@@ -62,12 +61,11 @@ class Result():
         self.processedFeatures['budget'] = self.processedFeatures['name'].str.extract('(_B[0-9]+)')
         self.processedFeatures['budget'] = self.processedFeatures['budget'].apply(lambda x: x.replace('_B',''))
 
-        self.processedFeatures['algo'] = self.processedFeatures['name'].apply(lambda x: x[x.find('_Local')+1:x.find('_T')].replace('_',''))
 
         self.processedFeatures[['function','instance', 'dimension', 'trial', 'budget']]= self.processedFeatures[['function','instance', 'dimension', 'trial', 'budget']].astype('int64')
         
         #remove duplicates because the performance table was pivoted 
-        self.processedFeatures = self.processedFeatures.groupby(['function','instance', 'dimension', 'trial', 'budget']).mean().reset_index()
+        #self.processedFeatures = self.processedFeatures.groupby(['function','instance', 'dimension', 'trial', 'budget']).mean().reset_index()
 
 
         self.processedELA = True
@@ -115,55 +113,68 @@ class Result():
 
 
     def _calculateBestSolvers(self):
-        #We need to pivot first and fill the missing values otherwise algorithm that finished first will be underrepresented.
+        #Ensure no duplicate entries. Mean is the default aggregation.
         self.classificationCost = self.processedPerformance.pivot_table(index=['function', 'dimension','instance', 'trial', 'budget'], columns = 'algo', values='performance').reset_index().sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
+
+        
+        #get best performance for the base runner 
+        baseRunner = self.classificationCost.groupby(['function', 'dimension','instance', 'trial'])['Local:Base'].min().reset_index()
+        
+        #replace base runner performance with its best performance
+        self.classificationCost = self.classificationCost.drop(columns=['Local:Base'])
+        self.classificationCost = self.classificationCost.merge(baseRunner, on=['function', 'dimension','instance', 'trial'])
         
         #rename the to performance column
-        self.classificationCost = self.classificationCost.rename(columns={'Local:Base':'Local:Base_perf_ref','Local:bfgs0.1':'Local:bfgs0.1_perf', 'Local:bfgs0.3':'Local:bfgs0.3_perf', 'Local:nedler':'Local:nedler_perf' })
+        self.classificationCost = self.classificationCost.rename(columns={'Local:Base':'Local:Base_perf_ref','Local:bfgs':'Local:bfgs_perf', 'Local:nedler':'Local:nedler_perf' })
 
         #The base runner performance should be the correct choice till the optimal value for the local search is reached.
         self.classificationCost['Local:Base_perf'] = self.classificationCost['Local:Base_perf_ref']
-        self.classificationCost['Local:Base_perf_ref'] = self.classificationCost['Local:Base_perf_ref'].bfill()
-        bestPath = self.classificationCost[['Local:Base_perf_ref', 'Local:bfgs0.1_perf','Local:bfgs0.3_perf', 'Local:nedler_perf','function', 'dimension','instance', 'trial']].groupby(['function', 'dimension','instance', 'trial']).min().min(axis=1).reset_index()
+        bestPath = self.classificationCost[['Local:Base_perf_ref', 'Local:bfgs_perf', 'Local:nedler_perf','function', 'dimension','instance', 'trial']].groupby(['function', 'dimension','instance', 'trial']).min().min(axis=1).reset_index()
         
         self.classificationCost = self.classificationCost.merge(bestPath, on= ['function','instance','dimension','trial'], how='left')
         self.classificationCost.rename(columns={0:'bestPath'}, inplace=True)
         
-        #fill values based on performance of the runners
-        self.classificationCost['Local:bfgs0.1_perf'] = self.classificationCost['Local:bfgs0.1_perf'].ffill()
-        self.classificationCost['Local:bfgs0.3_perf'] = self.classificationCost['Local:bfgs0.3_perf'].ffill()
-        self.classificationCost['Local:nedler_perf' ] = self.classificationCost['Local:nedler_perf' ].ffill()
         
-        self.classificationCost['best_choice'] = self.classificationCost[['Local:Base_perf_ref', 'Local:bfgs0.1_perf','Local:bfgs0.3_perf',  'Local:nedler_perf']].min(axis=1)
+        self.classificationCost['best_choice'] = self.classificationCost[['Local:Base_perf_ref', 'Local:bfgs_perf',  'Local:nedler_perf']].min(axis=1)
         
-        #this will set the score of the base runner to the best score until that point is reached. This should only be applied when the base runner has a null value performance.
+        #this will set the score of the base runner to the best score until that point is reached.
+        self.classificationCost['indicator'] =  self.classificationCost.apply(lambda x: True if x['best_choice']==x['bestPath'] else False, axis=1)
+
+        f = None
+        d = None
+        i = None
+        t = None
+        state = None
+        for index, row in self.classificationCost.iterrows():
+            if row['function'] != f or row['dimension'] != d or row['instance'] != i or row['trial'] != t:
+                f = row['function']
+                d = row['dimension']
+                i = row['instance']
+                t = row['trial']
+                state = row['indicator']
+            elif row['indicator']:
+                state = True
+            
+            self.classificationCost.loc[index,'indicator'] = state
+
+
         def getCorrectBasePerformance(x):
-            if x['Local:Base_perf'] is not None:
-                if  x['bestPath']==x['best_choice']:
-                    return x['Local:Base_perf_ref']
-                else:
-                    return x['bestPath']
+            if  x['indicator']:
+                return x['Local:Base_perf_ref']
             else:
-                return x['Local:Base_perf']
+                return x['bestPath']
+
 
         self.classificationCost['Local:Base_perf'] = self.classificationCost.apply(getCorrectBasePerformance, axis=1)
 
 
         #calculate VBS
-        self.classificationCost['vbs'] = self.classificationCost[['Local:Base_perf', 'Local:bfgs0.1_perf','Local:bfgs0.3_perf',  'Local:nedler_perf']].min(axis=1)
+        self.classificationCost['vbs'] = self.classificationCost[['Local:Base_perf', 'Local:bfgs_perf',  'Local:nedler_perf']].min(axis=1)
 
         #calculate cost for each algorithm
         self.classificationCost['Local:Base'] = self.classificationCost['Local:Base_perf'] - self.classificationCost['vbs']
-        self.classificationCost['Local:bfgs0.1'] = self.classificationCost['Local:bfgs0.1_perf'] - self.classificationCost['vbs']
-        self.classificationCost['Local:bfgs0.3'] = self.classificationCost['Local:bfgs0.3_perf'] - self.classificationCost['vbs']
+        self.classificationCost['Local:bfgs'] = self.classificationCost['Local:bfgs_perf'] - self.classificationCost['vbs']
         self.classificationCost['Local:nedler'] = self.classificationCost['Local:nedler_perf' ] - self.classificationCost['vbs']
-
-        #calculate SBS and SBS-VBS-Gap
-        indexSBS = np.array([self.classificationCost['Local:Base_perf'].mean(), self.classificationCost['Local:bfgs0.1_perf'].mean(), self.classificationCost['Local:bfgs0.3_perf'].mean(), self.classificationCost['Local:nedler_perf'].mean()]).argmin()
-        sbsAlgo = y_labels[indexSBS]
-        
-        self.classificationCost['sbs_'+sbsAlgo]  = self.classificationCost[sbsAlgo+'_perf']
-        self.classificationCost['VBS-SBS-Gap'] = self.classificationCost['sbs_'+sbsAlgo] - self.classificationCost['vbs']
 
         self.processedSolvers = True
 
@@ -173,22 +184,43 @@ class Result():
         #remove the algorithm selected to have a meaningful performance aggregation
         self.processedPerformance['_algo'] =  self.processedPerformance['algo'].replace(to_replace=r'^Local:nedler[^-]', value='', regex=True)
         self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^Local:Base[^-]', value='', regex=True)
-        self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^Local:bfgs0.1[^-]', value='', regex=True)
-        self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^Local:bfgs0.3[^-]', value='', regex=True)
+        self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^Local:bfgs[^-]', value='', regex=True)
         self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^ample[0-9]*[^-]', value='', regex=True)
 
-        self.classificationCost = self.processedPerformance.pivot_table(index=['function', 'dimension','instance', 'trial'], columns = '_algo', values='performance').reset_index().sort_values(['function', 'dimension','instance', 'trial'], ascending=True)
 
-        #VBS should be based on the base runners
-        baseRunners = ['Local:Test', 'Local:bfgs0.1-LHS1000', 'Local:bfgs0.1-LHS2000', 'Local:bfgs0.1-LHS5000', 'Local:bfgs0.3-LHS1000', 'Local:bfgs0.3-LHS2000', 'Local:bfgs0.3-LHS5000', 'Local:nedler-LHS1000', 'Local:nedler-LHS2000', 'Local:nedler-LHS5000']
-        self.classificationCost['vbs'] = self.classificationCost[baseRunners].min(axis=1)
-
-        sbs = self.classificationCost[baseRunners].mean(axis=0).idxmin(axis=0)
-        self.classificationCost['sbs_'+str(sbs)]  = self.classificationCost[sbs]
-        self.classificationCost['VBS-SBS-Gap'] = self.classificationCost['sbs_'+str(sbs)] - self.classificationCost['vbs']
+        #first sort the function 
+        self.processedPerformance = self.processedPerformance.sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
+        base = self.processedPerformance[self.processedPerformance['algo']=='Local:Base'].groupby(['function', 'instance', 'dimension','trial'])['performance'].min().reset_index()
+        base['algo'] = 'Base'
+        local = self.processedPerformance[self.processedPerformance['algo'].isin(['Local:bfgs', 'Local:nedler'])].groupby(['function', 'instance', 'dimension','trial','algo'])['performance'].mean().reset_index()
 
 
-        return self.classificationCost
+        #SBS is the lowest mean score of the each algorithm performance
+        sbsRunner = pd.concat([local,base]).groupby('algo')['performance'].mean().idxmin()
+        sbsPerformance = pd.concat([local,base]).pivot_table(index=['function', 'dimension','instance', 'trial'], columns = 'algo', values='performance', aggfunc='mean').reset_index()
+
+
+        #Dealing with null values in cases when the base run reached the optimal value before the checkpoint
+        sbsPerformance[sbsRunner] =  sbsPerformance[sbsRunner].fillna(sbsPerformance['Base'])
+ 
+        #just keep the SBS runner
+        sbsPerformance = sbsPerformance[['function', 'dimension','instance', 'trial', sbsRunner]]
+        sbsPerformance = sbsPerformance.rename(columns={sbsRunner:'performance'})
+        runnerName = 'SBS_'+sbsRunner
+        sbsPerformance['algo'] = runnerName
+
+        #VBS-- Get the lowest score
+        local = self.processedPerformance[self.processedPerformance['algo'].isin(['Local:bfgs', 'Local:nedler'])].groupby(['function', 'instance', 'dimension','trial','algo'])['performance'].min().reset_index()
+        vbsPerformance = pd.concat([local,base]).groupby(['function', 'instance', 'dimension','trial'])['performance'].min().reset_index()
+        vbsPerformance['algo'] =  'VBS'
+        
+
+        #get the individual model performance
+        modelPerformance = self.processedPerformance[~self.processedPerformance['algo'].isin(['Local:Base', 'Local:nedler', 'Local:bfgs'])][['function', 'instance', 'dimension','trial','algo', 'performance']]
+        
+        allPerformance = pd.concat([sbsPerformance,vbsPerformance,modelPerformance]).pivot_table(index=['function', 'dimension','instance', 'trial'], columns = 'algo', values='performance').reset_index()
+
+        return allPerformance
 
     def createTrainSet(self, dataset, algorithm=None, reset=False, interface=None, RNN=None):
         if reset:
@@ -213,9 +245,6 @@ class Result():
         
         #add the percentage of budget used
         self.trainingData['budget.used'] = self.trainingData['budget'] / (10000*self.trainingData['dimension'])
- 
-        #Remove first generation
-        self.trainingData = self.trainingData[self.trainingData['budget'] >self.trainingData['dimension']* 500 + 400]
 
         #some ela features are infinity. They are replaced by the average value
         self.trainingData.replace([np.inf, -np.inf], np.nan,  inplace=True)
@@ -249,12 +278,12 @@ class Result():
             Xtrain = training[inputeInterface].values
             ycost = training[y_labels].values
         else:
-            Xtrain, ycost = self.createRNNSet(RNN, training, inputeInterface)
+            Xtrain, ycost = self._createRNNSet(RNN, training, inputeInterface)
         
         return Xtrain, ycost
 
 
-    def createRNNSet(self, n_step, dataFrame, inputeInterface):
+    def _createRNNSet(self, n_step, dataFrame, inputeInterface):
 
         #make sure that the dataframe is sorted
         dataFrame = dataFrame.sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
@@ -272,9 +301,12 @@ class Result():
                 for i in instance:
                     for t in trial:
                         subset =  dataFrame[(dataFrame['function']==f) & (dataFrame['dimension']==d) & (dataFrame['instance']==i) & (dataFrame['trial']==t)]
-                        for s in range(len(subset)-n_step+1):
-                            x_arr.append(subset[inputeInterface].iloc[s:s+n_step].values)
-                            y_arr.append(subset[y_labels].iloc[s+n_step-1].values)
+                        #make sure there's enough time steps otherwise exclude it.
+                        if len(subset)-n_step >= 0:
+                            #The last entry does not have an ELA calculation. As a result, it is automatically excluded when merged with the features.
+                            for s in range(len(subset)-n_step+1):
+                                x_arr.append(subset[inputeInterface].iloc[s:s+n_step].values)
+                                y_arr.append(subset[y_labels].iloc[s+n_step-1].values)
                             
         #convert to one hot encoded data
         ycost = np.zeros_like(np.array(y_arr))
