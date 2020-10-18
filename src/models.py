@@ -123,7 +123,7 @@ class Models():
         model = Sequential()
         model.add(LSTM(numFeatures, activation='relu', input_shape=(stepSize,numFeatures),return_sequences=True))
         model.add(LSTM(numFeatures, activation='relu'))
-        model.add(Dense(4, activation='softmax'))
+        model.add(Dense(3, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.001)
         model.compile(optimizer=opt, loss='CategoricalCrossentropy')
         model.fit(self.features, self.y_cost, epochs=1000)
