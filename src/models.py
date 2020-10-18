@@ -114,8 +114,17 @@ class Models():
             y_arr.append(y_test[i+n_step])
         return np.array(x_arr), np.array(y_arr)
 
-    def trainLSTM(self, stepSize ,size):
-        model_name = '_RNN_Hidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss'+'CategoricalCrossentropy'
+    def trainLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
+        self.inferClass()
+        if loss == 'WCategoricalCrossentropy':
+            lossFunc = self.weightedCategoricalCrossentropy
+            y_true = self.y_cost
+        else:
+            lossFunc = loss
+            self.oneHotEncode()
+            y_true = self.y_class
+
+        model_name = '_RNN_Hidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss_'+loss
 
         numFeatures = len(self.features[0][0])
         #self.oneHotEncode()
@@ -125,6 +134,6 @@ class Models():
         model.add(LSTM(numFeatures, activation='relu'))
         model.add(Dense(3, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.001)
-        model.compile(optimizer=opt, loss='CategoricalCrossentropy')
-        model.fit(self.features, self.y_cost, epochs=1000)
+        model.compile(optimizer=opt, loss=lossFunc)
+        model.fit(self.features, y_true, epochs=1000)
         model.save('./models/'+model_name)
