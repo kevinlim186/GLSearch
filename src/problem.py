@@ -495,7 +495,7 @@ class Problem():
 
     def runASPTest(self, testRun, ASP,ASPName, size, restart, features, stepSize):
         checkpoints = self.getCheckPoints()
-        currentLength = 1
+        currentLength = 0
         maxIndex = len(checkpoints)-1
         targetReached = False
         if features is not None:
@@ -514,11 +514,12 @@ class Problem():
             #If the optimal value is not reached then continue running
             self.optimizer.runOneGeneration()
             self.optimizer.recordStatistics()
-
+            
             #Check the check point then calculate the ELA
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
                 currentLength += 1
                 self.calculateELA(size=size, sanitize=True)
+                print(len(self.elaFetures))
                 
                 if "RNN" in ASPName:
                     print("calulating ELA ASP")
@@ -526,12 +527,12 @@ class Problem():
                     if len(self.elaFetures) < stepSize:
                         index = 0
                     else:  
-                        ela = [self.elaFetures[x_labels].iloc[-1,]]
+                        ela = np.array([self.elaFetures[x_labels].iloc[-1,].values])
         
                         #add additional step in the ela
                         for i in range(2, stepSize+1):   
-                            ela1 = self.elaFetures[x_labels].iloc[-i,]
-                            ela = np.concatenate(([ela],[ela1]),axis=0)
+                            ela1 = np.array([self.elaFetures[x_labels].iloc[-i,].values])
+                            ela = np.concatenate((ela,ela1),axis=0)
         
                         print(ela)
                         index = ASP.predict(ela.reshape(1, stepSize,len(x_labels))).argmax()

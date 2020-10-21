@@ -129,7 +129,7 @@ esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1]
 if (size is not None):
     for i in range(1,25):
         suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
-        suite.runTestModel(ASP=model, size=size,restart=False, features= features, ASPName=name, stepsize=stepsize)
+        suite.runTestModel(ASP=model, size=size,restart=False, features= features, ASPName=name, stepSize=stepsize)
         performance.saveToCSVPerformance('Test_'+name)
 
 else:
