@@ -523,7 +523,7 @@ class Problem():
                 if "RNN" in ASPName:
                     print("calulating ELA ASP")
                     #We need to have at least the number of step size
-                    if len(self.elaFetures) <= stepSize:
+                    if len(self.elaFetures) < stepSize:
                         index = 0
                     else:  
                         ela = [self.elaFetures[x_labels].iloc[-1,]]
