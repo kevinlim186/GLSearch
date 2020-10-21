@@ -8,14 +8,14 @@ import pickle
 import numpy as np
 
 
-#features = None
+features = None
 #features = np.load('./models/randomForest_Selection_50feat.npy')
 #features = np.load('./models/randomForest_Selection_100feat.npy')
 #features = np.load('./models/randomForest_Selection_200feat.npy')
-features = ['ela_meta.lin_simple.adj_r2', 'nbc.nb_fitness.cor', 'ela_meta.lin_simple.intercept', 'basic.dim', 'ela_meta.quad_w_interact.adj_r2', 'nbc.nn_nb.sd_ratio', 'ela_meta.lin_w_interact.adj_r2', 'ela_meta.quad_simple.adj_r2', 'budget.used']
+#features = ['ela_meta.lin_simple.adj_r2', 'nbc.nb_fitness.cor', 'ela_meta.lin_simple.intercept', 'basic.dim', 'ela_meta.quad_w_interact.adj_r2', 'nbc.nn_nb.sd_ratio', 'ela_meta.lin_w_interact.adj_r2', 'ela_meta.quad_simple.adj_r2', 'budget.used']
 
-modelSelected = 'forest'
-modelLocation = 'randomForest_noSelection50'
+#modelSelected = 'forest'
+#modelLocation = 'randomForest_noSelection50'
 #modelLocation = 'randomForest_noSelection100'
 #modelLocation = 'randomForest_noSelection200'
 
@@ -38,9 +38,29 @@ modelLocation = 'randomForest_noSelection50'
 #modelLocation = '_Drop0.5_Hidden105_Epoch50_Learning0.001_Size:100_Losscategorical_crossentropy'
 #modelLocation = '_Drop0.5_Hidden105_Epoch50_Learning0.001_Size:200_Losscategorical_crossentropy'
 
-#modelSelected = 'RNN'
-#modelLocation = '_RNN_Hidden2_Epoch1000_Learning0.001_Size:50_LossCategoricalCrossentropy'
-#modelLocation = '_RNN_Hidden2_StepSize2_Epoch1000_Learning0.001_Size:50_LossCategoricalCrossentropy'
+stepsize =1
+
+modelSelected = 'RNN'
+modelLocation = '_RNN_Hidden2_StepSize1_Epoch100_Learning0.001_Size:0_Loss_categorical_crossentropy'
+#modelLocation = '_RNN_Hidden2_StepSize1_Epoch100_Learning0.001_Size:1_Loss_categorical_crossentropy'
+#modelLocation = '_RNN_Hidden2_StepSize1_Epoch100_Learning0.001_Size:2_Loss_categorical_crossentropy'
+
+#modelLocation = '_RNN_Hidden2_StepSize2_Epoch100_Learning0.001_Size:0_Loss_categorical_crossentropy'
+#modelLocation = '_RNN_Hidden2_StepSize2_Epoch100_Learning0.001_Size:1_Loss_categorical_crossentropy'
+#modelLocation = '_RNN_Hidden2_StepSize2_Epoch100_Learning0.001_Size:2_Loss_categorical_crossentropy'
+
+
+
+#modelSelected = 'rnnExpected'
+#modelLocation = '_RNN_Hidden2_StepSize1_Epoch100_Learning0.001_Size:0_Loss_WCategoricalCrossentropy'
+#modelLocation = '_RNN_Hidden2_StepSize1_Epoch100_Learning0.001_Size:2_Loss_WCategoricalCrossentropy'
+#modelLocation = '_RNN_Hidden2_StepSize1_Epoch100_Learning0.001_Size:1_Loss_WCategoricalCrossentropy'
+
+#modelLocation = '_RNN_Hidden2_StepSize2_Epoch100_Learning0.001_Size:0_Loss_WCategoricalCrossentropy'
+#modelLocation = '_RNN_Hidden2_StepSize2_Epoch100_Learning0.001_Size:2_Loss_WCategoricalCrossentropy'
+#modelLocation = '_RNN_Hidden2_StepSize2_Epoch100_Learning0.001_Size:1_Loss_WCategoricalCrossentropy'
+
+
 
 
 size = 50
@@ -48,9 +68,9 @@ size = 50
 #size = 200
 
 
-if modelSelected =='annExpected':
+if modelSelected =='rnnExpected':
     def weightedCategoricalCrossentropy(self, y_true, y_pred):
-        return K.sum(y_true * y_pred, axis=-1,keepdims=True)
+         return K.mean(K.sum(y_true*y_pred, axis=1))
 
     model = tf.keras.models.load_model('./models/'+modelLocation, custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy})
 
@@ -108,8 +128,8 @@ esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1]
 
 if (size is not None):
     for i in range(1,25):
-        suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10,20], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
-        suite.runTestModel(ASP=model, size=size,restart=False, features= features, ASPName=name)
+        suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
+        suite.runTestModel(ASP=model, size=size,restart=False, features= features, ASPName=name, stepsize=stepsize)
         performance.saveToCSVPerformance('Test_'+name)
 
 else:

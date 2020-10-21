@@ -6,9 +6,13 @@ from src.result import Result
 from src.models import Models
 
 #dateset
-dataset = '50'
-#dataset = '100'
-#dataset = '200'
+#dataset = '0' #50D
+#dataset = '1' #100D
+dataset = '2' #200D
+#dataset = '3' #5G
+#dataset = '4' #50G
+#dataset = '5' #100G
+
 
 
 #Interface
@@ -23,7 +27,10 @@ interface = None
 #modelSelected='Forest'
 #modelSelected='ForestFeature'
 modelSelected = 'LSTM'
-stepSize =2
+stepSize =1
+
+#loss = 'categorical_crossentropy'
+loss = 'WCategoricalCrossentropy'
 
 print(dataset+ ' for ' +  modelSelected)
 
@@ -32,33 +39,19 @@ result = Result()
 
 
 #load performance
-perf1 = pd.read_csv("./perf/all_performance.csv")
+perf = pd.read_csv("./perf/Performance_Gathering.csv")
 
 #Load ELA Files
-if dataset == '50':
-    ela50 = pd.read_csv("./perf/train50.csv").rename(columns={'name':'oldname'})
-    ela50['name'] = ela50['oldname'] + '_ela_sample_50'
-    ela50 = ela50.iloc[:,23:]
-    traindata= ela50
-elif dataset == '100':
-    ela100 = pd.read_csv("./perf/train100.csv").rename(columns={'name':'oldname'})
-    ela100['name'] = ela100['oldname'] + '_ela_sample_100'
-    ela100 = ela100.iloc[:,23:]
-    traindata= ela100
-elif dataset == '200':
-    ela200 = pd.read_csv("./perf/train200.csv").rename(columns={'name':'oldname'})
-    ela200['name'] = ela200['oldname'] + '_ela_sample_200'
-    ela200 = ela200.iloc[:,23:]
-    traindata= ela200
+traindata= pd.read_csv("./perf/Performance_Gathering_ELA.csv")
 
-    
-result.addPerformance(perf1)
+result.addPerformance(perf)
 result.addELA(traindata)
+
 
 if modelSelected =='LSTM':
     Xtrain, Ytrain = result.createTrainSet(dataset=dataset, algorithm=None, reset=False, interface=interface, RNN=stepSize)
     model = Models(Xtrain,Ytrain,_shuffle=False)
-    model.trainLSTM(stepSize=stepSize, size=dataset)
+    model.trainLSTM(stepSize=stepSize, size=dataset, loss=loss)
 
 else:
     Xtrain, Ytrain = result.createTrainSet(dataset=dataset, algorithm=None, reset=False, interface=interface)

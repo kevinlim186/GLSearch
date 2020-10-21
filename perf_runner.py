@@ -6,23 +6,25 @@ import pandas as pd
 import math
 from numpy import log
 
-function = [1,2,3,4,5]
+#function = [1,2,3,4,5]
 #function = [6,7,8,9,10]
 #function = [11,12,13,14,15]
 #function = [16,17,18,19,20]
 #function = [21,22,23,24]
 
+function = [7]
 
-file= 'allocation_'+str(function[0])+'_'+str(function[-1])
+
+file= 'allocation_7'
 performance = Performance()
 
 esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1] 
 
 for i in function:
-    suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3,5,10], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
+    suite = Suites(instances=[1,2,3,4,5], baseBudget=10000, dimensions=[2,3,5,10], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
     suite.runDataGathering()
-    performance.saveToCSVPerformance('Performance_Testing_'+file)
-    performance.saveToCSVELA('ELA_Testing_'+file)
+    performance.saveToCSVPerformance('Performance_Gathering_'+file)
+    performance.saveToCSVELA('ELA_Gathering_'+file)
 
 '''
 baseDIR = "./temp/"
