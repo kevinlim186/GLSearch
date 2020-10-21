@@ -125,6 +125,7 @@ class Models():
             y_true = self.y_class
 
         model_name = '_RNN_Hidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss_'+loss
+        csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
 
         numFeatures = len(self.features[0][0])
         #self.oneHotEncode()
@@ -135,7 +136,7 @@ class Models():
         model.add(Dense(3, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.001)
         model.compile(optimizer=opt, loss=lossFunc)
-        model.fit(self.features, y_true, epochs=1000)
+        model.fit(self.features, y_true, epochs=1000, callbacks=[csv_logger])
         model.save('./models/'+model_name)
 
 def trainSingleLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
@@ -149,6 +150,7 @@ def trainSingleLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
             y_true = self.y_class
 
         model_name = '_RNN_Hidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss_'+loss
+        csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
 
         numFeatures = len(self.features[0][0])
         #self.oneHotEncode()
@@ -158,5 +160,5 @@ def trainSingleLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
         model.add(Dense(3, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.001)
         model.compile(optimizer=opt, loss=lossFunc)
-        model.fit(self.features, y_true, epochs=1000)
+        model.fit(self.features, y_true, epochs=1000, callbacks=[csv_logger])
         model.save('./models/'+model_name)
