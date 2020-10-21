@@ -62,7 +62,7 @@ class Suites:
                 self.runModelTest(budget=budget, function=self.function, instance=instance, dimension=dimension, esconfig=self.esconfig, checkPoint=checkPoint, logger=self.performance, pflacco=self.pflacco, localSearch=self.localSearch,  ASP=ASP, size=size,restart=restart, features=features, ASPName=ASPName)
 
 
-    def runModelTest(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco,localSearch, ASP, size,restart, features, ASPName):
+    def runModelTest(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco,localSearch, ASP, size,restart, features, ASPName, stepSize):
             problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger,pflacco,localSearch)
-            problem.runASPBattery(ASP, ASPName, size,restart, features)
+            problem.runASPBattery(ASP, ASPName, size,stepSize,restart, features)
         

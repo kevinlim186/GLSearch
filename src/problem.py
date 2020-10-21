@@ -486,14 +486,14 @@ class Problem():
                 bestgenoType = i
         return bestgenoType
 
-    def runASPBattery(self,ASP, ASPName, size, restart= False, features=None):
+    def runASPBattery(self,ASP, ASPName, size,  stepSize, restart= False, features=None):
         #Runs five independent tests
         for i in range(1,6):
             self.reset()
-            self.runASPTest(i, ASP,ASPName, size, restart, features)
+            self.runASPTest(i, ASP,ASPName, size, restart, features, stepSize)
 
 
-    def runASPTest(self, testRun, ASP,ASPName, size, restart, features):
+    def runASPTest(self, testRun, ASP,ASPName, size, restart, features, stepSize):
         checkpoints = self.getCheckPoints()
         currentLength = 1
         maxIndex = len(checkpoints)-1
@@ -522,14 +522,19 @@ class Problem():
                 
                 if "RNN" in ASPName:
                     print("calulating ELA ASP")
-                    #We need to have two check points for the RNN to work
-                    if len(self.elaFetures) <2:
+                    #We need to have at least the number of step size
+                    if len(self.elaFetures) <= stepSize:
                         index = 0
                     else:  
-                        ela1 = self.elaFetures[x_labels].iloc[-1,]
-                        ela2 = self.elaFetures[x_labels].iloc[-2,]
-                        ela = np.array([ela1,ela2])
-                        index = ASP.predict(ela.reshape(1,2,len(x_labels))).argmax()
+                        ela = [self.elaFetures[x_labels].iloc[-1,]]
+        
+                        #add additional step in the ela
+                        for i in range(2, stepSize+1):   
+                            ela1 = self.elaFetures[x_labels].iloc[-i,]
+                            ela = np.concatenate(([ela],[ela1]),axis=0)
+        
+                        print(ela)
+                        index = ASP.predict(ela.reshape(1, stepSize,len(x_labels))).argmax()
 
                 else:
                     
