@@ -35,6 +35,16 @@ class Models():
     #	cost = y_label * K.log(y_pred) - costMatrix 
         return K.mean(K.sum(y_true*y_pred, axis=1))
 
+    def weightedExponentCategoricalCrossentropy(self, y_true, y_pred):
+        #    y_cost = y_true * y_pred
+    #	y_cost = (y_true-y_label) * 1e5
+    #	condition = tf.equal(y_pred, tf.math.reduce_max(y_pred, axis=1, keepdims=True))
+    #	probabilityMatrix = tf.where(condition, tf.zeros_like(y_pred), y_pred)
+
+    #	costMatrix = y_cost * probabilityMatrix
+
+    #	cost = y_label * K.log(y_pred) - costMatrix 
+        return K.mean(K.sum(K.exp(y_true*y_pred), axis=1))
     def trainANN(self, inputSize, dropout, hidden, epoch, size, learning=0.001, output_size=4, loss='WCategoricalCrossentropy'):
         if loss == 'WCategoricalCrossentropy':
             lossFunc = self.weightedCategoricalCrossentropy
@@ -119,6 +129,9 @@ class Models():
         if loss == 'WCategoricalCrossentropy':
             lossFunc = self.weightedCategoricalCrossentropy
             y_true = self.y_cost
+        elif loss == 'WECategoricalCrossentropy':
+            lossFunc = self.weightedExponentCategoricalCrossentropy
+            y_true = self.y_cost
         else:
             lossFunc = loss
             self.oneHotEncode()
@@ -143,6 +156,9 @@ def trainSingleLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
         self.inferClass()
         if loss == 'WCategoricalCrossentropy':
             lossFunc = self.weightedCategoricalCrossentropy
+            y_true = self.y_cost
+        elif loss == 'WECategoricalCrossentropy':
+            lossFunc = self.weightedExponentCategoricalCrossentropy
             y_true = self.y_cost
         else:
             lossFunc = loss
