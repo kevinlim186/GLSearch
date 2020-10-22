@@ -192,7 +192,12 @@ class Result():
         self.processedPerformance = self.processedPerformance.sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
         base = self.processedPerformance[self.processedPerformance['algo']=='Local:Base'].groupby(['function', 'instance', 'dimension','trial'])['performance'].min().reset_index()
         base['algo'] = 'Base'
-        local = self.processedPerformance[self.processedPerformance['algo'].isin(['Local:bfgs', 'Local:nedler'])].groupby(['function', 'instance', 'dimension','trial','algo'])['performance'].mean().reset_index()
+
+
+        #create algorithm based on the checkpoint
+        local = self.processedPerformance[self.processedPerformance['algo'].isin(['Local:bfgs', 'Local:nedler'])]
+        local['algo'] = local.apply(lambda x: x['algo'] + str(round(x['budget']/(x['dimension']*500),0)), axis=1)
+        local = local.groupby(['function', 'instance', 'dimension','trial','algo'])['performance'].mean().reset_index()
 
 
         #SBS is the lowest mean score of the each algorithm performance
