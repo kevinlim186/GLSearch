@@ -152,7 +152,7 @@ class Models():
         model.fit(self.features, y_true, epochs=1000, callbacks=[csv_logger])
         model.save('./models/'+model_name)
 
-def trainSingleLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
+    def trainSingleLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
         self.inferClass()
         if loss == 'WCategoricalCrossentropy':
             lossFunc = self.weightedCategoricalCrossentropy
