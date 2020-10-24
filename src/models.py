@@ -178,3 +178,31 @@ class Models():
         model.compile(optimizer=opt, loss=lossFunc)
         model.fit(self.features, y_true, epochs=1000, callbacks=[csv_logger])
         model.save('./models/'+model_name)
+
+    def trainDoubleNeuronsLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
+        self.inferClass()
+        if loss == 'WCategoricalCrossentropy':
+            lossFunc = self.weightedCategoricalCrossentropy
+            y_true = self.y_cost
+        elif loss == 'WECategoricalCrossentropy':
+            lossFunc = self.weightedExponentCategoricalCrossentropy
+            y_true = self.y_cost
+        else:
+            lossFunc = loss
+            self.oneHotEncode()
+            y_true = self.y_class
+
+        model_name = '_RNN_Hidden_Double'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss_'+loss
+        csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
+
+        numFeatures = len(self.features[0][0])
+        #self.oneHotEncode()
+        #X_, Y_ = self.createTestSet(2, self.features, self.y_class)
+        model = Sequential()
+        model.add(LSTM(numFeatures*2, activation='relu', input_shape=(stepSize,numFeatures),return_sequences=True))
+        model.add(LSTM(numFeatures*2, activation='relu'))
+        model.add(Dense(3, activation='softmax'))
+        opt = tf.keras.optimizers.Adam(learning_rate=0.001)
+        model.compile(optimizer=opt, loss=lossFunc)
+        model.fit(self.features, y_true, epochs=1000, callbacks=[csv_logger])
+        model.save('./models/'+model_name)
