@@ -165,7 +165,7 @@ class Models():
             self.oneHotEncode()
             y_true = self.y_class
 
-        model_name = '_RNN_SingleHidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss_'+loss
+        model_name = '_RNN_Hidden'+str(1)+'_StepSize'+str(stepSize)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss_'+loss
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
 
         numFeatures = len(self.features[0][0])
