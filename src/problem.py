@@ -316,14 +316,14 @@ class Problem():
                 self.currentResults = self.currentResults[(self.currentResults[column]>-5) & (self.currentResults[column]<5)]
             
             if size == '5G':
-                genSize = 4+ math.floor(3*log(self.dimension))
-                sampleSize =  genSize * 5
+                genSize = 4+ math.floor(3*log())
+                sampleSize =  genSize * 5 * self.dimension
             elif size == '50G':
                 genSize = 4+ math.floor(3*log(self.dimension))
-                sampleSize =  genSize * 50
+                sampleSize =  genSize * 50 * self.dimension
             elif size == '100G':
                 genSize = 4+ math.floor(3*log(self.dimension))
-                sampleSize =  genSize * 100
+                sampleSize =  genSize * 100 * self.dimension
             else:
                 sampleSize = self.dimension * size 
             
