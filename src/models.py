@@ -148,7 +148,7 @@ class Models():
         model.add(LSTM(numFeatures, activation='relu', input_shape=(stepSize,numFeatures),return_sequences=True))
         model.add(LSTM(numFeatures, activation='relu'))
         model.add(Dense(3, activation='softmax'))
-        opt = tf.keras.optimizers.Adam(learning_rate=0.001)
+        opt = tf.keras.optimizers.Adam(learning_rate=0.0001)
         model.compile(optimizer=opt, loss=lossFunc)
         model.fit(self.features, y_true, epochs=1000, callbacks=[csv_logger])
         model.save('./models/'+model_name)
