@@ -44,7 +44,8 @@ class Models():
     #	costMatrix = y_cost * probabilityMatrix
 
     #	cost = y_label * K.log(y_pred) - costMatrix 
-        return K.mean(K.sum(K.exp(y_true*y_pred), axis=1))
+        return K.sum(y_true*y_pred)
+        
     def trainANN(self, inputSize, dropout, hidden, epoch, size, learning=0.001, output_size=4, loss='WCategoricalCrossentropy'):
         if loss == 'WCategoricalCrossentropy':
             lossFunc = self.weightedCategoricalCrossentropy
