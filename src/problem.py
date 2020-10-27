@@ -297,7 +297,7 @@ class Problem():
         maxiter = self.remainingBudget
         #x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
         opt={'maxfev': maxiter, 'disp': False, 'return_all': False}
-        minimize(self.problemInstance, x0=population, method='nelder-mead', options=opt)
+        minimize(self.problemInstance,tol=1e-8, x0=population, method='nelder-mead', options=opt)
 
     def bfgsAlgorithm(self, population):
         #x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
