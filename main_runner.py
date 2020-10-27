@@ -83,8 +83,8 @@ elif modelSelected=='forest':
 name = modelLocation
 performance = Performance()
 print(name)
-#name = 'nedler'
-#localSearch = 'nedler'
+#name = 'nelder'
+#localSearch = 'nelder'
 
 #name = 'bfgs0.1'
 #localSearch = 'bfgs0.1'
