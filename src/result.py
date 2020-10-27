@@ -6,7 +6,7 @@ import math
 
 
 class Result():
-    def __init__(self, bestTiming= False, restricted=False):
+    def __init__(self, bestTiming= True, restricted=False):
         self.consolidatedPerformance = pd.DataFrame()
         self.processedPerformance = pd.DataFrame()
         self.calculatedPerformance = pd.DataFrame()
