@@ -242,9 +242,9 @@ class Result():
             self._elaPrecalculate(dataset)
 
         if interface == None:
-            inputeInterface = x_labels
+            inputInterface = x_labels
         else:
-            inputeInterface = interface
+            inputInterface = interface
     
         self.trainingData = self.processedFeatures.merge(self.classificationCost, on= ['function','instance','dimension','trial', 'budget'])
         
@@ -255,7 +255,7 @@ class Result():
         self.trainingData.replace([np.inf, -np.inf], np.nan,  inplace=True)
 
         #get the function, instance and dimension with missing values
-        for label in inputeInterface:
+        for label in inputInterface:
             missingMask = self.trainingData[label].isna()
             missingList = self.trainingData[missingMask]['function'].astype(str) + '_' + self.trainingData[missingMask]['dimension'].astype(str) +'_'+ self.trainingData[missingMask]['instance'].astype(str)
 
@@ -280,18 +280,23 @@ class Result():
             training = self.trainingData[(self.trainingData['algo']==algorithm)]
 
         if RNN is None:
-            Xtrain = training[inputeInterface].values
+            Xtrain = training[inputInterface].values
             if not restricted:
                 ycost = training[y_labels].values
             else:
                 ycost = training[y_labels[:2]].values
         else:
-            Xtrain, ycost = self._createRNNSet(RNN, training, inputeInterface)
+            Xtrain, ycost = self._createRNNSet(RNN, training, inputInterface, restricted)
         
         return Xtrain, ycost
 
 
-    def _createRNNSet(self, n_step, dataFrame, inputeInterface):
+    def _createRNNSet(self, n_step, dataFrame, inputInterface, restricted):
+
+        if restricted:
+            y_labels_used = y_labels[:2]
+        else:
+            y_labels_used = y_labels
 
         #make sure that the dataframe is sorted
         dataFrame = dataFrame.sort_values(['function', 'dimension','instance', 'trial', 'budget'], ascending=True)
@@ -313,8 +318,8 @@ class Result():
                         if len(subset)-n_step >= 0:
                             #The last entry does not have an ELA calculation. As a result, it is automatically excluded when merged with the features.
                             for s in range(len(subset)-n_step+1):
-                                x_arr.append(subset[inputeInterface].iloc[s:s+n_step].values)
-                                y_arr.append(subset[y_labels].iloc[s+n_step-1].values)
+                                x_arr.append(subset[inputInterface].iloc[s:s+n_step].values)
+                                y_arr.append(subset[y_labels_used].iloc[s+n_step-1].values)
                             
         #convert to one hot encoded data
         ycost = np.zeros_like(np.array(y_arr))
