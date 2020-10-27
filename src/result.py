@@ -6,7 +6,7 @@ import math
 
 
 class Result():
-    def __init__(self):
+    def __init__(self, bestTiming= False, restricted=False):
         self.consolidatedPerformance = pd.DataFrame()
         self.processedPerformance = pd.DataFrame()
         self.calculatedPerformance = pd.DataFrame()
@@ -17,6 +17,8 @@ class Result():
         self.processedPerf = False
         self.processedSolvers = False
         self.processedELA = False
+        self.bestTiming = bestTiming
+        self.restricted = restricted
     
     def addPerformance(self, *args):
         dataframes = []
@@ -127,54 +129,62 @@ class Result():
         #rename the to performance column
         self.classificationCost = self.classificationCost.rename(columns={'Local:Base':'Local:Base_perf_ref','Local:bfgs':'Local:bfgs_perf', 'Local:nedler':'Local:nedler_perf' })
 
+        #check if there is a restriction
+        if self.restricted:
+            usedOptions = ['Local:Base_perf_ref', 'Local:bfgs_perf']
+        else:
+            usedOptions = ['Local:Base_perf_ref', 'Local:bfgs_perf',  'Local:nedler_perf']
+
         #The base runner performance should be the correct choice till the optimal value for the local search is reached.
         self.classificationCost['Local:Base_perf'] = self.classificationCost['Local:Base_perf_ref']
-        bestPath = self.classificationCost[['Local:Base_perf_ref', 'Local:bfgs_perf', 'Local:nedler_perf','function', 'dimension','instance', 'trial']].groupby(['function', 'dimension','instance', 'trial']).min().min(axis=1).reset_index()
+        bestPathFeatures = np.append( usedOptions, ['function', 'dimension','instance', 'trial']).tolist()
+        bestPath = self.classificationCost[bestPathFeatures].groupby(['function', 'dimension','instance', 'trial']).min().min(axis=1).reset_index()
         
         self.classificationCost = self.classificationCost.merge(bestPath, on= ['function','instance','dimension','trial'], how='left')
         self.classificationCost.rename(columns={0:'bestPath'}, inplace=True)
         
         
-        self.classificationCost['best_choice'] = self.classificationCost[['Local:Base_perf_ref', 'Local:bfgs_perf',  'Local:nedler_perf']].min(axis=1)
+        self.classificationCost['best_choice'] = self.classificationCost[usedOptions].min(axis=1)
         
-        #this will set the score of the base runner to the best score until that point is reached.
-        self.classificationCost['indicator'] =  self.classificationCost.apply(lambda x: True if x['best_choice']==x['bestPath'] else False, axis=1)
+        if self.bestTiming:
+            #this will set the score of the base runner to the best score until that point is reached.
+            self.classificationCost['indicator'] =  self.classificationCost.apply(lambda x: True if x['best_choice']==x['bestPath'] else False, axis=1)
 
-        f = None
-        d = None
-        i = None
-        t = None
-        state = None
-        for index, row in self.classificationCost.iterrows():
-            if row['function'] != f or row['dimension'] != d or row['instance'] != i or row['trial'] != t:
-                f = row['function']
-                d = row['dimension']
-                i = row['instance']
-                t = row['trial']
-                state = row['indicator']
-            elif row['indicator']:
-                state = True
-            
-            self.classificationCost.loc[index,'indicator'] = state
-
-
-        def getCorrectBasePerformance(x):
-            if  x['indicator']:
-                return x['Local:Base_perf_ref']
-            else:
-                return x['bestPath']
+            f = None
+            d = None
+            i = None
+            t = None
+            state = None
+            for index, row in self.classificationCost.iterrows():
+                if row['function'] != f or row['dimension'] != d or row['instance'] != i or row['trial'] != t:
+                    f = row['function']
+                    d = row['dimension']
+                    i = row['instance']
+                    t = row['trial']
+                    state = row['indicator']
+                elif row['indicator']:
+                    state = True
+                
+                self.classificationCost.loc[index,'indicator'] = state
 
 
-        self.classificationCost['Local:Base_perf'] = self.classificationCost.apply(getCorrectBasePerformance, axis=1)
+            def getCorrectBasePerformance(x):
+                if  x['indicator']:
+                    return x['Local:Base_perf_ref']
+                else:
+                    return x['bestPath']
+
+
+            self.classificationCost['Local:Base_perf'] = self.classificationCost.apply(getCorrectBasePerformance, axis=1)
 
 
         #calculate VBS
-        self.classificationCost['vbs'] = self.classificationCost[['Local:Base_perf', 'Local:bfgs_perf',  'Local:nedler_perf']].min(axis=1)
+        self.classificationCost['vbs'] = self.classificationCost[usedOptions].min(axis=1)
 
         #calculate cost for each algorithm
-        self.classificationCost['Local:Base'] = self.classificationCost['Local:Base_perf'] - self.classificationCost['vbs']
-        self.classificationCost['Local:bfgs'] = self.classificationCost['Local:bfgs_perf'] - self.classificationCost['vbs']
-        self.classificationCost['Local:nedler'] = self.classificationCost['Local:nedler_perf' ] - self.classificationCost['vbs']
+        for option in usedOptions:
+            self.classificationCost[option.replace('_ref','').replace('_perf','')] = self.classificationCost[option.replace('_ref','')] - self.classificationCost['vbs']
+
 
         self.processedSolvers = True
 
