@@ -125,8 +125,9 @@ class Models():
             y_arr.append(y_test[i+n_step])
         return np.array(x_arr), np.array(y_arr)
 
-    def trainLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
+    def trainLSTM(self, stepSize ,size, loss='categorical_crossentropy', restricted=False):
         self.inferClass()
+
         if loss == 'WCategoricalCrossentropy':
             lossFunc = self.weightedCategoricalCrossentropy
             y_true = self.y_cost
@@ -138,7 +139,13 @@ class Models():
             self.oneHotEncode()
             y_true = self.y_class
 
-        model_name = '_RNN_Hidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(1000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
+        if not restricted:
+            model_name = '_RNN_Hidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(1000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
+            output = 3
+        else:
+            model_name = '_RNN_Hidden_Restricted'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(1000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
+            output = 2
+
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
 
         numFeatures = len(self.features[0][0])
@@ -147,7 +154,7 @@ class Models():
         model = Sequential()
         model.add(LSTM(numFeatures, activation='relu', input_shape=(stepSize,numFeatures),return_sequences=True))
         model.add(LSTM(numFeatures, activation='relu'))
-        model.add(Dense(3, activation='softmax'))
+        model.add(Dense(output, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.00001)
         model.compile(optimizer=opt, loss=lossFunc)
         model.fit(self.features, y_true, epochs=1000, callbacks=[csv_logger])
