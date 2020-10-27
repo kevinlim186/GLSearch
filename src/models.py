@@ -138,7 +138,7 @@ class Models():
             self.oneHotEncode()
             y_true = self.y_class
 
-        model_name = '_RNN_Hidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss_'+loss
+        model_name = '_RNN_Hidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(1000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
 
         numFeatures = len(self.features[0][0])
@@ -166,7 +166,7 @@ class Models():
             self.oneHotEncode()
             y_true = self.y_class
 
-        model_name = '_RNN_Hidden'+str(1)+'_StepSize'+str(stepSize)+'_Epoch'+str(100)+'_Learning'+str(0.001)+'_Size:'+str(size)+'_Loss_'+loss
+        model_name = '_RNN_Hidden'+str(1)+'_StepSize'+str(stepSize)+'_Epoch'+str(1000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
 
         numFeatures = len(self.features[0][0])
@@ -175,7 +175,7 @@ class Models():
         model = Sequential()
         model.add(LSTM(numFeatures, activation='relu', input_shape=(stepSize,numFeatures)))
         model.add(Dense(3, activation='softmax'))
-        opt = tf.keras.optimizers.Adam(learning_rate=0.001)
+        opt = tf.keras.optimizers.Adam(learning_rate=0.00001)
         model.compile(optimizer=opt, loss=lossFunc)
         model.fit(self.features, y_true, epochs=1000, callbacks=[csv_logger])
         model.save('./models/'+model_name)
