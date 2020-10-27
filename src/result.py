@@ -237,7 +237,7 @@ class Result():
 
         return allPerformance
 
-    def createTrainSet(self, dataset, algorithm=None, reset=False, interface=None, RNN=None, restricted=False):
+    def createTrainSet(self, dataset, algorithm=None, reset=False, interface=None, RNN=None):
         if reset:
             self._reset()
         if not self.processedPerf and not self.processedSolvers:
@@ -291,19 +291,19 @@ class Result():
 
         if RNN is None:
             Xtrain = training[inputInterface].values
-            if not restricted:
+            if not self.restricted:
                 ycost = training[y_labels].values
             else:
                 ycost = training[y_labels[:2]].values
         else:
-            Xtrain, ycost = self._createRNNSet(RNN, training, inputInterface, restricted)
+            Xtrain, ycost = self._createRNNSet(RNN, training, inputInterface)
         
         return Xtrain, ycost
 
 
-    def _createRNNSet(self, n_step, dataFrame, inputInterface, restricted):
+    def _createRNNSet(self, n_step, dataFrame, inputInterface):
 
-        if restricted:
+        if self.restricted:
             y_labels_used = y_labels[:2]
         else:
             y_labels_used = y_labels
