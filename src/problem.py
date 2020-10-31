@@ -545,7 +545,7 @@ class Problem():
                         #add additional step in the ela
                         for i in range(2, stepSize+1):   
                             ela1 = np.array([self.elaFetures[x_labels].iloc[-i,].values])
-                            ela = np.concatenate((ela,ela1),axis=0)
+                            ela = np.concatenate((ela1,ela),axis=0)
         
                         print(ela)
                         index = ASP.predict(ela.reshape(1, stepSize,len(x_labels))).argmax()
