@@ -125,7 +125,7 @@ class Models():
             y_arr.append(y_test[i+n_step])
         return np.array(x_arr), np.array(y_arr)
 
-    def trainLSTM(self, stepSize ,size, loss='categorical_crossentropy', restricted=False):
+    def trainLSTM(self, stepSize ,size,dropout=0.2, grossup=1, loss='categorical_crossentropy', restricted=False):
         self.inferClass()
 
         if loss == 'WCategoricalCrossentropy':
@@ -140,10 +140,10 @@ class Models():
             y_true = self.y_class
 
         if not restricted:
-            model_name = '_RNN_Hidden'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(2000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
+            model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+'_StepSize'+str(stepSize)+'_Epoch'+str(2500)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
             output = 3
         else:
-            model_name = '_RNN_Hidden_Restricted'+str(2)+ '_StepSize'+str(stepSize)+'_Epoch'+str(2000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
+            model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+ '_StepSize'+str(stepSize)+'_Epoch'+str(2500)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
             output = 2
 
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
@@ -152,12 +152,13 @@ class Models():
         #self.oneHotEncode()
         #X_, Y_ = self.createTestSet(2, self.features, self.y_class)
         model = Sequential()
-        model.add(LSTM(numFeatures, activation='relu', input_shape=(stepSize,numFeatures),return_sequences=True))
-        model.add(LSTM(numFeatures, activation='relu'))
+        model.add(LSTM(int(numFeatures/grossup), activation='relu', input_shape=(stepSize,numFeatures),return_sequences=True))
+        model.add(LSTM(int(numFeatures/grossup), activation='relu'))
+        model.add(Dropout(dropout))
         model.add(Dense(output, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.00001)
         model.compile(optimizer=opt, loss=lossFunc)
-        model.fit(self.features, y_true, epochs=2000, callbacks=[csv_logger])
+        model.fit(self.features, y_true, epochs=2500, callbacks=[csv_logger])
         model.save('./models/'+model_name)
 
     def trainSingleLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
