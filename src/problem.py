@@ -316,7 +316,7 @@ class Problem():
                 self.currentResults = self.currentResults[(self.currentResults[column]>-5) & (self.currentResults[column]<5)]
             
             if size == '5G':
-                genSize = 4+ math.floor(3*log())
+                genSize = 4+ math.floor(3*log(self.dimension))
                 sampleSize =  genSize * 5 * self.dimension
             elif size == '50G':
                 genSize = 4+ math.floor(3*log(self.dimension))
