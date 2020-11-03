@@ -140,10 +140,10 @@ class Models():
             y_true = self.y_class
 
         if not restricted:
-            model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+'_StepSize'+str(stepSize)+'_Epoch'+str(2500)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
+            model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+'_Grossup_'+str(grossup)+'_StepSize'+str(stepSize)+'_Epoch'+str(2500)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
             output = 3
         else:
-            model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+ '_StepSize'+str(stepSize)+'_Epoch'+str(2500)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
+            model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+'_Grossup_'+str(grossup)+ '_StepSize'+str(stepSize)+'_Epoch'+str(2500)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
             output = 2
 
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
