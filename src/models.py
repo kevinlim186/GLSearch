@@ -140,10 +140,10 @@ class Models():
             y_true = self.y_class
 
         if not restricted:
-            model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+'_Grossup_'+str(grossup)+'_StepSize'+str(stepSize)+'_Epoch'+str(2500)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
+            model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+'_Grossup_'+str(grossup)+'_StepSize'+str(stepSize)+'_Epoch'+str(2000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
             output = 3
         else:
-            model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+'_Grossup_'+str(grossup)+ '_StepSize'+str(stepSize)+'_Epoch'+str(2500)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
+            model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+'_Grossup_'+str(grossup)+ '_StepSize'+str(stepSize)+'_Epoch'+str(2000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
             output = 2
 
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)
@@ -158,7 +158,7 @@ class Models():
         model.add(Dense(output, activation='softmax'))
         opt = tf.keras.optimizers.Adam(learning_rate=0.00001)
         model.compile(optimizer=opt, loss=lossFunc)
-        model.fit(self.features, y_true, epochs=2500, callbacks=[csv_logger])
+        model.fit(self.features, y_true, epochs=2000, callbacks=[csv_logger])
         model.save('./models/'+model_name)
 
     def trainSingleLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
