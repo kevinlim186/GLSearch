@@ -2,8 +2,7 @@ import numpy as np
 import pandas as pd
 from src.interface import y_labels, x_labels
 import math
-
-
+import bbobbenchmarks.bbobbenchmarks as bn
 
 class Result():
     def __init__(self, bestTiming= True, restricted=False):
@@ -106,7 +105,8 @@ class Result():
 
         #adjust FCE to factor in accuracy set when experiment was setup
         self.processedPerformance['fce'] =  self.processedPerformance['fce']+ 1e-8 
-        self.processedPerformance['relFCE'] = self.processedPerformance.apply(lambda x: 1 + ((np.log10(float(x['fce'])/1e-8))/(np.log10(float(x['fcemax'])/1e-8)) ), axis=1)
+        self.processedPerformance['fceTarget'] = self.processedPerformance.apply(lambda x: self._getOptimalValue(x['function'], x['instance']))
+        self.processedPerformance['relFCE'] = self.processedPerformance.apply(lambda x: 1 + ((np.log10(float(x['fce'])/x['fceTarget']))/(np.log10(float(x['fcemax'])/x['fceTarget'])) ), axis=1)
 
         #Calculate performance based on Rajn's performance measure; 
         self.processedPerformance['performance'] = self.processedPerformance.apply(lambda x: x['relERT'] if x['relERT'] >0  else x['relFCE'], axis=1)
@@ -341,3 +341,8 @@ class Result():
         self.processedSolvers = False
         self.processedPerf = False
         self.processedELA = False
+
+    def _getOptimalValue(self, functionID, instance, precision=1e-8):
+        functionAttr = 'F' + str(functionID)
+        function = getattr(bn, functionAttr)(instance)
+        return function.getfopt() + precision
