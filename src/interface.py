@@ -3,7 +3,7 @@
 y_labels = [
     'Local:Base', 
     'Local:bfgs',
-    'Local:nedler'
+    'Local:nelder'
 ]
 
 x_labels = [

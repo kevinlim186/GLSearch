@@ -162,7 +162,7 @@ class Problem():
                 self.saveState()
                 
                 #Simplex Method
-                name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler',testRun)
+                name = self.getProblemName(self.function, self.instance, self.spentBudget,'nelder',testRun)
                 
                 self.simplexAlgorithm(x0)
 
@@ -235,12 +235,12 @@ class Problem():
                 self.performance.importHistoricalPath('temp/'+name+'.csv')
 
         
-        elif self.localSearch=='nedler':
+        elif self.localSearch=='nelder':
             for i in [1000,2000,5000]:
-                print('Running test using local search nedler on function '+str(self.function) +' with instance '+str(self.instance) + ' dimension '+str(self.dimension)+ ' LHS Run '+str(i))
+                print('Running test using local search nelder on function '+str(self.function) +' with instance '+str(self.instance) + ' dimension '+str(self.dimension)+ ' LHS Run '+str(i))
                 x0 = self.generateLHSBestIndividuals(i)
                 self.simplexAlgorithm(x0)
-                name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler_LHS'+str(i)+'_',testRun)
+                name = self.getProblemName(self.function, self.instance, self.spentBudget,'nelder_LHS'+str(i)+'_',testRun)
                 _ = self.calculatePerformance(name)
                 self.currentResults['name'] = name
                 self.currentResults.to_csv('temp/'+name+'.csv',index=False)
@@ -504,6 +504,8 @@ class Problem():
         for i in range(1,6):
             self.reset()
             self.runASPTest(i, ASP,ASPName, size, restart, features, stepSize)
+            name = self.getProblemName(self.function, self.instance, self.spentBudget, ASPName, str(i))
+            self.currentResults.to_csv('/currentPoints/'+name+'.csv',index=False)
 
 
     def runASPTest(self, testRun, ASP,ASPName, size, restart, features, stepSize):
@@ -570,7 +572,7 @@ class Problem():
                         self.bfgsAlgorithm(x0)
 
                     if (index == 2):
-                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'nedler'+ASPName,testRun)
+                        name = self.getProblemName(self.function, self.instance, self.spentBudget,'nelder'+ASPName,testRun)
                         self.simplexAlgorithm(x0)
 
 

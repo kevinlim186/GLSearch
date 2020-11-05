@@ -127,13 +127,13 @@ class Result():
         self.classificationCost = self.classificationCost.merge(baseRunner, on=['function', 'dimension','instance', 'trial'])
         
         #rename the to performance column
-        self.classificationCost = self.classificationCost.rename(columns={'Local:Base':'Local:Base_perf_ref','Local:bfgs':'Local:bfgs_perf', 'Local:nedler':'Local:nedler_perf' })
+        self.classificationCost = self.classificationCost.rename(columns={'Local:Base':'Local:Base_perf_ref','Local:bfgs':'Local:bfgs_perf', 'Local:nelder':'Local:nelder_perf' })
 
         #check if there is a restriction
         if self.restricted:
             usedOptions = ['Local:Base_perf_ref', 'Local:bfgs_perf']
         else:
-            usedOptions = ['Local:Base_perf_ref', 'Local:bfgs_perf',  'Local:nedler_perf']
+            usedOptions = ['Local:Base_perf_ref', 'Local:bfgs_perf',  'Local:nelder_perf']
 
         #The base runner performance should be the correct choice till the optimal value for the local search is reached.
         self.classificationCost['Local:Base_perf'] = self.classificationCost['Local:Base_perf_ref']
@@ -192,7 +192,7 @@ class Result():
     def calculatePerformance(self):
         self._preCalculation()
         #remove the algorithm selected to have a meaningful performance aggregation
-        self.processedPerformance['_algo'] =  self.processedPerformance['algo'].replace(to_replace=r'^Local:nedler[^-]', value='', regex=True)
+        self.processedPerformance['_algo'] =  self.processedPerformance['algo'].replace(to_replace=r'^Local:nelder[^-]', value='', regex=True)
         self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^Local:Base[^-]', value='', regex=True)
         self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^Local:bfgs[^-]', value='', regex=True)
         self.processedPerformance['_algo'] =  self.processedPerformance['_algo'].replace(to_replace=r'^ample[0-9]*[^-]', value='', regex=True)
@@ -205,7 +205,7 @@ class Result():
 
 
         #create algorithm based on the checkpoint
-        local = self.processedPerformance[self.processedPerformance['algo'].isin(['Local:bfgs', 'Local:nedler'])]
+        local = self.processedPerformance[self.processedPerformance['algo'].isin(['Local:bfgs', 'Local:nelder'])]
         local['algo'] = local.apply(lambda x: x['algo'] + str(round(x['budget']/(x['dimension']*500),0)), axis=1)
         local = local.groupby(['function', 'instance', 'dimension','trial','algo'])['performance'].mean().reset_index()
 
@@ -225,13 +225,13 @@ class Result():
         sbsPerformance['algo'] = runnerName
 
         #VBS-- Get the lowest score
-        local = self.processedPerformance[self.processedPerformance['algo'].isin(['Local:bfgs', 'Local:nedler'])].groupby(['function', 'instance', 'dimension','trial','algo'])['performance'].min().reset_index()
+        local = self.processedPerformance[self.processedPerformance['algo'].isin(['Local:bfgs', 'Local:nelder'])].groupby(['function', 'instance', 'dimension','trial','algo'])['performance'].min().reset_index()
         vbsPerformance = pd.concat([local,base]).groupby(['function', 'instance', 'dimension','trial'])['performance'].min().reset_index()
         vbsPerformance['algo'] =  'VBS'
         
 
         #get the individual model performance
-        modelPerformance = self.processedPerformance[~self.processedPerformance['algo'].isin(['Local:Base', 'Local:nedler', 'Local:bfgs'])][['function', 'instance', 'dimension','trial','algo', 'performance']]
+        modelPerformance = self.processedPerformance[~self.processedPerformance['algo'].isin(['Local:Base', 'Local:nelder', 'Local:bfgs'])][['function', 'instance', 'dimension','trial','algo', 'performance']]
         
         allPerformance = pd.concat([sbsPerformance,vbsPerformance,modelPerformance]).pivot_table(index=['function', 'dimension','instance', 'trial'], columns = 'algo', values='performance').reset_index()
 
