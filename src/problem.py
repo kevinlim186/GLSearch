@@ -31,6 +31,7 @@ class Problem():
         self.prevSpentBudget = None
         self.localSearch = localSearch
         self.x_labels = x_labels
+        self.baseDIR = os.getcwd()
 
         self.ela_feat = None
 
@@ -505,7 +506,7 @@ class Problem():
             self.reset()
             self.runASPTest(i, ASP,ASPName, size, restart, features, stepSize)
             name = self.getProblemName(self.function, self.instance, self.spentBudget, ASPName, str(i))
-            self.currentResults.to_csv('/currentPoints/'+name+'.csv',index=False)
+            self.currentResults.to_csv(self.baseDIR+'/currentPoints/'+name+'.csv',index=False)
 
 
     def runASPTest(self, testRun, ASP,ASPName, size, restart, features, stepSize):
