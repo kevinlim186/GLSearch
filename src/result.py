@@ -232,7 +232,7 @@ class Result():
         #get the individual model performance
         modelPerformance = self.processedPerformance[~self.processedPerformance['algo'].isin(['Local:Base', 'Local:nelder', 'Local:bfgs'])][['function', 'instance', 'dimension','trial','algo', 'performance']]
         
-        allPerformance = pd.concat([sbsPerformance,vbsPerformance,modelPerformance]).pivot_table(index=['function', 'dimension','instance', 'trial'], columns = 'algo', values='performance').reset_index()
+        allPerformance = pd.concat([sbsPerformance,vbsPerformance,modelPerformance,base]).pivot_table(index=['function', 'dimension','instance', 'trial'], columns = 'algo', values='performance').reset_index()
 
         return allPerformance
 
