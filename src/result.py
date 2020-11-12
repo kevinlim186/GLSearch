@@ -215,6 +215,7 @@ class Result():
 
 
         #Dealing with null values in cases when the base run reached the optimal value before the checkpoint
+        sbsRunnersPerformance = sbsPerformance
         sbsPerformance[sbsRunner] =  sbsPerformance[sbsRunner].fillna(sbsPerformance['Base'])
  
         #just keep the SBS runner
@@ -234,7 +235,7 @@ class Result():
         
         allPerformance = pd.concat([sbsPerformance,vbsPerformance,modelPerformance,base, local]).pivot_table(index=['function', 'dimension','instance', 'trial'], columns = 'algo', values='performance').reset_index()
 
-        return allPerformance
+        return allPerformance, sbsRunnersPerformance 
 
     def createTrainSet(self, dataset, algorithm=None, reset=False, interface=None, RNN=None):
         if reset:
