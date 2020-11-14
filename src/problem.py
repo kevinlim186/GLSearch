@@ -204,7 +204,7 @@ class Problem():
         for i in range(1,6):
             self.reset()
             self.runPerformanceTest(i)
-            name = self.getProblemName(self.function, self.instance, self.spentBudget, ASPName, str(i))
+            name = self.getProblemName(self.function, self.instance, self.spentBudget, 'test', str(i))
             self.currentResults.to_csv(self.baseDIR+'/currentPoints/'+name+'.csv',index=False)
 
     def runPerformanceTest(self, testRun):
