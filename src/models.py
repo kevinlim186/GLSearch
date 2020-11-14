@@ -13,6 +13,7 @@ import pickle
 from sklearn.feature_selection import RFE
 from src.interface import y_labels, x_labels
 from sklearn.utils import shuffle
+import os
 
 class Models():
     def __init__(self, features, y_cost, _shuffle=False):
@@ -68,6 +69,7 @@ class Models():
         model.summary()
 
         model.fit(self.features, y_true, epochs=epoch, callbacks=[csv_logger])
+        self.checkDirectory('./models')
         model.save('./models/'+model_name)
 
     def inferClass(self):
@@ -101,6 +103,7 @@ class Models():
 
         print("Training the model")
         model.fit(features, self.y_class)
+        self.checkDirectory('./models')
         pickle.dump(model, open('./models/'+name, 'wb'))
         np.save('./models/'+name+'feat', selectedFeatures)
 
@@ -159,6 +162,7 @@ class Models():
         opt = tf.keras.optimizers.Adam(learning_rate=0.00001)
         model.compile(optimizer=opt, loss=lossFunc)
         model.fit(self.features, y_true, epochs=2000, callbacks=[csv_logger])
+        self.checkDirectory('./models')
         model.save('./models/'+model_name)
 
     def trainSingleLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
@@ -186,6 +190,7 @@ class Models():
         opt = tf.keras.optimizers.Adam(learning_rate=0.00001)
         model.compile(optimizer=opt, loss=lossFunc)
         model.fit(self.features, y_true, epochs=2000, callbacks=[csv_logger])
+        self.checkDirectory('./models')
         model.save('./models/'+model_name)
 
     def trainDoubleNeuronsLSTM(self, stepSize ,size, loss='categorical_crossentropy'):
@@ -214,4 +219,9 @@ class Models():
         opt = tf.keras.optimizers.Adam(learning_rate=0.00001)
         model.compile(optimizer=opt, loss=lossFunc)
         model.fit(self.features, y_true, epochs=2000, callbacks=[csv_logger])
+        self.checkDirectory('./models')
         model.save('./models/'+model_name)
+    
+    def checkDirectory(self, path):
+        if not os.path.exists(str(path)):
+            os.mkdir(path)

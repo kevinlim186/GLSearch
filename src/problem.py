@@ -205,6 +205,7 @@ class Problem():
             self.reset()
             self.runPerformanceTest(i)
             name = self.getProblemName(self.function, self.instance, self.spentBudget, 'test', str(i))
+            self.checkDirectory(self.baseDIR+'/currentPoints')
             self.currentResults.to_csv(self.baseDIR+'/currentPoints/'+name+'.csv',index=False)
 
     def runPerformanceTest(self, testRun):
@@ -223,7 +224,8 @@ class Problem():
                 self.optimizer.recordStatistics()
             name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Test',testRun)
             self.currentResults['name'] = name
-            self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+            self.checkDirectory(self.baseDIR+'/temp')
+            self.currentResults.to_csv(self.baseDIR+'/temp/'+name+'.csv',index=False)
             self.performance.importHistoricalPath('temp/'+name+'.csv')
             
         elif self.localSearch=='bfgs':
@@ -234,7 +236,8 @@ class Problem():
                 name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs_LHS'+str(i)+'_',testRun)
                 _ = self.calculatePerformance(name)
                 self.currentResults['name'] = name
-                self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+                self.checkDirectory(self.baseDIR+'/temp')
+                self.currentResults.to_csv(self.baseDIR+'/temp/'+name+'.csv',index=False)
                 self.performance.importHistoricalPath('temp/'+name+'.csv')
 
         
@@ -246,14 +249,16 @@ class Problem():
                 name = self.getProblemName(self.function, self.instance, self.spentBudget,'nelder_LHS'+str(i)+'_',testRun)
                 _ = self.calculatePerformance(name)
                 self.currentResults['name'] = name
-                self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+                self.checkDirectory(self.baseDIR+'/temp')
+                self.currentResults.to_csv(self.baseDIR+'/temp/'+name+'.csv',index=False)
                 self.performance.importHistoricalPath('temp/'+name+'.csv')
 
     def saveState(self):
         temp = 'F_' + str(self.function) +'_I_'+ str(self.instance) +'_D_'+ str(self.dimension)+'.csv'
         self.prevRemainingBudget  = self.remainingBudget 
         self.prevSpentBudget  = self.spentBudget 
-        self.currentResults.to_csv('temp1/'+temp, index=False)
+        self.checkDirectory(self.baseDIR+'/temp1')
+        self.currentResults.to_csv(self.baseDIR+'/temp1/'+temp, index=False)
 
     def loadState(self):
         temp = 'F_' + str(self.function) +'_I_'+ str(self.instance) +'_D_'+ str(self.dimension)+'.csv'
@@ -394,37 +399,38 @@ class Problem():
         if self.pflacco:
             self.performance.insertELAData(name, self.ela_feat)
         else:
-            self.currentResults.to_csv('temp/'+name+'_pflacco.csv',index=False)
+            self.checkDirectory(self.baseDIR+'/temp')
+            self.currentResults.to_csv(self.baseDIR+'temp/'+name+'_pflacco.csv',index=False)
     
     def calculatePerformance(self, name):
         optimalValue = self.optimalValue  
         ert8, fce, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue))
 
-        ert7, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-7)))
+        ert7, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-7)))
 
-        ert6, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-6)))
+        ert6, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-6)))
 
-        ert5, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-5)))
+        ert5, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-5)))
 
-        ert4, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-4)))
+        ert4, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-4)))
 
-        ert3, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-3)))
+        ert3, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-3)))
 
-        ert2, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-2)))
+        ert2, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-2)))
 
-        ert1, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-1)))
+        ert1, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-1)))
         
-        ert0, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e0)))
+        ert0, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e0)))
 
-        ertp1, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e1)))
+        ertp1, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e1)))
 
-        ertp2, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e2)))
+        ertp2, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e2)))
 
-        ertp3, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e3)))
+        ertp3, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e3)))
 
-        ertp4, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e4)))
+        ertp4, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e4)))
         
-        self.performance.insertPerformance(name, ert8, ert7, ert6, ert5, ert4, ert3, ert2, ert1, ert0, ertp1, ertp2,ertp3, ertp4, fce)
+        self.performance.insertPerformance(name= name, ert8=ert8, ert7=ert7, ert6=ert6, ert5=ert5, ert4=ert4, ert3=ert3, ert2=ert2, ert1=ert1, ert0=ert0, ertp1=ertp1, ertp2=ertp2, ertp3=ertp3, ertp4=ertp4, fce=fce)
 
         return minValue
     
@@ -440,6 +446,7 @@ class Problem():
             length      - Optional  : character length of bar (Int)
             fill        - Optional  : bar fill character (Str)
             printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+            Source: https://stackoverflow.com/questions/62116732/combining-two-for-to-integrate-a-progress-bar-while-deleting-line-in-a-text-fi
         """
         percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
         filledLength = int(length * iteration // total)
@@ -455,7 +462,7 @@ class Problem():
             Calculates the FCE and ERT of a given set of function evaluation results and target value
 
             :param fitnesses:   Numpy array of size (num_runs, num_evals)
-            :param target:      Target value to use for basing the ERT on. Default: 1e-8
+            :param target:      Target value to use for basing the ERT on. 
             :return:            ESFitness object with FCE and ERT properly set
             Source: Modea Python Package by https://github.com/sjvrijn, slightly modified to consider target based on BBOB target value.
         """
@@ -508,6 +515,7 @@ class Problem():
             self.reset()
             self.runASPTest(i, ASP,ASPName, size, restart, features, stepSize)
             name = self.getProblemName(self.function, self.instance, self.spentBudget, ASPName, str(i))
+            self.checkDirectory(self.baseDIR+'/currentPoints')
             self.currentResults.to_csv(self.baseDIR+'/currentPoints/'+name+'.csv',index=False)
 
 
@@ -545,15 +553,15 @@ class Problem():
                     if len(self.elaFetures) < stepSize:
                         index = 0
                     else:  
-                        ela = np.array([self.elaFetures[x_labels].iloc[-1,].values])
+                        ela = np.array([self.elaFetures[x_labels].iloc[-1,].values]).astype('float32')
         
                         #add additional step in the ela
                         for i in range(2, stepSize+1):   
-                            ela1 = np.array([self.elaFetures[x_labels].iloc[-i,].values])
+                            ela1 = np.array([self.elaFetures[x_labels].iloc[-i,].values]).astype('float32')
                             ela = np.concatenate((ela1,ela),axis=0)
         
                         print(ela)
-                        index = ASP.predict(ela.reshape(1, stepSize,len(x_labels))).argmax()
+                        index = ASP.predict(ela.reshape(1, stepSize,len(x_labels)).astype('float32')).argmax()
 
                 else:
                     
@@ -611,3 +619,7 @@ class Problem():
             #check if the value is still missing. Impute a value of 0 if there is still nan.
             if (np.isnan(sum(self.elaFetures[label]))):
                 self.elaFetures[label] = self.elaFetures[label].fillna(0)
+
+    def checkDirectory(self, path):
+        if not os.path.exists(str(path)):
+            os.mkdir(path)

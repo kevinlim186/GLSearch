@@ -13,3 +13,5 @@ models/*
 test.py
 perf.csv
 Exploration.ipynb
+currentPoints/*
+performance.csv
