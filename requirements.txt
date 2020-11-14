@@ -19,7 +19,7 @@ chardet==3.0.4
 click==7.1.1
 cocoex==0.0.0
 cocopp==0.0.0
-cryptography==2.9.2
+cryptography==3.2
 cssselect==1.1.0
 cycler==0.10.0
 decorator==4.4.2
@@ -128,7 +128,7 @@ cffi==1.14.0
 chardet==3.0.4
 cocoex==2.3.3.5
 cocopp==2.3.3.5
-cryptography==2.9.2
+cryptography==3.2
 cvxopt==1.2.5
 cycler==0.10.0
 dask==2.20.0
