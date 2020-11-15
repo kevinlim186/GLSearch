@@ -11,9 +11,9 @@ esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1]
 performance = Performance()
 
 
-#sample run gathering data for function 1, instances 1 and 2 with dimensions 2 and 3. 
+#sample run gathering data for function 1 with dimensions 2 and 3. 
 for i in range(1,2):
-    suite = Suites(instances=[1,2], baseBudget=10000, dimensions=[2,3], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
+    suite = Suites(instances=[1,2,3,4,5], baseBudget=10000, dimensions=[2,3], esconfig=esconfig, function=i, performance=performance, pflacco=True, localSearch=None)
     suite.runDataGathering()
     performance.saveToCSVPerformance('DataGathering')
     performance.saveToCSVELA('DataGathering')
@@ -59,18 +59,18 @@ model = tf.keras.models.load_model('./models/'+modelName, custom_objects={'weigh
 
 performanceASP = Performance()
 
-#test model for function 1, instances 6 and 7 with dimensions 2 and 3. 
+#test model for function 1 with dimensions 2 and 3. 
 for i in range(1,2):
-    suite = Suites(instances=[6,7], baseBudget=10000, dimensions=[2,3], esconfig=esconfig, function=i, performance=performanceASP, pflacco=True, localSearch=None)
+    suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3], esconfig=esconfig, function=i, performance=performanceASP, pflacco=True, localSearch=None)
     suite.runTestModel(ASP=model, size=sampleSizeValue ,restart=False, features=None, ASPName=modelName, stepSize=timeSteps)
     performanceASP.saveToCSVPerformance('Test_'+modelName)
 
 
 ####################### Performance Reporting #############################
 performanceBenchmark = Performance()
-#create a benchmark for function 1, instances 6 and 7 with dimensions 2 and 3. 
+#create a benchmark for function 1 with dimensions 2 and 3. 
 for i in range(1,2):
-    suite = Suites(instances=[6,7], baseBudget=10000, dimensions=[2,3], esconfig=esconfig, function=i, performance=performanceBenchmark , pflacco=True, localSearch=None)
+    suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3], esconfig=esconfig, function=i, performance=performanceBenchmark , pflacco=True, localSearch=None)
     suite.runDataGathering()
     performanceBenchmark.saveToCSVPerformance('Benchmark')
 
