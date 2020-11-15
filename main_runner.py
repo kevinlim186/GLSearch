@@ -93,7 +93,7 @@ removeAlgorithmChosen(ASPPerformance)
 result= Result()
 result.addPerformance(ASPPerformance, benchmark)
 
-performance, _ = result.calculatePerformance()
+performance= result.calculatePerformance()
 
 #access the performance information in the performance.csv file
 performance.to_csv('performance.csv')

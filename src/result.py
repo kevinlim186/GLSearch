@@ -225,17 +225,17 @@ class Result():
         sbsPerformance['algo'] = runnerName
 
         #VBS-- Get the lowest score
-        local = self.processedPerformance[self.processedPerformance['algo'].isin(['Local:bfgs', 'Local:nelder'])].groupby(['function', 'instance', 'dimension','trial','algo'])['performance'].min().reset_index()
-        vbsPerformance = pd.concat([local,base]).groupby(['function', 'instance', 'dimension','trial'])['performance'].min().reset_index()
-        vbsPerformance['algo'] =  'VBS'
+        #local = self.processedPerformance[self.processedPerformance['algo'].isin(['Local:bfgs', 'Local:nelder'])].groupby(['function', 'instance', 'dimension','trial','algo'])['performance'].min().reset_index()
+        #vbsPerformance = pd.concat([local,base]).groupby(['function', 'instance', 'dimension','trial'])['performance'].min().reset_index()
+        #vbsPerformance['algo'] =  'VBS'
         
 
         #get the individual model performance
         modelPerformance = self.processedPerformance[~self.processedPerformance['algo'].isin(['Local:Base', 'Local:nelder', 'Local:bfgs'])][['function', 'instance', 'dimension','trial','algo', 'performance']]
         
-        allPerformance = pd.concat([sbsPerformance,vbsPerformance,modelPerformance,base, local]).pivot_table(index=['function', 'dimension','instance', 'trial'], columns = 'algo', values='performance').reset_index()
+        allPerformance = pd.concat([sbsPerformance,modelPerformance,base]).pivot_table(index=['function', 'dimension','instance', 'trial'], columns = 'algo', values='performance').reset_index()
 
-        return allPerformance, sbsRunnersPerformance 
+        return allPerformance
 
     def createTrainSet(self, dataset, algorithm=None, reset=False, interface=None, RNN=None):
         if reset:
