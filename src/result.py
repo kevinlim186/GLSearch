@@ -5,7 +5,7 @@ import math
 import bbobbenchmarks.bbobbenchmarks as bn
 
 class Result():
-    def __init__(self, bestTiming= True, restricted=False):
+    def __init__(self, bestTiming= True, restricted=False, ert_column='ert-8'):
         self.consolidatedPerformance = pd.DataFrame()
         self.processedPerformance = pd.DataFrame()
         self.calculatedPerformance = pd.DataFrame()
@@ -18,6 +18,8 @@ class Result():
         self.processedELA = False
         self.bestTiming = bestTiming
         self.restricted = restricted
+        self.ert_column = ert_column
+        self.ert_precision = float('1'+ert_column.replace('rt',''))
     
     def addPerformance(self, *args):
         dataframes = []
@@ -99,13 +101,13 @@ class Result():
 
         #Calculate necessary numbers in preparation for calculate the true performance
         self.processedPerformance['ertMax'] = 10000*self.processedPerformance['dimension']
-        self.processedPerformance['relERT'] = self.processedPerformance['ert-8']/self.processedPerformance['ertMax']
+        self.processedPerformance['relERT'] = self.processedPerformance[self.ert_column]/self.processedPerformance['ertMax']
         maxFCE = self.processedPerformance.groupby(['function', 'instance', 'dimension','trial'])['fce'].max().reset_index()
         self.processedPerformance = self.processedPerformance.merge(maxFCE, on=['function', 'instance', 'dimension','trial'], how='left', suffixes=('', 'max'))
 
         #adjust FCE to factor in accuracy set when experiment was setup
-        self.processedPerformance['fce'] =  self.processedPerformance['fce']+ 1e-8 
-        self.processedPerformance['relFCE'] = self.processedPerformance.apply(lambda x: 1 + ((np.log10(float(x['fce'])/1e-8))/(np.log10(float(x['fcemax'])/1e-8)) ), axis=1)
+        self.processedPerformance['fce'] =  self.processedPerformance['fce']+ self.ert_precision
+        self.processedPerformance['relFCE'] = self.processedPerformance.apply(lambda x: 1 + ((np.log10(float(x['fce'])/self.ert_precision))/(np.log10(float(x['fcemax'])/self.ert_precision)) ), axis=1)
 
         #Calculate performance based on Rajn's performance measure; 
         self.processedPerformance['performance'] = self.processedPerformance.apply(lambda x: x['relERT'] if x['relERT'] >0  else x['relFCE'], axis=1)
@@ -342,7 +344,7 @@ class Result():
         self.processedPerf = False
         self.processedELA = False
 
-    def _getOptimalValue(self, functionID, instance, precision=1e-8):
+    def _getOptimalValue(self, functionID, instance):
         functionAttr = 'F' + str(functionID)
         function = getattr(bn, functionAttr)(instance)
-        return function.getfopt() + precision
+        return function.getfopt() + self.ert_precision

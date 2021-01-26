@@ -52,7 +52,7 @@ class Models():
             lossFunc = self.weightedCategoricalCrossentropy
             y_true = self.y_cost
         else:
-            lossFunc = loss
+            lossFunc = lossf
             self.oneHotEncode()
             y_true = self.y_class
         model_name = '_Drop'+str(dropout)+'_Hidden'+str(hidden)+'_Epoch'+str(epoch)+'_Learning'+str(learning)+'_Size:'+str(size)+'_Loss'+loss
@@ -128,7 +128,7 @@ class Models():
             y_arr.append(y_test[i+n_step])
         return np.array(x_arr), np.array(y_arr)
 
-    def trainLSTM(self, stepSize ,size,dropout=0.2, grossup=1, loss='categorical_crossentropy', restricted=False):
+    def trainLSTM(self, stepSize ,size,dropout=0.2, grossup=1, loss='categorical_crossentropy', restricted=False, precision_value=''):
         self.inferClass()
 
         if loss == 'WCategoricalCrossentropy':
@@ -146,7 +146,7 @@ class Models():
             model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+'_Grossup_'+str(grossup)+'_StepSize'+str(stepSize)+'_Epoch'+str(2000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
             output = 3
         else:
-            model_name = '_RNN_Hidden'+str(2)+'_Dropout_'+str(dropout)+'_Grossup_'+str(grossup)+ '_StepSize'+str(stepSize)+'_Epoch'+str(2000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
+            model_name = '_RNN_Hidden('+precision_value+')'+str(2)+'_Dropout_'+str(dropout)+'_Grossup_'+str(grossup)+ '_StepSize'+str(stepSize)+'_Epoch'+str(2000)+'_Learning'+str(0.00001)+'_Size:'+str(size)+'_Loss_'+loss
             output = 2
 
         csv_logger = CSVLogger('./perf/'+model_name , separator=',', append=False)

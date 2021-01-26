@@ -52,7 +52,7 @@ sampleSizeValue = 200
 
 
 #custom loss function needs to be redefined 
-def weightedCategoricalCrossentropy(self, y_true, y_pred):
+def weightedCategoricalCrossentropy( y_true, y_pred):
         return K.mean(K.sum(y_true*y_pred, axis=1))
 
 model = tf.keras.models.load_model('./models/'+modelName, custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy})
