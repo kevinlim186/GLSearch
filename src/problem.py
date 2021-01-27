@@ -404,7 +404,7 @@ class Problem():
     
     def calculatePerformance(self, name):
         optimalValue = self.optimalValue  
-        ert8, fce, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue))
+        ert8, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue))
 
         ert7, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-7)))
 
@@ -416,7 +416,7 @@ class Problem():
 
         ert3, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-3)))
 
-        ert2, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-2)))
+        ert2, fce, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-2)))
 
         ert1, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-1)))
         
@@ -469,7 +469,7 @@ class Problem():
         min_fitnesses = np.min(fitnesses, axis=1).tolist()  # Save as list to ensure eval() can read it as summary
 
         num_runs, num_evals = fitnesses.shape
-        below_target = fitnesses < target
+        below_target = fitnesses <= target
         num_below_target = np.sum(below_target, axis=1)
         min_indices = []
         num_successful = 0
