@@ -688,12 +688,6 @@ class Problem():
                     
                                     print(ela)
                                     index = model['asp'].predict(ela.reshape(1, stepSize,len(x_labels)).astype('float32')).argmax()
-
-                            else:
-                                
-                                ela = self.elaFetures[x_labels].iloc[-1,]
-                                print(ela)
-                                index = model['model'].predict(ela.values.reshape(1,-1)).argmax()
                             
                             print("Selected algorihtm of "+ model['name'] +' is '+ y_labels[index])
 
