@@ -104,7 +104,7 @@ files_df =files_df.groupby(['dim','function','instance','trial']).max().reset_in
 
 total = len(files_df)
 for i, row_file in files_df.iterrows():
-    print("In "+ row_file['name']+ '. '+str(i/total)+'% completed'.)
+    print("In "+ row_file['name']+ '. '+str(i/total)+'% completed')
     #load the points
     data = pd.read_csv('./test/'+row_file['name'])
     
