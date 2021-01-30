@@ -33,6 +33,7 @@ class Problem():
         self.x_labels = x_labels
         self.precision=precision
         self.baseDIR = os.getcwd()
+        self.selected_checkpoint = pd.DataFrame()
 
         self.ela_feat = None
 
@@ -639,7 +640,6 @@ class Problem():
 
 
     def runMultipleModels(self, testRun, models, features, stepSize):
-        selected_checkpoint = pd.DataFrame()
         checkpoints = self.getCheckPoints()
         currentLength = 0
         maxIndex = len(checkpoints)-1
@@ -696,10 +696,10 @@ class Problem():
                             #if index is greater than 0, then local search must be used
                             if (index > 0):
                                 if (index==1):
-                                    selected_checkpoint = selected_checkpoint.append({'model':model['name'], 'function':self.function, 'instance': self.instance, 'budget': self.spentBudget,'local':'BFGS' }, ignore_index=True)
+                                    self.selected_checkpoint  = self.selected_checkpoint .append({'model':model['name'], 'function':self.function, 'instance': self.instance, 'budget': self.spentBudget,'local':'BFGS' }, ignore_index=True)
 
                                 if (index == 2):
-                                    selected_checkpoint = selected_checkpoint.append({'model':model['name'], 'function':self.function, 'instance': self.instance, 'budget': self.spentBudget,'local':'Nelder' }, ignore_index=True)
+                                    self.selected_checkpoint  = self.selected_checkpoint .append({'model':model['name'], 'function':self.function, 'instance': self.instance, 'budget': self.spentBudget,'local':'Nelder' }, ignore_index=True)
 
                                 #remove the model from the models
                                 models.remove(model)
@@ -749,7 +749,7 @@ class Problem():
                 self.optimizer.runOneGeneration()
                 self.optimizer.recordStatistics()
 
-
+        self.selected_checkpoint.to_csv('./perf/model_selection_f'+str(self.function)+'.csv')
         
         name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
         self.calculatePerformance(name)
