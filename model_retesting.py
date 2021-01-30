@@ -25,6 +25,11 @@ def weightedCategoricalCrossentropy( y_true, y_pred):
         return K.mean(K.sum(y_true*y_pred, axis=1))
     
 def calculateELA(sampleSize, currentResults, budget, budget_used, dimension, elaFeatures):
+    #remove out of bounds population
+    activeColumns = ['x'+str(x) for x in range(1,dimension+1)] + ['y', 'name']
+    for column in activeColumns[0:-2]:
+        currentResults = currentResults[(currentResults[column]>-5) & (currentResults[column]<5)]
+    
     sample = currentResults.iloc[:,0:dimension].values[-sampleSize:]
     obj_values = currentResults['y'].values[-sampleSize:]
     featureObj = create_feature_object(sample,obj_values, lower=-5, upper=5)
