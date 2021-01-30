@@ -688,7 +688,9 @@ class Problem():
                     
                                     print(ela)
                                     index = model['asp'].predict(ela.reshape(1, stepSize,len(x_labels)).astype('float32')).argmax()
-                            
+                            else:
+                                #just continue
+                                index =0
                             print("Selected algorihtm of "+ model['name'] +' is '+ y_labels[index])
 
                             #if index is greater than 0, then local search must be used
