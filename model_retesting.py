@@ -130,7 +130,7 @@ for i, row_file in files_df.iterrows():
     check_points= 500* dim
     check_points_iterable = range(check_points,budget,  check_points)
 
-    elaFeatures = pd.DataFrame()
+    elaFeatures = pd.DataFrame(columns=x_labels)
     for idx, check_point in enumerate(check_points_iterable):
         selection_data = data.iloc[:check_point]
         elaFeatures = calculateELA(sampleSize=sampleSize, currentResults=data, budget=budget, budget_used=budget_used , dimension=dim,elaFeatures=elaFeatures)
