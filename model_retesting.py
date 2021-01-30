@@ -10,7 +10,14 @@ import keras.backend as K
 import tensorflow as tf
 
 
-modelName = '_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:0_Loss_categorical_crossentropy'
+modelName ='_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:0_Loss_WCategoricalCrossentropy'
+#modelName ='_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:1_Loss_WCategoricalCrossentropy'
+#modelName ='_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:2_Loss_WCategoricalCrossentropy'
+
+#modelName = '_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:0_Loss_categorical_crossentropy'
+#modelName = '_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:1_Loss_categorical_crossentropy'
+#modelName = '_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:2_Loss_categorical_crossentropy'
+
 sampleSize =50
 
 
@@ -134,3 +141,5 @@ for i, row_file in files_df.iterrows():
         #if local search has never been chosen, then we save the chosen algorithm as the CMA-ES
         elif idx ==18:
             files_df.loc[idx,'chosen']=0
+
+files_df.to_csv('./perf/Model_Retesting_'+modelName)
