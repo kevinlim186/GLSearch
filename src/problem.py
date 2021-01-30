@@ -665,13 +665,15 @@ class Problem():
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
                 currentLength += 1
 
-                sizes = [50,100,200]
-                for size in sizes:
-                    self.calculateELA(size=size, sanitize=True)
-                    print(len(self.elaFetures))
+                #code efficieny. Don't calculate ela if all the models are done
+                for model in models:
+                    sizes = [50,100,200]
+                    for size in sizes:
+                        if len(list(filter(lambda x: x['size']==size, models)))>0:
+                            self.calculateELA(size=size, sanitize=True)
+                            print(len(self.elaFetures))
                     
                     #ELA features will only be computed if there are models in the model list
-                    for model in models:
                         if model['size']==size:
                             #We need to have at least the number of step size
                             if len(self.elaFetures) < stepSize:
@@ -749,3 +751,5 @@ class Problem():
         
         name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
         self.calculatePerformance(name)
+
+
