@@ -693,7 +693,7 @@ class Problem():
                                 
                                 ela = self.elaFetures[x_labels].iloc[-1,]
                                 print(ela)
-                                index = model['asp'].predict(ela.values.reshape(1,-1)).argmax()
+                                index = model['model'].predict(ela.values.reshape(1,-1)).argmax()
                             
                             print("Selected algorihtm of "+ model['name'] +' is '+ y_labels[index])
 

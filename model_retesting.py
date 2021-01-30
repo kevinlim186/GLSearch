@@ -19,32 +19,32 @@ esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1]
 models = [
     {
         'name': 'Expected_Loss_50D_Sample',
-        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:0_Loss_WCategoricalCrossentropy', custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy})
+        'model': tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:0_Loss_WCategoricalCrossentropy', custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy}),
         'size': 50
     },
     {
         'name': 'Expected_Loss_100D_Sample',
-        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:1_Loss_WCategoricalCrossentropy', custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy})
+        'model': tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:1_Loss_WCategoricalCrossentropy', custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy}),
         'size': 100
     },    
     {
         'name': 'Expected_Loss_200D_Sample',
-        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:2_Loss_WCategoricalCrossentropy', custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy})
+        'model': tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:2_Loss_WCategoricalCrossentropy', custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy}),
         'size': 200
     },
     {
         'name': 'Cat_Loss_50D_Sample',
-        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:0_Loss_categorical_crossentropy'),
+        'model': tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:0_Loss_categorical_crossentropy'),
         'size': 50
     },
     {
         'name': 'Cat_Loss_100D_Sample',
-        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:1_Loss_categorical_crossentropy')
+        'model':tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:1_Loss_categorical_crossentropy'),
         'size': 100
     },
     {
         'name': 'Cat_Loss_200D_Sample',
-        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:2_Loss_categorical_crossentropy')
+        'model':  tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:2_Loss_categorical_crossentropy'),
         'size': 200
     }
 ]
