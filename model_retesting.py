@@ -8,143 +8,50 @@ from pflacco.pflacco import calculate_feature_set, create_feature_object
 from src.interface import y_labels, x_labels
 import keras.backend as K
 import tensorflow as tf
-
-
-modelName ='_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:0_Loss_WCategoricalCrossentropy'
-#modelName ='_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:1_Loss_WCategoricalCrossentropy'
-#modelName ='_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:2_Loss_WCategoricalCrossentropy'
-
-#modelName = '_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:0_Loss_categorical_crossentropy'
-#modelName = '_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:1_Loss_categorical_crossentropy'
-#modelName = '_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:2_Loss_categorical_crossentropy'
-
-sampleSize =50
-
+from src.suites import Suites
+from src.logger import Performance
 
 def weightedCategoricalCrossentropy( y_true, y_pred):
         return K.mean(K.sum(y_true*y_pred, axis=1))
-    
-def calculateELA(sampleSize, currentResults, budget, budget_used, dimension, elaFeatures):
-    #remove out of bounds population
-    activeColumns = ['x'+str(x) for x in range(1,dimension+1)] + ['y', 'name']
-    for column in activeColumns[0:-2]:
-        currentResults = currentResults[(currentResults[column]>-5) & (currentResults[column]<5)]
-    
-    sample = currentResults.iloc[:,0:dimension].values[-sampleSize:]
-    obj_values = currentResults['y'].values[-sampleSize:]
-    featureObj = create_feature_object(sample,obj_values, lower=-5, upper=5)
 
-    try:
-        ela_distr = calculate_feature_set(featureObj, 'ela_distr')
-    except:
-        ela_distr = {}
+esconfig = [0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1] 
 
+models = [
+    {
+        'name': 'Expected_Loss_50D_Sample',
+        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:0_Loss_WCategoricalCrossentropy', custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy})
+        'size': 50
+    },
+    {
+        'name': 'Expected_Loss_100D_Sample',
+        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:1_Loss_WCategoricalCrossentropy', custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy})
+        'size': 100
+    },    
+    {
+        'name': 'Expected_Loss_200D_Sample',
+        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:2_Loss_WCategoricalCrossentropy', custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy})
+        'size': 200
+    },
+    {
+        'name': 'Cat_Loss_50D_Sample',
+        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:0_Loss_categorical_crossentropy'),
+        'size': 50
+    },
+    {
+        'name': 'Cat_Loss_100D_Sample',
+        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:1_Loss_categorical_crossentropy')
+        'size': 100
+    },
+    {
+        'name': 'Cat_Loss_200D_Sample',
+        'model': model = tf.keras.models.load_model('./models/_RNN_Hidden2_Dropout_0.2_Grossup_1_StepSize2_Epoch2000_Learning1e-05_Size:2_Loss_categorical_crossentropy')
+        'size': 200
+    }
+]
 
-    ela_level = calculate_feature_set(featureObj, 'ela_level')
-
-
-    try:
-        ela_meta = calculate_feature_set(featureObj, 'ela_meta')
-    except:
-        ela_meta = {}
-
-    try:
-        basic = calculate_feature_set(featureObj, 'basic')
-    except:
-        basic ={}
-
-    try:
-        disp = calculate_feature_set(featureObj, 'disp')
-    except:
-        disp = {}
-
-    try:
-        limo = calculate_feature_set(featureObj, 'limo')
-    except:
-        limo = {}
-
-    try:
-        nbc = calculate_feature_set(featureObj, 'nbc')
-    except:
-        nbc = {}
-
-    try: 
-        pca = calculate_feature_set(featureObj, 'pca')
-    except:
-        pca ={}
-
-    try:
-        ic = calculate_feature_set(featureObj, 'ic')
-    except:
-        ic = {}
-
-    ela_feat =  {**ela_distr, **ela_level, **ela_meta, **basic, **disp, **limo, **nbc, **pca, **ic }
-
-    ela_feat['budget.used'] = budget_used / budget
-
-    elaFeatures = elaFeatures.append(ela_feat, ignore_index=True)
-    
-    #to avoid any errors if the ela feature computed is infinit or null
-    elaFeatures.replace([np.inf, -np.inf], np.nan,  inplace=True)
-    elaFeatures = elaFeatures.fillna(0)
-    
-    return elaFeatures
-
-
-model = tf.keras.models.load_model('./models/'+modelName, custom_objects={'weightedCategoricalCrossentropy':weightedCategoricalCrossentropy})
-
-
-#load files in the benchmark data
-files = os.listdir("./test")
-files = sorted(files)
-
-#just get the most latest base runner. 
-files_df = pd.DataFrame()
-for file in files:
-    if 'Local:Base' in file:
-        name = file
-        function_id = int(re.search('(_F[0-9]+)', file).group(1).replace('_F',''))
-        instance_id = int(re.search('(_I[0-9]+)', file).group(1).replace('_I',''))
-        dim = int(re.search('(_D[0-9]+)', file).group(1).replace('_D',''))
-        trial = int(re.search('(_T[0-9]+)', file).group(1).replace('_T',''))
-        budget = int(re.search('(_B[0-9]+)', file).group(1).replace('_B',''))
-        files_df = files_df.append({'name':name,'function': function_id, 'instance':instance_id, 'dim':dim, 'trial':trial, 'budget':budget}, ignore_index=True)
-
-
-#get the latest base runner
-files_df =files_df.groupby(['dim','function','instance','trial']).max().reset_index()
-
-total = len(files_df)
-for i, row_file in files_df.iterrows():
-    print("In "+ row_file['name']+ '. '+str(i/total)+'% completed')
-    #load the points
-    data = pd.read_csv('./test/'+row_file['name'])
-    
-    #parse needed info
-    function_id = int(row_file['function'])
-    instance_id = int(row_file['instance'])
-    dim = int(row_file['dim'])
-    trial = int(row_file['trial'])
-    budget = dim*10000
-    budget_used = 500
-    check_points= 500* dim
-    check_points_iterable = range(check_points,budget,  check_points)
-
-    elaFeatures = pd.DataFrame(columns=x_labels)
-    for idx, check_point in enumerate(check_points_iterable):
-        selection_data = data.iloc[:check_point]
-        elaFeatures = calculateELA(sampleSize=sampleSize, currentResults=data, budget=budget, budget_used=budget_used , dimension=dim,elaFeatures=elaFeatures)
-
-        #skip first checkpoint
-        if idx > 0:
-            prediction = model.predict(elaFeatures[x_labels].iloc[-2:].values.reshape(1, 2,len(x_labels)).astype('float32')).argmax()
-
-            #if the model decides to intiate the Local search, then we get the chosen index and break the loop
-            if prediction >0:
-                files_df.loc[idx,'chosen']=prediction
-                break
-        #if local search has never been chosen, then we save the chosen algorithm as the CMA-ES
-        elif idx ==18:
-            files_df.loc[idx,'chosen']=0
-
-files_df.to_csv('./perf/Model_Retesting_'+modelName)
+performanceBenchmark = Performance()
+#create a benchmark for function 1 with dimensions 2 and 3. 
+for i in range(1,2):
+    suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3], esconfig=esconfig, function=i, performance=performanceBenchmark , pflacco=True, localSearch=None)
+    suite.runTestMultipleModel(models=models, stepSize=2, precision=1e-2)
+    performanceBenchmark.saveToCSVPerformance('Benchmark_Resting_with_Models_func_'+str(1))

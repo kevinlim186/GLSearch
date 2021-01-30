@@ -65,3 +65,20 @@ class Suites:
             problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger,pflacco,localSearch)
             problem.runASPBattery(ASP, ASPName, size,stepSize,restart, features)
         
+
+    def runTestMultipleModel(self,  models, stepSize, precision):
+        maxDimensionLen = len(self.dimensions)
+        maxInstanceLen = len(self.instances)
+        
+        for i in range(maxDimensionLen):
+            dimension = self.dimensions[i]
+            budget = self.baseBudget * self.dimensions[i]
+            checkPoint = 500 * self.dimensions[i]
+            for j in range(maxInstanceLen):
+                instance = self.instances[j]
+                self.runModelTestMultiple(budget=budget, function=self.function, instance=instance, dimension=dimension, esconfig=self.esconfig, checkPoint=checkPoint, logger=self.performance, pflacco=self.pflacco, localSearch=self.localSearch,  models=models, stepSize=stepSize, precision=precision)
+
+
+    def runModelTestMultiple(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco,localSearch,models,stepSize, precision):
+            problem = Problem(budget, function, instance, dimension, esconfig, checkPoint, logger,pflacco,localSearch, precision=precision)
+            problem.runTestMultipleModels(models,  stepSize)

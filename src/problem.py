@@ -13,7 +13,7 @@ from src.interface import y_labels, x_labels
 import math
 
 class Problem():
-    def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco, localSearch=None):
+    def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco, localSearch=None, precision=1e-8):
         self.pflacco = pflacco
         self.totalBudget = budget
         self.remainingBudget = budget
@@ -31,6 +31,7 @@ class Problem():
         self.prevSpentBudget = None
         self.localSearch = localSearch
         self.x_labels = x_labels
+        self.precision=precision
         self.baseDIR = os.getcwd()
 
         self.ela_feat = None
@@ -113,7 +114,7 @@ class Problem():
                 self.currentResults = self.currentResults.append(data, ignore_index=True,)
                 return result
             self.problemInstance = functionInstance
-            self.optimalValue = function.getfopt() + 1e-8
+            self.optimalValue = function.getfopt() + self.precision
         elif self.function == 0:
             def parabola(x):
                 self.remainingBudget = self.remainingBudget - 1
@@ -126,7 +127,7 @@ class Problem():
                 self.currentResults = self.currentResults.append(data, ignore_index=True,)
                 return result
             self.problemInstance = parabola 
-            self.optimalValue = 0 + 1e-8
+            self.optimalValue = 0 + self.precision
     
 
     def runDataGathering(self, size):
@@ -305,13 +306,13 @@ class Problem():
         maxiter = self.remainingBudget
         #x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
         opt={'maxfev': maxiter, 'disp': False, 'return_all': False}
-        minimize(self.problemInstance,tol=1e-8, x0=population, method='nelder-mead', options=opt)
+        minimize(self.problemInstance,tol=self.precision, x0=population, method='nelder-mead', options=opt)
 
     def bfgsAlgorithm(self, population):
         #x_bounds = Bounds(np.array([-5.]), np.array([5.]), keep_feasible = True)
         opt={'maxiter' : self.remainingBudget, 'disp': False, 'return_all': False}
         
-        minimize(self.problemInstance,tol=1e-8,  x0=population, method='BFGS', options=opt)
+        minimize(self.problemInstance,tol=self.precision,  x0=population, method='BFGS', options=opt)
     
     def calculateELA(self, size=None, sanitize=False):
         if size is None:
@@ -402,35 +403,36 @@ class Problem():
             self.checkDirectory(self.baseDIR+'/temp')
             self.currentResults.to_csv(self.baseDIR+'temp/'+name+'_pflacco.csv',index=False)
     
-    def calculatePerformance(self, name):
+    def calculatePerformance(self, name, save=True):
         optimalValue = self.optimalValue  
-        ert8, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue))
+        ert8, _, _, _, minValue = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue)-(self.precision)+(1e-8))
 
-        ert7, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-7)))
+        ert7, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e-7)))
 
-        ert6, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-6)))
+        ert6, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e-6)))
 
-        ert5, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-5)))
+        ert5, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e-5)))
 
-        ert4, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-4)))
+        ert4, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e-4)))
 
-        ert3, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-3)))
+        ert3, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e-3)))
 
-        ert2, fce, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-2)))
+        ert2, fce, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e-2)))
 
-        ert1, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e-1)))
+        ert1, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e-1)))
         
-        ert0, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e0)))
+        ert0, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e0)))
 
-        ertp1, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e1)))
+        ertp1, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e1)))
 
-        ertp2, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e2)))
+        ertp2, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e2)))
 
-        ertp3, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e3)))
+        ertp3, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e3)))
 
-        ertp4, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(1e-8)+(1e4)))
+        ertp4, _, _, _, _ = self._calcFCEandERT(fitnesses=np.array([list(self.currentResults['y'].values)]),target=(optimalValue-(self.precision)+(1e4)))
         
-        self.performance.insertPerformance(name= name, ert8=ert8, ert7=ert7, ert6=ert6, ert5=ert5, ert4=ert4, ert3=ert3, ert2=ert2, ert1=ert1, ert0=ert0, ertp1=ertp1, ertp2=ertp2, ertp3=ertp3, ertp4=ertp4, fce=fce)
+        if save:
+            self.performance.insertPerformance(name= name, ert8=ert8, ert7=ert7, ert6=ert6, ert5=ert5, ert4=ert4, ert3=ert3, ert2=ert2, ert1=ert1, ert0=ert0, ertp1=ertp1, ertp2=ertp2, ertp3=ertp3, ertp4=ertp4, fce=fce)
 
         return minValue
     
@@ -623,3 +625,135 @@ class Problem():
     def checkDirectory(self, path):
         if not os.path.exists(str(path)):
             os.mkdir(path)
+
+
+    def runTestMultipleModels(self,models, stepSize, features=None):
+        #models must be a list of dictionary of name and model.
+        #Runs five independent tests
+        for i in range(1,6):
+            self.reset()
+            self.runMultipleModels(i, models, features, stepSize)
+            name = self.getProblemName(self.function, self.instance, self.spentBudget, 'models', str(i))
+            self.checkDirectory(self.baseDIR+'/currentPoints')
+            self.currentResults.to_csv(self.baseDIR+'/currentPoints/'+name+'.csv',index=False)
+
+
+    def runMultipleModels(self, testRun, models, features, stepSize):
+        selected_checkpoint = pd.DataFrame()
+        checkpoints = self.getCheckPoints()
+        currentLength = 0
+        maxIndex = len(checkpoints)-1
+        targetReached = False
+        if features is not None:
+            x_labels = features
+        else:
+            x_labels = self.x_labels 
+
+        #default name is the base. If the algorithm selects the local search, the name will be overridden.
+        #name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base'+ASPName,testRun)
+                
+
+        #Run model ES algorithm
+        while self.totalBudget > self.spentBudget and not (targetReached):
+            self._printProgressBar(self.spentBudget, self.totalBudget,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
+
+            #If the optimal value is not reached then continue running
+            self.optimizer.runOneGeneration()
+            self.optimizer.recordStatistics()
+            
+            #Check the check point then calculate the ELA
+            if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
+                currentLength += 1
+
+                sizes = [50,100,200]
+                for size in sizes:
+                    self.calculateELA(size=size, sanitize=True)
+                    print(len(self.elaFetures))
+                    
+                    #ELA features will only be computed if there are models in the model list
+                    for model in models:
+                        if model['size']==size:
+                            if "RNN" in model['name']:
+                                print("calulating ELA ASP")
+                                #We need to have at least the number of step size
+                                if len(self.elaFetures) < stepSize:
+                                    index = 0
+                                else:  
+                                    ela = np.array([self.elaFetures[x_labels].iloc[-1,].values]).astype('float32')
+                    
+                                    #add additional step in the ela
+                                    for i in range(2, stepSize+1):   
+                                        ela1 = np.array([self.elaFetures[x_labels].iloc[-i,].values]).astype('float32')
+                                        ela = np.concatenate((ela1,ela),axis=0)
+                    
+                                    print(ela)
+                                    index = model['asp'].predict(ela.reshape(1, stepSize,len(x_labels)).astype('float32')).argmax()
+
+                            else:
+                                
+                                ela = self.elaFetures[x_labels].iloc[-1,]
+                                print(ela)
+                                index = model['asp'].predict(ela.values.reshape(1,-1)).argmax()
+                            
+                            print("Selected algorihtm of "+ model['name'] +' is '+ y_labels[index])
+
+                            #if index is greater than 0, then local search must be used
+                            if (index > 0):
+                                if (index==1):
+                                    selected_checkpoint = selected_checkpoint.append({'model':model['name'], 'function':self.function, 'instance': self.instance, 'budget': self.spentBudget,'local':'BFGS' }, ignore_index=True)
+
+                                if (index == 2):
+                                    selected_checkpoint = selected_checkpoint.append({'model':model['name'], 'function':self.function, 'instance': self.instance, 'budget': self.spentBudget,'local':'Nelder' }, ignore_index=True)
+
+                                #remove the model from the models
+                                models.remove(model)
+
+
+                
+                #check if the target is reached
+                if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue:
+                    targetReached = True
+
+
+                name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
+                self.calculatePerformance(name, save=False)
+                # Get the best individuals as of this time as input to the local search. Calculate the ELA features
+                x0 = np.array(self.optimizer.best_individual.genotype.flatten())
+
+                self.saveState()
+                
+                #Simplex Method
+                name = self.getProblemName(self.function, self.instance, self.spentBudget,'nelder',testRun)
+                
+                self.simplexAlgorithm(x0)
+
+                self.calculatePerformance(name)
+                self.loadState()
+                
+                name = self.getProblemName(self.function, self.instance, self.spentBudget,'bfgs',testRun)
+
+                self.bfgsAlgorithm(x0)
+
+                self.calculatePerformance(name)
+
+                self.loadState()
+
+                
+            
+            if round(self.optimizer.best_individual.fitness,8)<=self.optimalValue and not targetReached:
+                targetReached = True
+                name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
+            
+                    #self.currentResults['name'] = name
+                    #self.currentResults.to_csv('temp/'+name+'.csv',index=False)
+                    #self.performance.importHistoricalPath('temp/'+name+'.csv')
+                    #self.performance.saveToCSVPerformance('Function_'+str(self.function))
+                
+                #If the optimal value is not reached then continue running
+                self.optimizer.runOneGeneration()
+                self.optimizer.recordStatistics()
+
+
+        
+        name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
+        self.calculatePerformance(name)
