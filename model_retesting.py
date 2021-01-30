@@ -135,8 +135,8 @@ for i, row_file in files_df.iterrows():
             prediction = model.predict(elaFeatures[x_labels].iloc[-2:].values.reshape(1, 2,len(x_labels)).astype('float32')).argmax()
 
             #if the model decides to intiate the Local search, then we get the chosen index and break the loop
-            if prediction[0][0] >0:
-                files_df.loc[idx,'chosen']=prediction[0][0]
+            if prediction >0:
+                files_df.loc[idx,'chosen']=prediction
                 break
         #if local search has never been chosen, then we save the chosen algorithm as the CMA-ES
         elif idx ==18:
