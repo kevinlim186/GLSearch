@@ -33,7 +33,6 @@ class Problem():
         self.x_labels = x_labels
         self.precision=precision
         self.baseDIR = os.getcwd()
-        self.selected_checkpoint = pd.DataFrame()
 
         self.ela_feat = None
 
@@ -694,10 +693,10 @@ class Problem():
                             #if index is greater than 0, then local search must be used
                             if (index > 0):
                                 if (index==1):
-                                    self.selected_checkpoint  = self.selected_checkpoint .append({'model':model['name'], 'function':self.function, 'instance': self.instance, 'budget': self.spentBudget,'local':'BFGS' }, ignore_index=True)
+                                    self.performance.insertSelectedCheckpoint(model= model['name'], function=self.function, instance= self.instance, budget= self.spentBudget,local='BFGS')
 
                                 if (index == 2):
-                                    self.selected_checkpoint  = self.selected_checkpoint .append({'model':model['name'], 'function':self.function, 'instance': self.instance, 'budget': self.spentBudget,'local':'Nelder' }, ignore_index=True)
+                                    self.performance.insertSelectedCheckpoint(model= model['name'], function=self.function, instance= self.instance, budget= self.spentBudget,local='Nelder')
 
                                 #remove the model from the models
                                 models.remove(model)
@@ -746,8 +745,6 @@ class Problem():
                 #If the optimal value is not reached then continue running
                 self.optimizer.runOneGeneration()
                 self.optimizer.recordStatistics()
-
-        self.selected_checkpoint.to_csv('./perf/model_selection_f'+str(self.function)+'.csv')
         
         name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base',testRun)
         self.calculatePerformance(name)

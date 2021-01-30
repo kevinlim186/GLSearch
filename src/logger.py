@@ -23,6 +23,7 @@ class Performance():
         self.baseDIR = os.getcwd()
         self.ertPerformance = pd.DataFrame(columns=['name', 'fce'])
         self.elaFeatures = pd.DataFrame()
+        self.selected_checkpoint = pd.DataFrame(columns=['model', 'function', 'instance','budget', 'local'])
 
     def intializeServer(self):
         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
@@ -48,6 +49,9 @@ class Performance():
         self.cHandler = self.conn.cursor()
     
 
+    def insertSelectedCheckpoint(self, model, function, instance,budget, local):
+            self.selected_checkpoint  = self.selected_checkpoint .append({'model':model, 'function':function, 'instance': instance, 'budget': budget,'local':local }, ignore_index=True)
+    
     def insertELAData(self, name, elaFeat):
         if 'None' in elaFeat.keys():
             elaFeat.pop('None')
@@ -162,3 +166,8 @@ class Performance():
     def checkDirectory(self, path):
         if not os.path.exists(str(path)):
             os.mkdir(path)
+
+    def saveToSelectedCheckPoint(self,fileName):	
+        self.checkDirectory(self.baseDIR+ '/perf')
+        fileName = self.baseDIR+ '/perf/selected_checkpoints'+ str(fileName)  
+        self.selected_checkpoint.to_csv(fileName+ 'd.csv',index=False)
