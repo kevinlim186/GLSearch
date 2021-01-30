@@ -685,7 +685,7 @@ class Problem():
                                     ela = np.concatenate((ela1,ela),axis=0)
                 
                                 print(ela)
-                                index = model['asp'].predict(ela.reshape(1, stepSize,len(x_labels)).astype('float32')).argmax()
+                                index = model['model'].predict(ela.reshape(1, stepSize,len(x_labels)).astype('float32')).argmax()
 
                             print("Selected algorihtm of "+ model['name'] +' is '+ y_labels[index])
 
