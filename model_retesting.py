@@ -54,4 +54,4 @@ performanceBenchmark = Performance()
 for i in range(1,2):
     suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3], esconfig=esconfig, function=i, performance=performanceBenchmark , pflacco=True, localSearch=None)
     suite.runTestMultipleModel(models=models, stepSize=2, precision=1e-2)
-    performanceBenchmark.saveToCSVPerformance('Benchmark_Resting_with_Models_func_'+str(1))
+    performanceBenchmark.saveToCSVPerformance('Benchmark_Testing_with_Models_func_'+str(1))

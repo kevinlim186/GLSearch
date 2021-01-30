@@ -673,24 +673,20 @@ class Problem():
                     #ELA features will only be computed if there are models in the model list
                     for model in models:
                         if model['size']==size:
-                            if "RNN" in model['name']:
-                                print("calulating ELA ASP")
-                                #We need to have at least the number of step size
-                                if len(self.elaFetures) < stepSize:
-                                    index = 0
-                                else:  
-                                    ela = np.array([self.elaFetures[x_labels].iloc[-1,].values]).astype('float32')
-                    
-                                    #add additional step in the ela
-                                    for i in range(2, stepSize+1):   
-                                        ela1 = np.array([self.elaFetures[x_labels].iloc[-i,].values]).astype('float32')
-                                        ela = np.concatenate((ela1,ela),axis=0)
-                    
-                                    print(ela)
-                                    index = model['asp'].predict(ela.reshape(1, stepSize,len(x_labels)).astype('float32')).argmax()
-                            else:
-                                #just continue
-                                index =0
+                            #We need to have at least the number of step size
+                            if len(self.elaFetures) < stepSize:
+                                index = 0
+                            else:  
+                                ela = np.array([self.elaFetures[x_labels].iloc[-1,].values]).astype('float32')
+                
+                                #add additional step in the ela
+                                for i in range(2, stepSize+1):   
+                                    ela1 = np.array([self.elaFetures[x_labels].iloc[-i,].values]).astype('float32')
+                                    ela = np.concatenate((ela1,ela),axis=0)
+                
+                                print(ela)
+                                index = model['asp'].predict(ela.reshape(1, stepSize,len(x_labels)).astype('float32')).argmax()
+
                             print("Selected algorihtm of "+ model['name'] +' is '+ y_labels[index])
 
                             #if index is greater than 0, then local search must be used
