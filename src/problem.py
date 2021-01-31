@@ -667,7 +667,7 @@ class Problem():
                 currentLength += 1
 
                 # needs to be copied by creating a new object
-                model_copy = copy.deepcopy(models)
+                model_copy = [x for x in models]
                 print('Number of models remaining: '+ str(len(model_copy)))
                 #code efficieny. Don't calculate ela if all the models are done
                 for model in model_copy:
