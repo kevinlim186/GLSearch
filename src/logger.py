@@ -23,7 +23,7 @@ class Performance():
         self.baseDIR = os.getcwd()
         self.ertPerformance = pd.DataFrame(columns=['name', 'fce'])
         self.elaFeatures = pd.DataFrame()
-        self.selected_checkpoint = pd.DataFrame(columns=['model', 'function', 'instance','budget', 'local'])
+        self.selected_checkpoint = pd.DataFrame(columns=['model', 'function', 'instance','trial', 'dimension', 'budget', 'local'])
 
     def intializeServer(self):
         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
@@ -49,8 +49,8 @@ class Performance():
         self.cHandler = self.conn.cursor()
     
 
-    def insertSelectedCheckpoint(self, model, function, instance,budget, local):
-            self.selected_checkpoint  = self.selected_checkpoint .append({'model':model, 'function':function, 'instance': instance, 'budget': budget,'local':local }, ignore_index=True)
+    def insertSelectedCheckpoint(self, model, function, instance, trial, dimension, budget, local):
+            self.selected_checkpoint  = self.selected_checkpoint .append({'model':model, 'function':function, 'instance': instance, 'budget': budget,'local':local, 'trial':trial , 'dimension':dimension}, ignore_index=True)
     
     def insertELAData(self, name, elaFeat):
         if 'None' in elaFeat.keys():

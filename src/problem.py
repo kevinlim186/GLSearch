@@ -666,11 +666,12 @@ class Problem():
                 currentLength += 1
 
                 model_copy = models
+                print('Number of models remaining: '+ str(len(model_copy)))
                 #code efficieny. Don't calculate ela if all the models are done
                 for model in model_copy:
                     sizes = [50,100,200]
                     for size in sizes:
-                        if len(list(filter(lambda x: x['size']==size, models)))>0:
+                        if len(list(filter(lambda x: x['size']==size, model_copy)))>0:
                             self.calculateELA(size=size, sanitize=True)
                             print(len(self.elaFetures))
                     
@@ -696,10 +697,10 @@ class Problem():
                             #if index is greater than 0, then local search must be used
                             if (index > 0):
                                 if (index==1):
-                                    self.performance.insertSelectedCheckpoint(model= model['name'], function=self.function, instance= self.instance, budget= self.spentBudget,local='BFGS')
+                                    self.performance.insertSelectedCheckpoint(model= model['name'], function=self.function, instance= self.instance, budget= self.spentBudget,local='BFGS', dimension=self.dimension, trial= testRun)
 
                                 if (index == 2):
-                                    self.performance.insertSelectedCheckpoint(model= model['name'], function=self.function, instance= self.instance, budget= self.spentBudget,local='Nelder')
+                                    self.performance.insertSelectedCheckpoint(model= model['name'], function=self.function, instance= self.instance, budget= self.spentBudget,local='Nelder', dimension=self.dimension, trial= testRun)
 
                                 #remove the model from the models
                                 model_copy.remove(model)
