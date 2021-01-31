@@ -669,13 +669,17 @@ class Problem():
                 # needs to be copied by creating a new object
                 model_copy = [x for x in models]
                 print('Number of models remaining: '+ str(len(model_copy)))
+
                 #code efficieny. Don't calculate ela if all the models are done
+                sizes = [50,100,200]
                 for model in model_copy:
-                    sizes = [50,100,200]
+                    
                     for size in sizes:
+                        #so ela are only computed once for multiple models
+                        sizes.remove(size)
                         if len(list(filter(lambda x: x['size']==size, model_copy)))>0:
                             self.calculateELA(size=size, sanitize=True)
-                            print(len(self.elaFetures))
+
                     
                     #ELA features will only be computed if there are models in the model list
                         if model['size']==size:
