@@ -49,12 +49,18 @@ models = [
     }
 ]
 
+#terminal 1: function 1-4
+#terminal 2: function 5-8
+#terminal 3: function 9-12
+#terminal 4: function 13-16
+#terminal 5: function 17-20
+#terminal 6: function 21-24
 name = ''
 performanceBenchmark = Performance()
 #create a benchmark for function 1 with dimensions 2 and 3. 
-for i in range(1,2):
-    name = name + str(1) + '_'
-    suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[5,10], esconfig=esconfig, function=i, performance=performanceBenchmark , pflacco=True, localSearch=None)
+for i in range(21,25):
+    name = name + str(i) + '_'
+    suite = Suites(instances=[6,7,8,9,10], baseBudget=10000, dimensions=[2,3, 5,10], esconfig=esconfig, function=i, performance=performanceBenchmark , pflacco=True, localSearch=None)
     suite.runTestMultipleModel(models=models, stepSize=2, precision=1e-2)
     performanceBenchmark.saveToCSVPerformance('Benchmark_Testing_with_Models_func_'+str(name))
     performanceBenchmark.saveToSelectedCheckPoint('Benchmark_Testing_with_Models_func_'+str(name))
