@@ -677,11 +677,11 @@ class Problem():
                     
                     #ELA features will only be computed if there are models in the model list
                         if model['size']==size:
+                            elaFeatSize = self.elaFetures[self.elaFetures['size']==size]
                             #We need to have at least the number of step size
-                            if len(self.elaFetures) < stepSize:
+                            if len(elaFeatSize) < stepSize:
                                 index = 0
                             else:  
-                                elaFeatSize = self.elaFetures[self.elaFetures['size']==size]
                                 ela = np.array([elaFeatSize[x_labels].iloc[-1,].values]).astype('float32')
                 
                                 #add additional step in the ela
