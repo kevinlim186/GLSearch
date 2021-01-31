@@ -665,8 +665,9 @@ class Problem():
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
                 currentLength += 1
 
+                model_copy = models
                 #code efficieny. Don't calculate ela if all the models are done
-                for model in models:
+                for model in model_copy:
                     sizes = [50,100,200]
                     for size in sizes:
                         if len(list(filter(lambda x: x['size']==size, models)))>0:
@@ -701,7 +702,7 @@ class Problem():
                                     self.performance.insertSelectedCheckpoint(model= model['name'], function=self.function, instance= self.instance, budget= self.spentBudget,local='Nelder')
 
                                 #remove the model from the models
-                                models.remove(model)
+                                model_copy.remove(model)
 
 
                 
