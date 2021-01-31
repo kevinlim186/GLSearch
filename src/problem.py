@@ -653,7 +653,9 @@ class Problem():
         #default name is the base. If the algorithm selects the local search, the name will be overridden.
         #name = self.getProblemName(self.function, self.instance, self.spentBudget, 'Base'+ASPName,testRun)
                 
-
+        # needs to be copied by creating a new object
+        model_copy = [x for x in models]
+        
         #Run model ES algorithm
         while self.totalBudget > self.spentBudget and not (targetReached):
             self._printProgressBar(self.spentBudget, self.totalBudget,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
@@ -666,8 +668,6 @@ class Problem():
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
                 currentLength += 1
 
-                # needs to be copied by creating a new object
-                model_copy = [x for x in models]
                 print('Number of models remaining: '+ str(len(model_copy)))
 
                 #code efficieny. Don't calculate ela if all the models are done
