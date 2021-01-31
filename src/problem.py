@@ -11,6 +11,7 @@ from pflacco.pflacco import calculate_feature_set, create_feature_object
 from pyDOE import lhs
 from src.interface import y_labels, x_labels
 import math
+import copy
 
 class Problem():
     def __init__(self, budget, function, instance, dimension, esconfig, checkPoint, logger, pflacco, localSearch=None, precision=1e-8):
@@ -665,7 +666,8 @@ class Problem():
             if (checkpoints[currentLength] < self.spentBudget and currentLength < maxIndex):
                 currentLength += 1
 
-                model_copy = models
+                # needs to be copied by creating a new object
+                model_copy = copy.deepcopy(models)
                 print('Number of models remaining: '+ str(len(model_copy)))
                 #code efficieny. Don't calculate ela if all the models are done
                 for model in model_copy:
