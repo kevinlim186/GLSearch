@@ -679,7 +679,6 @@ class Problem():
                     
                     for size in sizes:
                         #so ela are only computed once for multiple models
-                        sizes.remove(size)
                         if len(list(filter(lambda x: x['size']==size, model_copy)))>0 and size in ela_comp_sizes:
                             self.calculateELA(size=size, sanitize=True)
                             ela_comp_sizes.remove(size)
