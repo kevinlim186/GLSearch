@@ -655,7 +655,7 @@ class Problem():
                 
         # needs to be copied by creating a new object
         model_copy = [x for x in models]
-        
+
         #Run model ES algorithm
         while self.totalBudget > self.spentBudget and not (targetReached):
             self._printProgressBar(self.spentBudget, self.totalBudget,prefix='Problem with '+str(self.dimension) + 'd - f'+ str(self.function) + ' - i' + str(self.instance) + ' -t' + str(testRun),length=50)
@@ -671,14 +671,18 @@ class Problem():
                 print('Number of models remaining: '+ str(len(model_copy)))
 
                 #code efficieny. Don't calculate ela if all the models are done
+                # two lists are needed. The first one for just looping for the prediction. The second one for the computation
                 sizes = [50,100,200]
+                ela_comp_sizes = [50,100,200]
+
                 for model in model_copy:
                     
                     for size in sizes:
                         #so ela are only computed once for multiple models
                         sizes.remove(size)
-                        if len(list(filter(lambda x: x['size']==size, model_copy)))>0:
+                        if len(list(filter(lambda x: x['size']==size, model_copy)))>0 and size in ela_comp_sizes:
                             self.calculateELA(size=size, sanitize=True)
+                            ela_comp_sizes.remove(size)
 
                     
                     #ELA features will only be computed if there are models in the model list
