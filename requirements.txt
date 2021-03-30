@@ -77,7 +77,7 @@ protobuf==3.10.0
 ptyprocess==0.6.0
 pycparser==2.20
 pyee==7.0.2
-Pygments==2.7.1
+Pygments==2.7.4
 pylint==2.4.4
 PyMySQL==0.9.3
 pyparsing==2.4.7
@@ -186,7 +186,7 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.20
 pyDOE==0.3.8
-Pygments==2.7.1
+Pygments==2.7.4
 pylint==2.4.4
 PyNaCl==1.4.0
 pyparsing==2.4.7
