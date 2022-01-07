@@ -129,7 +129,7 @@ chardet==3.0.4
 cocoex==2.3.3.5
 cocopp==2.3.3.5
 cryptography==2.9.2
-cvxopt==1.2.5
+cvxopt==1.2.7
 cycler==0.10.0
 dask==2.20.0
 decorator==4.4.2
