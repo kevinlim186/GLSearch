@@ -61,7 +61,7 @@ MarkupSafe==1.1.1
 matplotlib==3.2.2
 mccabe==0.6.1
 mistune==0.8.4
-numpy==1.18.2
+numpy==1.22.0
 opt-einsum==3.1.0
 orderedmultidict==1.0.1
 pandas==1.0.3
@@ -166,7 +166,7 @@ more-itertools==8.2.0
 mysql-connector==2.2.9
 mysql-connector-python==8.0.20
 mysqlclient==2.0.1
-numpy==1.18.2
+numpy==1.22.0
 oauthlib==3.1.0
 opt-einsum==3.3.0
 packaging==20.3
